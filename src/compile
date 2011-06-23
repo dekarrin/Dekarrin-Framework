@@ -1,0 +1,25 @@
+#!/bin/bash
+PACKAGE_COUNT=6;
+num=1;
+
+compile()
+{
+	echo "Compiling package $num of $PACKAGE_COUNT..."
+	javac $1/*.java -d ./bin
+	num=$((num+1))
+	return 0
+}
+
+
+echo "Moving to directory..."
+cd /home/annette/Documents/java/Chemistry
+
+echo "Compiling, please wait."
+compile com/dekarrin/util
+compile com/dekarrin/io
+compile com/dekarrin/fileio
+compile com/dekarrin/math
+compile com/dekarrin/chem
+compile com/Ostermiller/util
+
+echo "done"
