@@ -3,7 +3,7 @@ package com.dekarrin.file.png;
 /**
  * The header chunk from a png file.
  */
-public class HeaderChunk extends Chunk implements CriticalChunk {
+public class HeaderChunk extends CriticalChunk {
 	
 	/**
 	 * The width of the image.
@@ -18,7 +18,7 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	/**
 	 * The bit depth of the image.
 	 */
-	private byte bitDepth;
+	private int bitDepth;
 	
 	/**
 	 * Interpretation of image data.
@@ -29,25 +29,25 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * 4 - Each pixel is a grayscale sample followed by alpha
 	 * 6 - Each pixel is an RGB triple followed by alpha
 	 */
-	private byte colorType;
+	private int colorType;
 	
 	/**
 	 * Compression method. Currently, only deflate/inflate is
 	 * defined. If this is not 0, it should result in an error.
 	 */
-	private byte compressionMethod;
+	private int compressionMethod;
 	
 	/**
 	 * Filter method. Only 0 is defined, and an error should
 	 * result from any other value.
 	 */
-	private byte filterMethod;
+	private int filterMethod;
 	
 	/**
 	 * Interlace method. Typically either 0 (none) or 1
 	 * (Adam7).
 	 */
-	private byte interlaceMethod;
+	private int interlaceMethod;
 	
 	/**
 	 * Creates a new HeaderChunk. The supplied data is parsed.
@@ -89,7 +89,7 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * @returns
 	 * The bit depth.
 	 */
-	public byte getBitDepth() {
+	public int getBitDepth() {
 		return bitDepth;
 	}
 	
@@ -99,7 +99,7 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * @returns
 	 * The color type.
 	 */
-	public byte getColorType() {
+	public int getColorType() {
 		return colorType;
 	}
 	
@@ -109,7 +109,7 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * @returns
 	 * The compression method.
 	 */
-	public byte getCompressionMethod() {
+	public int getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -119,7 +119,7 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * @returns
 	 * The filter method.
 	 */
-	public byte getFilterMethod() {
+	public int getFilterMethod() {
 		return filterMethod;
 	}
 	
@@ -129,7 +129,7 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * @returns
 	 * The interlace method.
 	 */
-	public byte getInterlaceMethod() {
+	public int getInterlaceMethod() {
 		return interlaceMethod;
 	}
 	
@@ -137,13 +137,13 @@ public class HeaderChunk extends Chunk implements CriticalChunk {
 	 * Parses chunk data for header information.
 	 */
 	private void parseData() {
-		width				= parseInt();
-		height				= parseInt();
-		bitDepth			= parseByte();
-		colorType			= parseByte();
-		compressionMethod	= parseByte();
-		filterMethod		= parseByte();
-		interlaceMethod		= parseByte();
+		width				= parser.parseInt();
+		height				= parser.parseInt();
+		bitDepth			= parser.parseInt(1);
+		colorType			= parser.parseInt(1);
+		compressionMethod	= parser.parseInt(1);
+		filterMethod		= parser.parseInt(1);
+		interlaceMethod		= parser.parseInt(1);
 	}
 	
 }

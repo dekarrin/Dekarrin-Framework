@@ -1,6 +1,6 @@
 package com.dekarrin.chem;
 
-import com.dekarrin.util.StringHelper;
+import com.dekarrin.util.HelperString;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -169,7 +169,8 @@ public class ElementSpeller {
 				usedElements[i] = ElementList.getElement(symbols[i]);
 			}
 			
-			spelledWord = StringHelper.arrayToString(spelledWordList);
+			HelperString helper = new HelperString(spelledWordList);
+			spelledWord = helper.toString();
 		}
 	}
 	

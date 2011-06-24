@@ -1,7 +1,7 @@
 /**
  * Chunk that represents text data.
  */
-public abstract class TextChunk extends Chunk implements AncillaryChunk {
+public abstract class TextChunk extends AncillaryChunk {
 	
 	/**
 	 * The keyword of this text data.

@@ -144,7 +144,52 @@ public class PngParser {
 	 * Parses a chunk into its correct type based on its type.
 	 */
 	private Chunk parseChunk(Chunk pc) {
+		String type = pc.getTypeName();
+		byte[] data = pc.getData();
+		int crc = pc.getCrc();
 		
+		Chunk newChunk;
+		if(type.equals("IHDR")) {
+			newChunk = new HeaderChunk(data, crc);
+		} else if(type.equals("PLTE")) {
+			newChunk = new PaletteChunk(data, crc);
+		} else if(type.equals("IDAT")) {
+			newChunk = new ImageDataChunk(data, crc);
+		} else if(type.equals("IEND")) {
+			newChunk = new TrailerChunk(data, crc);
+		} else if(type.equals("tRNS")) {
+			newChunk = new TransparencyChunk(data, crc);
+		} else if(type.equals("gAMA")) {
+			newChunk = new GammaChunk(data, crc);
+		} else if(type.equals("cHRM")) {
+			newChunk = new ChromaticitiesChunk(data, crc);
+		} else if(type.equals("sRGB")) {
+			newChunk = new StandardRgbColorSpaceChunk(data, crc);
+		} else if(type.equals("iCCP")) {
+			newChunk = new EmbeddedColorProfileChunk(data, crc);
+		} else if(type.equals("tEXt")) {
+			newChunk = new TextDataChunk(data, crc);
+		} else if(type.equals("zTXt")) {
+			newChunk = new CompressedTextDataChunk(data, crc);
+		} else if(type.equals("iTXt")) {
+			newChunk = new InternationalTextDataChunk(data, crc);
+		} else if(type.equals("bKGD")) {
+			newChunk = new BackgroundColorChunk(data, crc);
+		} else if(type.equals("pHYs")) {
+			newChunk = new PhysicalPixelDimensionsChunk(data, crc);
+		} else if(type.equals("sBIT")) {
+			newChunk = new SignficantBitsChunk(data, crc);
+		} else if(type.equals("sPLT")) {
+			newChunk = new SuggestesPaletteChunk(data, crc);
+		} else if(type.equals("hIST")) {
+			newChunk = new PaletteHistogramChunk(data, crc);
+		} else if(type.equals("tIME")) {
+			newChunk = new LastModificationTimeChunk(data, crc);
+		} else {
+			newChunk = pc;
+		}
+		
+		return newChunk;
 	}
 	
 	/**

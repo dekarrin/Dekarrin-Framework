@@ -6,7 +6,7 @@ package com.dekarrin.file.png;
  * chunks must be interpreted together means that no ImageDataChunk
  * may parse its own contents.
  */
-public class ImageDataChunk extends Chunk implements CriticalChunk {
+public class ImageDataChunk extends CriticalChunk {
 	
 	/**
 	 * Creates a new ImageDataChunk.

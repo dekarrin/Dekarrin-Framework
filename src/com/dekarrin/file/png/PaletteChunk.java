@@ -5,7 +5,7 @@ import java.awt.Color;
 /**
  * A palette chunk from a png file.
  */
-public class PaletteChunk extends Chunk implements CriticalChunk {
+public class PaletteChunk extends CriticalChunk {
 	
 	/**
 	 * The palette entries.
@@ -54,15 +54,12 @@ public class PaletteChunk extends Chunk implements CriticalChunk {
 	 */
 	private void parseData() {
 		paletteEntries = new Color[chunkData.length / 3];
-		int red;
-		int green;
-		int blue;
-		int k = 0;
-		for(int i = 0; i < chunkData.length; i += 3) {
-			red		= (int)((int)chunkData[i] & 0xff);
-			green	= (int)((int)chunkData[i+1] & 0xff);
-			blue	= (int)((int)chunkData[i+2] & 0xff);
-			paletteEntries[k++] = new Color(red, green, blue);
+		int r, g, b;
+		for(int i = 0; i < paletteEntries.length; i++) {
+			r = parser.parseInt(1);
+			g = parser.parseInt(1);
+			b = parser.parseInt(1);
+			paletteEntries[i] = new Color(r, g, b);
 		}
 	}
 }

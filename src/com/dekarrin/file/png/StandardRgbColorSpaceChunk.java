@@ -1,12 +1,12 @@
 /**
  * Chunk data for a standard RGB color space.
  */
-public class StandardRgbColorSpaceChunk extends Chunk implements AncillaryChunk {
+public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 
 	/**
 	 * The rendering intent of this png.
 	 */
-	private byte renderingIntent;
+	private int renderingIntent;
 	
 	/**
 	 * Creates a new StandardRgbColorSpaceChunk. The supplied data is parsed.
@@ -23,9 +23,19 @@ public class StandardRgbColorSpaceChunk extends Chunk implements AncillaryChunk 
 	}
 	
 	/**
+	 * Gets the rendering intent.
+	 *
+	 * @returns
+	 * The rendering intent.
+	 */
+	public int getRenderingIntent() {
+		return renderingIntent;
+	}
+	
+	/**
 	 * Parses the chunk data.
 	 */
 	private void parseData() {
-		renderingIntent = chunkData[0];
+		renderingIntent = parser.parseInt(1);
 	}
 }

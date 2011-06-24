@@ -5,7 +5,7 @@ import java.awt.Point;
 /**
  * Png chunk for referencing chromaticities.
  */
-public class ChromaticitiesChunk extends Chunk implements AncillaryChunk {
+public class ChromaticitiesChunk extends AncillaryChunk {
 
 	/**
 	 * White point chromaticity.
@@ -28,7 +28,7 @@ public class ChromaticitiesChunk extends Chunk implements AncillaryChunk {
 	private Point blue;
 	
 	/**
-	 * Creates a new ChromaticityChunk.
+	 * Creates a new ChromaticitiesChunk.
 	 *
 	 * @param data
 	 * The chunk data.
@@ -36,7 +36,7 @@ public class ChromaticitiesChunk extends Chunk implements AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public ChromaticityChunk(byte[] data, int crc) {
+	public ChromaticitiesChunk(byte[] data, int crc) {
 		super(new byte[]{99, 72, 82, 77}, data, crc); // cHRM
 		parseData();
 	}
@@ -85,14 +85,14 @@ public class ChromaticitiesChunk extends Chunk implements AncillaryChunk {
 	 * Parses the chunk data into meaningful chromaticities.
 	 */
 	private void parseData() {
-		int wX	= parseInt();
-		int wY	= parseInt();
-		int rX	= parseInt();
-		int rY	= parseInt();
-		int bX	= parseInt();
-		int bY	= parseInt();
-		int gX	= parseInt();
-		int gY	= parseInt();
+		int wX	= parser.parseInt();
+		int wY	= parser.parseInt();
+		int rX	= parser.parseInt();
+		int rY	= parser.parseInt();
+		int bX	= parser.parseInt();
+		int bY	= parser.parseInt();
+		int gX	= parser.parseInt();
+		int gY	= parser.parseInt();
 		
 		whitePoint	= new Point(wX, wY);
 		red			= new Point(rX, rY);

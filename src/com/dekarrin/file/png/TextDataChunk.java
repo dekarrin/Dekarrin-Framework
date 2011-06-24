@@ -1,7 +1,7 @@
 /**
  * Chunk with uncompressed text content.
  */
-public class TextDataChunk extends TextChunk implements AncillaryChunk {
+public class TextDataChunk extends TextChunk {
 	
 	/**
 	 * Creates a new TextDataChunk.
@@ -28,8 +28,8 @@ public class TextDataChunk extends TextChunk implements AncillaryChunk {
 	 * Turns chunk data into useable data.
 	 */
 	private void parseData() {
-		keyword = parseString();
-		text = parseFinalString();
+		keyword	= parser.parseString();
+		text	= parser.parseFinalString();
 	}
 	
 }

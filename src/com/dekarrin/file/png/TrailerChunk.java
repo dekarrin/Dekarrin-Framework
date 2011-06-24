@@ -1,7 +1,7 @@
 /**
  * Chunk for image trailer.
  */
-public class TrailerChunk extends Chunk implements CriticalChunk {
+public class TrailerChunk extends CriticalChunk {
 	
 	/**
 	 * Creates a new TrailerChunk.

@@ -1,6 +1,6 @@
 package com.dekarrin.file.png;
 
-import java.nio.ByteBuffer;
+import com.dekarrin.util.ByteParser;
 import java.util.zip.CRC32;
 
 /**
@@ -9,75 +9,100 @@ import java.util.zip.CRC32;
 public class Chunk {
 	
 	/**
+	 * Unit specifier for unknown.
+	 */
+	public static final int UNKNOWN_UNIT = 0;
+	
+	/**
+	 * Unit specifier for the meter.
+	 */
+	public static final int METER_UNIT = 1;
+	
+	/**
+	 * The background mode for indexed colors.
+	 */
+	public static final int INDEXED_COLOR_MODE = 0;
+	
+	/**
+	 * The background mode for grayscale.
+	 */
+	public static final int GRAYSCALE_MODE = 1;
+	
+	/**
+	 * The background mode for truecolor.
+	 */
+	public static final int TRUECOLOR_MODE = 2;
+	
+	/**
 	 * The rendering intent of perceptual.
 	 */
-	public static final byte RENDERING_INTENT_PERCEPTUAL = 0;
+	public static final int RENDERING_INTENT_PERCEPTUAL = 0;
 	
 	/**
 	 * The rendering intent of relative colorimetric.
 	 */
-	public static final byte RENDERING_INTENT_RELATIVE_COLORIMETRIC = 1;
+	public static final int RENDERING_INTENT_RELATIVE_COLORIMETRIC = 1;
 	
 	/**
 	 * The rendering intent of saturation.
 	 */
-	public static final byte RENDERING_INTENT_SATURATION = 2;
+	public static final int RENDERING_INTENT_SATURATION = 2;
 	
 	/**
 	 * The rendering intent of absolute colorimetric.
 	 */
-	public static final byte RENDERING_INTENT_ABSOLUTE_COLORIMETRIC = 3;
+	public static final int RENDERING_INTENT_ABSOLUTE_COLORIMETRIC = 3;
 	 
 	/**
 	 * The compression method value for deflate/inflate.
 	 */
-	public static final byte COMPRESSION_METHOD_ZLIB = 0;
+	public static final int COMPRESSION_METHOD_ZLIB = 0;
 	
 	/**
 	 * Filter method for adaptive filtering with five basic filter
 	 * types.
 	 */
-	public static final byte FILTER_METHOD_ADAPTIVE = 0;
+	public static final int FILTER_METHOD_ADAPTIVE = 0;
 	
 	/**
 	 * Interlace method for no interlacing.
 	 */
-	public static final byte INTERLACE_METHOD_NONE = 0;
+	public static final int INTERLACE_METHOD_NONE = 0;
 	
 	/**
 	 * Interlace method for Adam7 interlacing.
 	 */
-	public static final byte INTERLACE_METHOD_ADAM7 = 1;
+	public static final int INTERLACE_METHOD_ADAM7 = 1;
 	
 	/**
 	 * Color type for no colors.
 	 */
-	public static final byte COLOR_TYPE_GRAYSCALE = 0;
+	public static final int COLOR_TYPE_GRAYSCALE = 0;
 	
 	/**
 	 * Color type for color used.
 	 */
-	public static final byte COLOR_TYPE_COLOR = 2;
+	public static final int COLOR_TYPE_COLOR = 2;
 	
 	/**
 	 * Color type for using both color and a palette.
 	 */
-	public static final byte COLOR_TYPE_COLOR_PALETTE = 3;
+	public static final int COLOR_TYPE_COLOR_PALETTE = 3;
 	
 	/**
 	 * Color type for using only an alpha channel.
 	 */
-	public static final byte COLOR_TYPE_GRAYSCALE_ALPHA = 4;
+	public static final int COLOR_TYPE_GRAYSCALE_ALPHA = 4;
 	
 	/**
 	 * Color type for using both an alpha channel and color.
 	 */
-	public static final byte COLOR_TYPE_COLOR_ALPHA = 6;
+	public static final int COLOR_TYPE_COLOR_ALPHA = 6;
 	
 	/**
 	 * Used for parsing primitives from chunkData.
 	 */
-	private ByteBuffer dataBuffer;
+	protected ByteParser parser;
 	
 	/**
 	 * The type of this chunk.
@@ -100,7 +125,7 @@ public class Chunk {
 	 */
 	public Chunk() {
 		super();
-		dataBuffer = ByteBuffer.wrap(chunkData);
+		parser = new ByteParser(chunkData);
 	}
 	
 	/**
@@ -117,11 +142,11 @@ public class Chunk {
 	 * CRC; if it isn't, this chunk is considered corrupted.
 	 */
 	public Chunk(byte[] type, byte[] data, int crc) {
-		this.crc = (long)crc;
+		this.crc = (long)((long)crc & 0xffffffff);
 		chunkData = data;
 		chunkType = type;
 		//TODO: check validity of chunk here with generateCrc().
-		dataBuffer = ByteBuffer.wrap(chunkData);
+		parser = new ByteParser(chunkData);
 	}
 	
 	/**
@@ -203,121 +228,7 @@ public class Chunk {
 	public boolean isSafeToCopy() {
 		return (chunkType[3] & 32 == 32);
 	}
-	
-	/**
-	 * Gets the next byte from the chunk data.
-	 *
-	 * @returns
-	 * The next byte.
-	 */
-	protected byte parseByte() {
-		return dataBuffer.get();
-	}
-	
-	/**
-	 * Gets multiple next bytes from the chunk data. After the
-	 * supplied array is filled, the position is remembered. This
-	 * is equivilent to calling parseByte() multiple times.
-	 *
-	 * @param byteArray
-	 * The array to fill with values.
-	 */
-	protected void parseBytes(byte[] byteArray) {
-		dataBuffer.get(byteArray);
-	}
-	
-	/**
-	 * Gets the rest of the chunkData.
-	 *
-	 * @returns
-	 * The rest of the chunkData.
-	 */
-	protected byte[] parseFinalBytes() {
-		int remainingLength = dataBuffer.capacity() - dataBuffer.position();
-		byte[] remainingBytes = new byte[remainingLength];
-		parseBytes(remainingBytes);
-		return remainingBytes;
-	}
-	
-	/**
-	 * Gets the next int from the chunk data. Reads 4 bytes and
-	 * converts them into an int.
-	 *
-	 * @returns
-	 * The next int.
-	 */
-	protected int parseInt() {
-		return dataBuffer.getInt();
-	}
-	
-	/**
-	 * Gets multiple next ints from the chunk data. After the
-	 * supplied array is filled, the position is remembered. This
-	 * is equivilent to calling parseInt() multiple times.
-	 *
-	 * @param intArray
-	 * The array to fill with values.
-	 */
-	protected void parseInts(int[] intArray) {
-		for(int i = 0; i < intArray.length; i++) {
-			intArray[i] = parseInt();
-		}
-	}
-	
-	/**
-	 * Parses the chunk data until a null seperater is encountered.
-	 *
-	 * @param
-	 * A string from the chunkData.
-	 */
-	protected String parseString() {
-		StringBuffer word = new StringBuffer();
-		byte charByte;
-		while((charByte = parseByte()) != 0) {
-			word.append(byteToString(charByte));
-		}
-		String parsed = word.toString();
-		return parsed;
-	}
-	
-	/**
-	 * Gets the rest of the chunkData as a string.
-	 *
-	 * @returns
-	 * The rest of the chunkData.
-	 */
-	protected String parseFinalString() {
-		byte[] remainingBytes = parseFinalBytes();
-		String parsed = byteToString(remainingBytes);
-		return parsed;
-	}
-	
-	/**
-	 * Converts a single byte into a string.
-	 *
-	 * @param subject
-	 * The byte to convert.
-	 *
-	 * @returns
-	 * The string.
-	 */
-	protected String byteToString(byte subject) {
-		return byteToString(new byte[]{subject});
-	}
-	
-	/**
-	 * Converts an entire array into a string.
-	 *
-	 * @param subject
-	 * An array of bytes to convert.
-	 *
-	 * @returns
-	 * The resulting string.
-	 */
-	protected String byteToString(byte[] subject) {
-		return new String(subject);
-	}
-	
+		
 	/**
 	 * Generates CRC code for this chunk.
 	 *

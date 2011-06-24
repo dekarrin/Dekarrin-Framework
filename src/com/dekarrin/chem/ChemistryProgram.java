@@ -103,31 +103,38 @@ public class ChemistryProgram extends CliProgram {
 		}
 		
 		if(e != null) {
+			HelperString[] unpadded = new HelperString[6];
+			unpadded[0] = new HelperString("| "+e.getProtons()+": "+e.getName() + " (" + e.getSymbol() + ")");
+			unpadded[1] = new HelperString("| Neutrons: "+e.getProtons());
+			unpadded[2] = new HelperString("| Mass: "+e.getMassString());
+			unpadded[3] = new HelperString("| Electronegativity: "+e.getElectronegativityString());
+			unpadded[4] = new HelperString("|");
+			
+			for(int i = 0; i < 5; i++) {
+				unpadded[i].padRight(27);	
+			}
+			
 			output = "+--------------------------+\n";
-			output += StringHelper.padRight("| "+e.getProtons()+": "+e.getName() + " (" + e.getSymbol() + ")", ' ', 27);
-			output += "|\n";
+			output += unpadded[0].toString() + "|\n";
 			output += "+--------------------------+\n";
-			output += StringHelper.padRight("| Neutrons: "+e.getProtons(), ' ', 27);
-			output += "|\n";
-			output += StringHelper.padRight("| Mass: "+e.getMassString(), ' ', 27);
-			output += "|\n";
-			output += StringHelper.padRight("| Electronegativity: "+e.getElectronegativityString(), ' ', 27);
-			output += "|\n";
-			output += StringHelper.padRight("|", ' ', 27) + "|\n";
+			output += unpadded[1].toString() + "|\n";
+			output += unpadded[2].toString() + "|\n";
+			output += unpadded[3].toString() + "|\n";
+			output += unpadded[4].toString() + "|\n";
 		
 			if(e.hasCharges()) {
 				int[] charges = e.getCharges();
 				String chargeLine = "";
-			
 				for(int c: charges) {
 					chargeLine += c + ", ";
 				}
-			
 				chargeLine = chargeLine.substring(0, chargeLine.length()-2);
-				output += "|" + StringHelper.padLeft(chargeLine + " |", ' ', 27) + "\n";
+				HelperString chargeLineDisp = new HelperString(chargeLine + " |");
+				chargeLineDisp.padLeft(27);
+				output += "|" + chargeLineDisp.toString() + "\n";
 			}
 		
-			output += StringHelper.padRight("+", '-', 27) + "+";
+			output += "+--------------------------+";
 		}
 		
 		return output;

@@ -1,7 +1,9 @@
+package com.dekarrin.file.png;
+
 /**
  * Represents a gamma chunk.
  */
-class GammaChunk extends Chunk implements AncillaryChunk {
+class GammaChunk extends AncillaryChunk {
 
 	/**
 	 * The gamma stored in this chunk.
@@ -23,10 +25,20 @@ class GammaChunk extends Chunk implements AncillaryChunk {
 	}
 	
 	/**
+	 * Gets the gamma of this chunk.
+	 *
+	 * @returns
+	 * The gamma.
+	 */
+	public int getGamma() {
+		return gamma;
+	}
+	
+	/**
 	 * Parses the chunk data into the content.
 	 */
 	private void parseData() {
-		gamma = parseInt();
+		gamma = parser.parseInt();
 	}
 	
 }

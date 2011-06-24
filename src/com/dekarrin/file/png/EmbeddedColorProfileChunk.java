@@ -3,7 +3,7 @@ package com.dekarrin.file.png;
 /**
  * Chunk for an embedded ICC color profile.
  */
-public class EmbeddedColorProfileChunk extends Chunk implements AncillaryChunk {
+public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	
 	/**
 	 * The name of the ICC Profile.
@@ -13,7 +13,7 @@ public class EmbeddedColorProfileChunk extends Chunk implements AncillaryChunk {
 	/**
 	 * The compression method of the profile.
 	 */
-	private byte compressionMethod;
+	private int compressionMethod;
 	
 	/**
 	 * The compressed profile.
@@ -55,7 +55,7 @@ public class EmbeddedColorProfileChunk extends Chunk implements AncillaryChunk {
 	 * @returns
 	 * The compression method.
 	 */
-	public byte getCompressionMethod() {
+	public int getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -86,9 +86,9 @@ public class EmbeddedColorProfileChunk extends Chunk implements AncillaryChunk {
 	 * Parses data.
 	 */
 	private void parseData() {
-		profileName			= parseString();
-		compressionMethod	= parseByte();
-		compressedProfile	= parseFinalBytes();
+		profileName			= parser.parseString();
+		compressionMethod	= parser.parseInt(1);
+		compressedProfile	= parser.parseFinalBytes();
 	}
 	
 	/**

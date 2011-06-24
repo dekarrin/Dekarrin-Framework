@@ -3,7 +3,7 @@ package com.dekarrin.file.png;
 /**
  * Chunk that holds international characters.
  */
-public class InternationalTextDataChunk extends TextChunk implements AncillaryChunk {
+public class InternationalTextDataChunk extends TextChunk {
 
 	/**
 	 * Whether the text data contained is compressed.
@@ -13,7 +13,7 @@ public class InternationalTextDataChunk extends TextChunk implements AncillaryCh
 	/**
 	 * Which compression method is used.
 	 */
-	private byte compressionMethod;
+	private int compressionMethod;
 	
 	/**
 	 * The language of this string.
@@ -55,7 +55,7 @@ public class InternationalTextDataChunk extends TextChunk implements AncillaryCh
 	 * @returns
 	 * The compression method.
 	 */
-	public byte getCompressionMethod() {
+	public int getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -90,12 +90,12 @@ public class InternationalTextDataChunk extends TextChunk implements AncillaryCh
 	 * Parses chunk data into usable data.
 	 */
 	private void parseData() {
-		keyword = parseString();
-		compressed = (parseByte() == 1);
-		compressionMethod = parseByte();
-		languageTag = parseString();
-		translatedKeyword = parseString();
-		text = parseFinalString();
+		keyword				= parser.parseString();
+		compressed			= parser.parseBoolean();
+		compressionMethod	= parser.parseInt(1);
+		languageTag			= parser.parseString();
+		translatedKeyword	= parser.parseString();
+		text				= parser.parseFinalString();
 		if(compressed) {
 			ZlibDecompresser zd = new ZlibDecompresser(text);
 			text = zd.decompressString("UTF-8");

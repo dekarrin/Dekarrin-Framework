@@ -3,7 +3,7 @@ package com.dekarrin.file.png;
 /**
  * Chunk holding compressed text data.
  */
-public class CompressedTextDataChunk extends TextChunk implements AncillaryChunk {
+public class CompressedTextDataChunk extends TextChunk {
 	
 	/**
 	 * The raw, compressed text.
@@ -13,7 +13,7 @@ public class CompressedTextDataChunk extends TextChunk implements AncillaryChunk
 	/**
 	 * The method used for compression.
 	 */
-	private byte compressionMethod;
+	private int compressionMethod;
 	
 	/**
 	 * Creates a new CompressedTextDataChunk. Does not decompress
@@ -46,7 +46,7 @@ public class CompressedTextDataChunk extends TextChunk implements AncillaryChunk
 	 * @returns
 	 * The compression method.
 	 */
-	public byte getCompressionMethod() {
+	public int getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -70,9 +70,9 @@ public class CompressedTextDataChunk extends TextChunk implements AncillaryChunk
 	 * Parses data into meaningful contents.
 	 */
 	private void parseData() {
-		keyword = parseString();
-		compressionMethod = parseByte();
-		compressedText = parseFinalString();
+		keyword				= parser.parseString();
+		compressionMethod	= parser.parseInt(1);
+		compressedText		= parser.parseFinalString();
 	}
 	
 	/**
