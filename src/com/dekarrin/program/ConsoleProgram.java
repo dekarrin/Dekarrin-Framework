@@ -1,12 +1,19 @@
 package com.dekarrin.program;
 
 import com.dekarrin.util.FlagArgumentList;
+import com.dekarrin.io.InteractionModule;
+
 import java.util.ArrayList;
 
 /**
  * Program to be run from the command line. Processes flags automatically.
  */
 public abstract class ConsoleProgram {
+	
+	/**
+	 * The program itself.
+	 */
+	protected static ConsoleProgram program;
 	
 	/**
 	 * The io module for interacting with the user.
@@ -22,6 +29,13 @@ public abstract class ConsoleProgram {
 	 * The flags passed to this program.
 	 */
 	protected FlagArgumentList flags;
+	
+	/**
+	 * The name of the currently running program. This is
+	 * automatically obtained using the exception throw/catch
+	 * trick.
+	 */
+	protected String programName;
 	
 	/**
 	 * A list of argument names for syntax help.
@@ -50,6 +64,7 @@ public abstract class ConsoleProgram {
 		this.flags = new FlagArgumentList(args);
 		this.args = FlagArgumentList.removeFlags(args);
 		ui = new InteractionModule();
+		setProgramName();
 	}
 	
 	/**
@@ -64,14 +79,7 @@ public abstract class ConsoleProgram {
 	protected String getArgument(int index) {
 		String arg = null;
 		if(args.length < index + 1) {
-			String name;
-			try{
-				throw new Exception();
-			} catch(Exception e) {
-				StackTraceElement[] l = e.getStackTrace();
-				name = l[l.length-1].getClassName();
-			}
-			giveSyntaxError(name);
+			giveSyntaxError();
 		} else {
 			arg = args[index];
 		}
@@ -81,12 +89,9 @@ public abstract class ConsoleProgram {
 	/**
 	 * Displays a message on proper syntax, then quits. The message is
 	 * automatically generated using the internal lists of arguments set
-	 * by sub-classes.
-	 *
-	 * @param programName
-	 * The name of the program committing the syntax error.
+	 * by subclasses.
 	 */
-	private void giveSyntaxError(String programName) {
+	private void giveSyntaxError() {
 		String error = "syntax: "+programName+" ";
 		for(int i = 0; i < argumentNames.size(); i++) {
 			error = error + String.format((optionalArgument.get(i)) ? "<%s> " : "[%s] ", argumentNames.get(i));
@@ -95,8 +100,22 @@ public abstract class ConsoleProgram {
 	}
 	
 	/**
+	 * Gets the name of the program currently running.
+	 */
+	private void setProgramName() {
+		try{
+			throw new Exception();
+		} catch(Exception e) {
+			StackTraceElement[] l = e.getStackTrace();
+			programName = l[l.length-1].getClassName();
+		}
+	}
+	
+	/**
 	 * Adds an argument to the internal lists. The arguments are used
-	 * for syntax help generation.
+	 * for syntax help generation. Note that it is not necessary to add
+	 * every argument you plan on using; however, any argument not added
+	 * will not be displayed in an automatically-generated syntax error.
 	 *
 	 * @param name
 	 * The name of the argument.

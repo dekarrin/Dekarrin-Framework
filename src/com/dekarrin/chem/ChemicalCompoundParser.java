@@ -34,7 +34,6 @@ public class ChemicalCompoundParser {
 		StringBuffer ion = new StringBuffer();
 		
 		for(char sc: subjectChars) {
-			if(sc != 
 		}
 	}
 	

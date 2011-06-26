@@ -1,3 +1,5 @@
+package com.dekarrin.file.png;
+
 /**
  * Holds last modification time information.
  */
@@ -110,7 +112,7 @@ public class LastModificationTimeChunk extends AncillaryChunk {
 	/**
 	 * Parses the chunk data into properties.
 	 */
-	private parseData() {
+	private void parseData() {
 		year	= parser.parseInt(2);
 		month	= parser.parseInt(1);
 		day		= parser.parseInt(1);

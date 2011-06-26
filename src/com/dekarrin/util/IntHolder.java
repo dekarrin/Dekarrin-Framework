@@ -21,7 +21,7 @@ public class IntHolder implements PrimitiveHolder {
 	 * @param size
 	 * The size of the int holder.
 	 */
-	public class IntHolder(int size) {
+	public IntHolder(int size) {
 		holder = new int[size];
 	}
 	
@@ -31,7 +31,7 @@ public class IntHolder implements PrimitiveHolder {
 	 * @param array
 	 * The array to create the IntHolder from.
 	 */
-	public class IntHolder(int[] array) {
+	public IntHolder(int[] array) {
 		holder = array;
 	}
 	
@@ -61,7 +61,7 @@ public class IntHolder implements PrimitiveHolder {
 	 * The int to be inserted.
 	 */
 	public void add(int data) {
-		holder[pointer++] = data.
+		holder[pointer++] = data;
 	}
 	
 	/**

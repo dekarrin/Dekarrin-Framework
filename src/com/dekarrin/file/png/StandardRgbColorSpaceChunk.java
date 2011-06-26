@@ -1,3 +1,5 @@
+package com.dekarrin.file.png;
+
 /**
  * Chunk data for a standard RGB color space.
  */

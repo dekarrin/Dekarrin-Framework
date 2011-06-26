@@ -1,0 +1,11 @@
+<project name="Dekarrin-Framework" basedir="." default="compile">
+	<property name="source" value="src"/>
+	<property name="build" value="bin"/>
+	<target name="clean">
+		<delete dir="${build}"/>
+	</target>
+	<target name="compile">
+		<mkdir dir="${build}"/>
+		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}"/>
+	</target>
+</project>

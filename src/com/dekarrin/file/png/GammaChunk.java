@@ -20,7 +20,7 @@ class GammaChunk extends AncillaryChunk {
 	 * The chunk crc.
 	 */
 	public GammaChunk(byte[] data, int crc) {
-		super(new byte[]{103, 65, 77, 65}, data, crc) // gAMA
+		super(new byte[]{103, 65, 77, 65}, data, crc); // gAMA
 		parseData();
 	}
 	

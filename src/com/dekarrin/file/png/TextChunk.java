@@ -1,3 +1,5 @@
+package com.dekarrin.file.png;
+
 /**
  * Chunk that represents text data.
  */

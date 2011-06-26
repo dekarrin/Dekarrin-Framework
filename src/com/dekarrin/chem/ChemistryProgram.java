@@ -1,6 +1,6 @@
 package com.dekarrin.chem;
 
-import com.dekarrin.fileio.*;
+import com.dekarrin.file.*;
 import com.dekarrin.io.*;
 import com.dekarrin.math.SigFigNumber;
 import com.dekarrin.util.*;
@@ -21,7 +21,7 @@ public class ChemistryProgram extends CliProgram {
 	 * Starts the program.
 	 */
 	public static void main(String[] args) {
-		program = new ChemistryProgram();
+		program = new ChemistryProgram(args);
 		program.showIntro();
 		program.startLoop();
 	}
@@ -29,7 +29,8 @@ public class ChemistryProgram extends CliProgram {
 	/**
 	 * Creates a new instance of ChemistryProgram.
 	 */
-	public ChemistryProgram() {
+	public ChemistryProgram(String[] args) {
+		super(args);
 		addCommands();
 		loadElements();
 	}
@@ -48,21 +49,21 @@ public class ChemistryProgram extends CliProgram {
 	 * Adds the new commands.
 	 */
 	private void addCommands() {
-		addCommand("spell");
-		addDescription("Spells a word with element symbols");
-		addSyntax(" {-l} [word]");
-		addOptions("l", "Shows a list of elements that make up the word.");
+		ArgumentDescription[] args;
+		FlagDescription[] flags;
 		
-		addCommand("info");
-		addDescription("Gets info on an element");
-		addSyntax(" [element]");
-		addOptions();
+		args	= {new ArgumentDescription("word", "The word to be spelled")};
+		flags	= {new FlagDescription("l", "Shows the list of elements that make up the word")};
+		addCommandDescription("spell", "Spells a word with element symbols", args, flags);
+		
+		args	= {new ArgumentDescription("element", "The element to get info on")};
+		addCommandDescription("info", "Gets info on an element", args);
 	}
 	
 	/**
 	 * Processes a command and gives output.
 	 */
-	protected String processCommand(String[] words, CliSwitchHolder flags) {
+	protected String processCommand(String[] words, FlagArgumentList flags) {
 		String output = null;
 	
 		if(words[0].equals("spell")) {
@@ -70,13 +71,13 @@ public class ChemistryProgram extends CliProgram {
 				boolean showList = flags.containsSwitch("l");
 				output = spellWord(words[1], showList);
 			} else {
-				output = getBadSyntaxMessage("spell");
+				output = getSyntaxMessage("spell");
 			}
 		} else if(words[0].equals("info")) {
 			if(syntaxIsGood(words, 2)) {
 				output = getElementInfo(words[1]);
 			} else {
-				output = getBadSyntaxMessage("info");
+				output = getSyntaxMessage("info");
 			}
 		}
 		

@@ -6,7 +6,7 @@ import java.awt.Color;
  * Chunk for transparency data. The format of data varies, so the current
  * color type must be passed in at construction for it to parse.
  */
-public class TansparencyChunk extends AncillaryChunk {
+public class TransparencyChunk extends AncillaryChunk {
 	
 	/**
 	 * The mode of this background chunk. This is dependent on

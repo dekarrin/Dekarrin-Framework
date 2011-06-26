@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
  * around an array of bytes and adds the capabilities of
  * reading the rest of the buffer.
  */
-public class ByteParser() {
+public class ByteParser {
 	
 	/**
 	 * The ByteBuffer responsible for parsing the data.

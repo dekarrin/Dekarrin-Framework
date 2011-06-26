@@ -21,7 +21,7 @@ public class ByteHolder implements PrimitiveHolder {
 	 * @param size
 	 * The size of the byte holder.
 	 */
-	public class ByteHolder(int size) {
+	public ByteHolder(int size) {
 		holder = new byte[size];
 	}
 	
@@ -31,7 +31,7 @@ public class ByteHolder implements PrimitiveHolder {
 	 * @param array
 	 * The array to create the ByteHolder from.
 	 */
-	public class ByteHolder(byte[] array) {
+	public ByteHolder(byte[] array) {
 		holder = array;
 	}
 	
@@ -61,7 +61,7 @@ public class ByteHolder implements PrimitiveHolder {
 	 * The byte to be inserted.
 	 */
 	public void add(byte data) {
-		holder[pointer++] = data.
+		holder[pointer++] = data;
 	}
 	
 	/**
