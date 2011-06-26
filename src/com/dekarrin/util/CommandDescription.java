@@ -108,4 +108,160 @@ public class CommandDescription {
 		this.name = name;
 		this.description = description;
 	}
+	
+	/**
+	 * Gets a syntax message for the command that this
+	 * CommandDescription is associated with.
+	 *
+	 * @returns
+	 * A message showing proper syntax for this Command.
+	 */
+	public String getSyntaxMessage() {
+		String syntax = "syntax: " + name;
+		syntax += getFlagSyntax();
+		syntax += getArgumentSyntax();
+		return syntax;
+	}
+	
+	/**
+	 * Gets a full-on help message for the command that this
+	 * CommandDescription is associated with.
+	 *
+	 * @returns
+	 * A long String containing the help message.
+	 */
+	public String getHelpMessage() {
+		String help = "";
+		
+		help += "NAME\n";
+		help += "\t"+name+" -- "+description+"\n";
+		help += "\n";
+		help += "SYNOPSIS\n";
+		help += "\t"+getSyntaxMessage()+"\n";
+		help += "\n";
+		help += getArgumentHelp();
+		help += getFlagHelp();
+		return help;
+	}
+	
+	/**
+	 * Gets the short list-form of the command that this
+	 * CommandDescription is associated with.
+	 *
+	 * @param nameLength
+	 * The length that the name should be. The name section
+	 * of the list will be padded to this length.
+	 *
+	 * @returns
+	 * The short list form of the command.
+	 */
+	public String getListing(int nameLength) {
+		HelperString nameSegement = new HelperString(name);
+		nameSegement.padRight(nameLength);
+		String listing = nameSegment.toString() + " - " + description;
+		return listing;
+	}
+	
+	/**
+	 * Gets the syntax for the flags in thie command that
+	 * this CommandDescription is associated with.
+	 *
+	 * @returns
+	 * The flag syntax.
+	 */
+	private String getFlagSyntax() {
+		String flagSyntax = "";
+		if(flags.length > 0) {
+			String noValue = "";
+			String valued = "";
+			for(FlagDescription fd: flags) {
+				if(fd.hasValue) {
+					valued += String.format(" [-%s=%s]", fd.name, fd.longName);
+				} else {
+					noValue += fd.name;
+				}
+			}
+			if(noValue.length() > 0) {
+				noValue = " [" + noValue + "]";
+				flagSyntax += noValue;
+			}
+			if(valued.length() > 0) {
+				flagSyntax += valued;
+			}
+		}
+		return flagSyntax;
+	}
+	
+	/**
+	 * Gets the syntax for the arguments in the command that
+	 * this CommandDescription is associated with.
+	 *
+	 * @returns
+	 * The argument syntax.
+	 */
+	private String getArgumentSyntax() {
+		String argSyntax = "";
+		if(arguments.length > 0) {
+			for(ArgumentDescription ad: arguments) {
+				String lSep, rSep;
+				if(ad.isOptional) {
+					lSep = "[";
+					rSep = "]";
+				} else {
+					lSep = "<";
+					rSep = ">";
+				}
+				String argumentLine = String.format(" %s%s%s", lSep, ad.name, rSep);
+				argSyntax = argumentLine;
+			}
+		}	
+		return argSyntax;
+	}
+	
+	/**
+	 * Gets the help strings for the flags.
+	 *
+	 * @returns
+	 * The flag help string.
+	 */
+	private String getFlagHelp() {
+		String help = "";
+		if(flags.length > 0) {
+			help += "FLAGS";
+			for(FlagDescription fd: flags) {
+				help += "\n";
+				help += "\t-"+fd.name;
+				if(!fd.name.equals(fd.longName)) {
+					help += " | -"+fd.longName;
+				}
+				if(fd.hasValue) {
+					help += " = " + fd.longName;
+				}
+				help += "\n";
+				help += "\t\t"+fd.description+"\n";
+			}
+			help += "\n";
+		}
+		return help;
+	}
+	
+	/**
+	 * Gets the help strings for the arguments.
+	 *
+	 * @returns
+	 * The argument help string.
+	 */
+	private String getArgumentHelp() {
+		String help = "";
+		if(arguments.length > 0) {
+			help += "ARGUMENTS";
+			for(ArgumentDescription ad: arguments) {
+				help += "\n";
+				help += "\t"+ad.name+":\n";
+				help += "\t\t"+ad.description+"\n";
+			}
+			help += "\n";
+		}
+		return help;
+	}
 }

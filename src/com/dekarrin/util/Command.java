@@ -100,7 +100,7 @@ public class Command {
 	 */
 	public boolean hasArgument(String name) {
 		boolean has = false;
-		int argIndex = getIndexOfArgument(name);
+		int argIndex = getArgumentIndex(name);
 		if(argument.index < arguments.length) {
 			if(arguments[argIndex] != null) {
 				has = true;
@@ -121,7 +121,7 @@ public class Command {
 	 */
 	public String getArgument(String name) {
 		String argumentValue = null;
-		int argIndex = getIndexOfArgument(name);
+		int argIndex = getArgumentIndex(name);
 		if(argument.index < arguments.length) {
 			argumentValue = arguments[argIndex];
 		}
@@ -152,10 +152,7 @@ public class Command {
 	 * A message showing proper syntax for this Command.
 	 */
 	public String getSyntaxMessage() {
-		String syntax = "syntax: " + commandName;
-		syntax += getFlagSyntax();
-		syntax += getArgumentSyntax();
-		return syntax;
+		return description.getSyntaxMessage();
 	}
 	
 	/**
@@ -165,117 +162,46 @@ public class Command {
 	 * A long String containing the help message.
 	 */
 	public String getHelpMessage() {
-		String help = "";
-		
-		help += "NAME\n";
-		help += "\t"+commandName+" -- "+description.description+"\n"
-		help += "\n";
-		help += "SYNOPSIS\n";
-		help += "\t"+getSyntaxMessage()+"\n";
-		help += "\n";
-		help += getArgumentHelp();
-		help += getFlagHelp();
-		return help;
+		return description.getHelpMessage();
 	}
 	
 	/**
-	 * Gets the syntax for the flags in this Command.
+	 * Gets the index of an argument. This is the index that
+	 * the argument is at if it exists.
+	 *
+	 * @param argument
+	 * The argument to get the index for.
 	 *
 	 * @returns
-	 * The flag syntax.
+	 * The index of the argument, if it is an argument. If
+	 * the given argument does not exist, -1 is returned.
 	 */
-	private String getFlagSyntax() {
-		String flagSyntax = "";
-		if(description.flags.length > 0) {
-			String noValue = "";
-			String valued = "";
-			for(FlagDescription fd: description.flags) {
-				if(fd.hasValue) {
-					valued += String.format(" [-%s=%s]", fd.name, fd.longName);
-				} else {
-					noValue += fd.name;
-				}
+	private int getArgumentIndex(String argument) {
+		int index = -1;
+		int position = 0;
+		while(index == -1 && position < description.arguments.length) {
+			if(ad.name.equals(argument)) {
+				index = position;
 			}
-			if(noValue.length() > 0) {
-				noValue = " [" + noValue + "]";
-				flagSyntax += noValue;
-			}
-			if(valued.length() > 0) {
-				flagSyntax += valued;
+			position++;
+		}
+		return index;
+	}
+	
+	/**
+	 * Gets the minimum number of arguments required for this
+	 * command.
+	 *
+	 * @returns
+	 * The minimum number of arguments.
+	 */
+	private int getMinimumArguments() {
+		int minimum = 0;
+		for(ArgumentDescription ad: description.arguments) {
+			if(!ad.isOptional) {
+				minimum++;
 			}
 		}
-		return flagSyntax;
-	}
-	
-	/**
-	 * Gets the syntax for the arguments in this Command.
-	 *
-	 * @returns
-	 * The argument syntax.
-	 */
-	private String getArgumentSyntax() {
-		String argSyntax = "";
-		if(description.arguments.length > 0) {
-			for(ArgumentDescription ad: description.arguments) {
-				String lSep, rSep;
-				if(ad.isOptional) {
-					lSep = "[";
-					rSep = "]"
-				} else {
-					lSep = "<";
-					rSep = ">";
-				}
-				String argumentLine = String.format(" %s%s%s", lSep, ad.name, rSep);
-				argSyntax = argumentLine;
-			}
-		}	
-		return argSyntax;
-	}
-	
-	/**
-	 * Gets the help strings for the flags.
-	 *
-	 * @returns
-	 * The flag help string.
-	 */
-	private String getFlagHelp() {
-		String help = "";
-		if(description.flags.length > 0) {
-			help += "FLAGS";
-			for(FlagDescription fd: description.flags) {
-				help += "\n";
-				help += "\t-"+fd.name;
-				if(!fd.name.equals(fd.longName)) {
-					help += " | -"+fd.longName;
-				}
-				if(fd.hasValue) {
-					help += " = " + fd.longName;
-				}
-				help += "\n";
-				help += "\t\t"+fd.description+"\n";
-			}
-			help += "\n";
-		}
-		return help;
-	}
-	
-	/**
-	 * Gets the help strings for the arguments.
-	 *
-	 * @returns
-	 * The argument help string.
-	 */
-	private String getArgumentHelp() {
-		String help = "";
-		if(description.arguments.length > 0) {
-			help += "ARGUMENTS";
-			for(ArgumentDescription ad: description.arguments) {
-				help += "\n";
-				help += "\t"+ad.name+":\n";
-				help += "\t\t"+ad.description+"\n";
-			}
-			help += "\n";
-		}
-		return help;
+		return minimum;
 	}
 }

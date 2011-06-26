@@ -32,6 +32,7 @@ public class ChemistryProgram extends CliProgram {
 	public ChemistryProgram(String[] args) {
 		super(args);
 		addCommands();
+		setShutdownMessage("Goodbye");
 		loadElements();
 	}
 	
@@ -52,11 +53,11 @@ public class ChemistryProgram extends CliProgram {
 		ArgumentDescription[] args;
 		FlagDescription[] flags;
 		
-		args	= {new ArgumentDescription("word", "The word to be spelled")};
-		flags	= {new FlagDescription("l", "Shows the list of elements that make up the word")};
+		args	= new ArgumentDescription[]{new ArgumentDescription("word", "The word to be spelled")};
+		flags	= new FlagDescription[]{new FlagDescription("l", "Shows the list of elements that make up the word")};
 		addCommandDescription("spell", "Spells a word with element symbols", args, flags);
 		
-		args	= {new ArgumentDescription("element", "The element to get info on")};
+		args	= new ArgumentDescription[]{new ArgumentDescription("element", "The element to get info on")};
 		addCommandDescription("info", "Gets info on an element", args);
 	}
 	

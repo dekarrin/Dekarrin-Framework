@@ -3,7 +3,7 @@ package com.dekarrin.util;
 /**
  * Gives information on a command flag.
  */
-public class FlagDescription() {
+public class FlagDescription {
 
 	/**
 	 * The name of this flag.
