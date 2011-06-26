@@ -4,7 +4,8 @@ import com.dekarrin.file.*;
 import com.dekarrin.io.*;
 import com.dekarrin.math.SigFigNumber;
 import com.dekarrin.util.*;
-import com.dekarrin.program.CliProgram;
+import com.dekarrin.cli.*;
+import com.dekarrin.program.*;
 import java.util.*;
 
 /**
@@ -21,7 +22,7 @@ public class ChemistryProgram extends CliProgram {
 	 * Starts the program.
 	 */
 	public static void main(String[] args) {
-		program = new ChemistryProgram(args);
+		ChemistryProgram program = new ChemistryProgram(args);
 		program.showIntro();
 		program.startLoop();
 	}
@@ -55,7 +56,7 @@ public class ChemistryProgram extends CliProgram {
 		
 		args	= new ArgumentDescription[]{new ArgumentDescription("word", "The word to be spelled")};
 		flags	= new FlagDescription[]{new FlagDescription("l", "Shows the list of elements that make up the word")};
-		addCommandDescription("spell", "Spells a word with element symbols", args, flags);
+		addCommandDescription("spell", "Spells a word with element symbols", flags, args);
 		
 		args	= new ArgumentDescription[]{new ArgumentDescription("element", "The element to get info on")};
 		addCommandDescription("info", "Gets info on an element", args);
@@ -63,23 +64,22 @@ public class ChemistryProgram extends CliProgram {
 	
 	/**
 	 * Processes a command and gives output.
+	 *
+	 * @param command
+	 * The Command created by the user-entered command.
+	 *
+	 * @returns
+	 * The output for whatever command was entered.
 	 */
-	protected String processCommand(String[] words, FlagArgumentList flags) {
+	protected String processCommand(Command command) {
 		String output = null;
-	
-		if(words[0].equals("spell")) {
-			if(syntaxIsGood(words, 2)) {
-				boolean showList = flags.containsSwitch("l");
-				output = spellWord(words[1], showList);
-			} else {
-				output = getSyntaxMessage("spell");
-			}
-		} else if(words[0].equals("info")) {
-			if(syntaxIsGood(words, 2)) {
-				output = getElementInfo(words[1]);
-			} else {
-				output = getSyntaxMessage("info");
-			}
+		String name = command.getName();
+		if(name.equals("spell")) {
+				output = spellWord(command.getArgument("word"), command.hasFlag("l"));
+		} else if(name.equals("info")) {
+			output = getElementInfo(command.getArgument("element"));
+		} else {
+			throw new UnrecognizedCommandException(name, "Bad command '"+name+"'");
 		}
 		
 		return output;

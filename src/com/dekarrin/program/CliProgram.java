@@ -1,5 +1,8 @@
 package com.dekarrin.program;
 
+import java.util.*;
+import com.dekarrin.cli.*;
+
 /**
  * Program to be run from the command line interactively. This program
  * operates in a loop, continuously processing user input and giving
@@ -15,12 +18,22 @@ public abstract class CliProgram extends ConsoleProgram {
 	/**
 	 * The list of commands that this program recognizes.
 	 */
-	private HashMap<String,CommandDescription> commands = new Vector<CommandDescription>();
+	private HashMap<String,CommandDescription> commands = new HashMap<String,CommandDescription>();
 	
 	/**
 	 * The shutdown message for this program.
 	 */
 	private String shutdownMessage = "Exiting";
+	
+	/**
+	 * The prompt for this program.
+	 */
+	private String prompt;
+	
+	/**
+	 * The width of each entry in the command list.
+	 */
+	private int COMMAND_LIST_SPACES = 16;
 
 	/**
 	 * Creates a new CliProgram.
@@ -37,7 +50,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	public void startLoop() {
 		while(running) {
 			String i = ui.read(prompt);
-			if(input != null) {
+			if(i != null) {
 				Command input = new Command(i);
 				String output;
 				if(commandExists(input)) {
@@ -89,7 +102,24 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * The arguments that the command uses.
 	 */
 	protected void addCommandDefinition(String name, String description, ArgumentDescription[] args) {
-		commands.put(name, new CommandDescription(name, description, args, flags));
+		commands.put(name, new CommandDescription(name, description, args));
+	}
+	
+	/**
+	 * Adds a new command description, that does not accept
+	 * arguments, to the list.
+	 *
+	 * @param name
+	 * The name of the command.
+	 *
+	 * @param description
+	 * The description of the command.
+	 *
+	 * @param flags
+	 * The flags that the command uses.
+	 */
+	protected void addCommandDefinition(String name, String description, FlagDescription[] flags) {
+		commands.put(name, new CommandDescription(name, description, flags));
 	}
 	
 	/**
@@ -113,7 +143,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * The description of the command.
 	 */
 	protected void addCommandDefinition(String name, String description) {
-		commands.add(name, new CommandDescription(name, description));
+		commands.put(name, new CommandDescription(name, description));
 	}
 	
 	/**
@@ -136,6 +166,16 @@ public abstract class CliProgram extends ConsoleProgram {
 	 */
 	protected void setShutdownMessage(String message) {
 		shutdownMessage = message;
+	}
+	
+	/**
+	 * Sets the prompt for the program.
+	 *
+	 * @param prompt
+	 * The new prompt.
+	 */
+	protected void setPrompt(String prompt) {
+		this.prompt = prompt;
 	}
 	
 	/**
@@ -209,9 +249,8 @@ public abstract class CliProgram extends ConsoleProgram {
 	 */
 	private String getCommandList() {
 		String list = "";
-		Iterator<CommandDescription> i = commands.values().iterator();
-		while(i.hasNext()) {
-			list += i.next().getListing() + "\n";
+		for(CommandDescription cd: commands.values()) {
+			list += cd.getListing(COMMAND_LIST_SPACES) + "\n";
 		}
 		return list;
 	}

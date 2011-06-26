@@ -1,4 +1,4 @@
-package com.dekarrin.util;
+package com.dekarrin.cli;
 
 /**
  * Gives information on a command flag.

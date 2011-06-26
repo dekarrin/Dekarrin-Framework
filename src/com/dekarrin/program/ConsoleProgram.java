@@ -1,6 +1,6 @@
 package com.dekarrin.program;
 
-import com.dekarrin.util.FlagArgumentList;
+import com.dekarrin.cli.FlagArgumentList;
 import com.dekarrin.io.InteractionModule;
 
 import java.util.ArrayList;
@@ -9,11 +9,6 @@ import java.util.ArrayList;
  * Program to be run from the command line. Processes flags automatically.
  */
 public abstract class ConsoleProgram {
-	
-	/**
-	 * The program itself.
-	 */
-	protected static ConsoleProgram program;
 	
 	/**
 	 * The io module for interacting with the user.

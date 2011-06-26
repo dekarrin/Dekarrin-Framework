@@ -1,4 +1,4 @@
-package com.dekarrin.util;
+package com.dekarrin.cli;
 
 /**
  * Gives information on a command from a CLI program.
@@ -51,8 +51,8 @@ public class CommandDescription {
 	}
 	
 	/**
-	 * Creates a new Command that accepts flags but not
-	 * arguments.
+	 * Creates a new Command that accepts arguments but not
+	 * flag.
 	 *
 	 * @param name
 	 * The name of the new Command. This is what the user
@@ -72,8 +72,8 @@ public class CommandDescription {
 	}
 	
 	/**
-	 * Creates a new Command that accepts arguments but not
-	 * flags.
+	 * Creates a new Command that accepts flags but not
+	 * arguments.
 	 *
 	 * @param name
 	 * The name of the new Command. This is what the user

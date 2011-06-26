@@ -1,4 +1,4 @@
-package com.dekarrin.util;
+package com.dekarrin.cli;
 
 /**
  * Represents a parsed command from a CLI program.
