@@ -17,7 +17,7 @@ public class ImageDataChunk extends CriticalChunk {
 	 * @param crc
 	 * The CRC for this chunk.
 	 */
-	public ImageDataChunk(byte[] data, int crc) {
+	public ImageDataChunk(byte[] data, long crc) {
 		super(new byte[]{73, 68, 65, 84}, data, crc);// IDAT
 	}
 }

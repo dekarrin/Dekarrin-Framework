@@ -14,7 +14,7 @@ public class TrailerChunk extends CriticalChunk {
 	 * @param crc
 	 * The CRC for this chunk.
 	 */
-	public TrailerChunk(byte[] data, int crc) {
+	public TrailerChunk(byte[] data, long crc) {
 		super(new byte[]{73, 69, 78, 68}, data, crc);// IEND
 	}
 }

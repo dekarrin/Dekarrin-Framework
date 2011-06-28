@@ -1,11 +1,24 @@
 <project name="Dekarrin-Framework" basedir="." default="compile">
 	<property name="source" value="src"/>
 	<property name="build" value="bin"/>
+	<property name="dekarrin" value="/com/dekarrin"/>
+	<property name="warnings" value="all"/>
+	<condition property="warning_count" value="${warnings}" else="all">
+		<isset property="${warnings}"/>
+	</condition>
 	<target name="clean">
 		<delete dir="${build}"/>
 	</target>
-	<target name="compile">
+	<target name="compileall">
 		<mkdir dir="${build}"/>
-		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}"/>
+		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+	</target>
+	<target name="compile">
+		<mkdir dir="${build}${dekarrin}"/>
+		<javac includeantruntime="false" target="1.6" srcdir="${source}${dekarrin}" destdir="${build}${dekarrin}">
+			<compilerarg value="Xlint:${warning_count}"/>
+		</javac>
 	</target>
 </project>

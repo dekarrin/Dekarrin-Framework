@@ -1,6 +1,7 @@
 package com.dekarrin.zip;
 
-import java.util.zip.Inflater;
+import java.util.zip.*;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Decompresses binary data using ZLIB.
@@ -114,14 +115,18 @@ public class ZlibDecompresser {
 	 */
 	private void decompressInputData() {
 		Inflater decompresser = new Inflater();
-		decompresser.setInput(input);
+		decompresser.setInput(compressedData);
 		byte[] result = new byte[OUTPUT_BUFFER_SIZE];
 		int actualLength = 0;
-		while(decompressor.getRemaining() > 0) {
-			actualLength = decompresser.inflate(result);
+		while(decompresser.getRemaining() > 0) {
+			try {
+				actualLength = decompresser.inflate(result);
+			} catch(DataFormatException e) {
+				System.err.println("Bad DEFLATE format!");
+			}
 			addToOutput(result, actualLength);
 		}
-		decompressor.finalize();
+		decompresser.end();
 	}
 	
 	/**
@@ -134,7 +139,7 @@ public class ZlibDecompresser {
 	 * The length to which the result array should be processed.
 	 */
 	private void addToOutput(byte[] result, int length) {
-		oldDataLength = decompressedData.length;
+		int oldDataLength = decompressedData.length;
 		allocateDecompressedData(length);
 		for(int i = 0; i < length; i++) {
 			decompressedData [oldDataLength + i] = result[i];

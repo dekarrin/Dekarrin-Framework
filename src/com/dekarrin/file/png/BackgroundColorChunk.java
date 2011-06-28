@@ -38,7 +38,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk crc.
 	 */
-	public BackgroundColorChunk(byte[] data, int crc) {
+	public BackgroundColorChunk(byte[] data, long crc) {
 		super(new byte[]{98, 75, 71, 68}, data, crc); // bKGD
 		parseData();
 	}
@@ -104,20 +104,21 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * Only one of the two background properties is needed.
 	 */
 	private void parseBackgroundProperty() {
+		int r,g,b;
 		switch(colorMode) {
 			case INDEXED_COLOR_MODE:
 				paletteIndex = parser.parseByte();
 				break;
 				
 			case GRAYSCALE_MODE:
-				int g = parser.parseInt(2);
+				g = parser.parseInt(2);
 				color = new Color(g, g, g);
 				break;
 				
 			case TRUECOLOR_MODE:
-				int r = parser.parseInt(2);
-				int g = parser.parseInt(2);
-				int b = parser.parseInt(2);
+				r = parser.parseInt(2);
+				g = parser.parseInt(2);
+				b = parser.parseInt(2);
 				color = new Color(r, g, b);
 				break;
 		}

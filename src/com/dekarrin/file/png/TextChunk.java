@@ -27,7 +27,7 @@ public abstract class TextChunk extends AncillaryChunk {
 	 * @param crc
 	 * The CRC for the chunk.
 	 */
-	public TextChunk(byte[] type, byte[] data, int crc) {
+	public TextChunk(byte[] type, byte[] data, long crc) {
 		super(type, data, crc);
 	}
 	

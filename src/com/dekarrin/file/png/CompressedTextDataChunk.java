@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.zip.ZlibDecompresser;
+
 /**
  * Chunk holding compressed text data.
  */
@@ -25,7 +27,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * @param crc
 	 * The cyclic redundancy code for the chunk.
 	 */
-	public CompressedTextDataChunk(byte[] data, int crc) {
+	public CompressedTextDataChunk(byte[] data, long crc) {
 		super(new byte[]{122, 84, 88, 116}, data, crc); // zTXt
 		parseData();
 	}

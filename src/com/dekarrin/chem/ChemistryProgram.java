@@ -1,6 +1,6 @@
 package com.dekarrin.chem;
 
-import com.dekarrin.file.*;
+import com.dekarrin.file.csv.CsvFile;
 import com.dekarrin.io.*;
 import com.dekarrin.math.SigFigNumber;
 import com.dekarrin.util.*;
@@ -56,10 +56,10 @@ public class ChemistryProgram extends CliProgram {
 		
 		args	= new ArgumentDescription[]{new ArgumentDescription("word", "The word to be spelled")};
 		flags	= new FlagDescription[]{new FlagDescription("l", "Shows the list of elements that make up the word")};
-		addCommandDescription("spell", "Spells a word with element symbols", flags, args);
+		addCommandDefinition("spell", "Spells a word with element symbols", args, flags);
 		
 		args	= new ArgumentDescription[]{new ArgumentDescription("element", "The element to get info on")};
-		addCommandDescription("info", "Gets info on an element", args);
+		addCommandDefinition("info", "Gets info on an element", args);
 	}
 	
 	/**

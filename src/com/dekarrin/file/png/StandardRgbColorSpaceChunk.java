@@ -19,7 +19,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * @param crc
 	 * The CRC for this chunk.
 	 */
-	public StandardRgbColorSpaceChunk(byte[] data, int crc) {
+	public StandardRgbColorSpaceChunk(byte[] data, long crc) {
 		super(new byte[]{115, 82, 71, 66}, data, crc); // sRGB
 		parseData();
 	}

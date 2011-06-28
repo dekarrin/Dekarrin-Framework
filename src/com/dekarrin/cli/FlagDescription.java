@@ -55,7 +55,7 @@ public class FlagDescription {
 	 * @param description
 	 * Information on this flag.
 	 */
-	public FlagDescription(String shotName, String longName, String description) {
+	public FlagDescription(String shortName, String longName, String description) {
 		name = shortName;
 		this.longName = longName;
 		this.description = description;
@@ -97,7 +97,7 @@ public class FlagDescription {
 	 * @param hasValue
 	 * Whether or not this flag accepts a value.
 	 */
-	public FlagDescription(String shotName, String longName, String description, boolean hasValue) {
+	public FlagDescription(String shortName, String longName, String description, boolean hasValue) {
 		name = shortName;
 		this.longName = longName;
 		this.description = description;

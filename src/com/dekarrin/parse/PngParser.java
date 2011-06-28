@@ -1,7 +1,7 @@
 package com.dekarrin.parse;
 
-import com.dekarrin.util.ByteHolder;
-import com.dekarrin.util.IntHolder;
+import com.dekarrin.util.*;
+import com.dekarrin.io.*;
 import com.dekarrin.file.png.*;
 import com.dekarrin.error.*;
 import java.io.*;
@@ -137,7 +137,7 @@ public class PngParser {
 	private void parseIndividualChunks() {
 		for(int i = 0; i < completedChunks.size(); i++) {
 			Chunk converted = parseChunk(completedChunks.get(i));
-			completedChunks.put(i, converted);
+			completedChunks.add(i, converted);
 		}
 	}
 	
@@ -147,7 +147,7 @@ public class PngParser {
 	private Chunk parseChunk(Chunk pc) {
 		String type = pc.getTypeName();
 		byte[] data = pc.getData();
-		int crc = pc.getCrc();
+		long crc = pc.getCrc();
 		
 		Chunk newChunk;
 		if(type.equals("IHDR")) {
@@ -179,9 +179,9 @@ public class PngParser {
 		} else if(type.equals("pHYs")) {
 			newChunk = new PhysicalPixelDimensionsChunk(data, crc);
 		} else if(type.equals("sBIT")) {
-			newChunk = new SignficantBitsChunk(data, crc);
+			newChunk = new SignificantBitsChunk(data, crc);
 		} else if(type.equals("sPLT")) {
-			newChunk = new SuggestesPaletteChunk(data, crc);
+			newChunk = new SuggestedPaletteChunk(data, crc);
 		} else if(type.equals("hIST")) {
 			newChunk = new PaletteHistogramChunk(data, crc);
 		} else if(type.equals("tIME")) {
@@ -197,14 +197,18 @@ public class PngParser {
 	 * Gets the data from the png file and stores it as generic
 	 * chunks in the completedChunks ArrayList.
 	 */
-	private void parseChunksFromFile() {
+	private void parseChunksFromFile() throws StreamFailureException, InvalidFileFormatException {
 		boolean parsing = true;
 		int nextByteAsInt;
 		parseMode = VERIFICATION_MODE;
 		while((nextByteAsInt = getNextByte()) != -1) {
 			parseByte(nextByteAsInt);
 		}
-		pngStream.close();
+		try {
+			pngStream.close();
+		} catch(IOException e) {
+			throw new StreamFailureException(e.getMessage());
+		}
 	}
 	
 	/**
@@ -335,7 +339,7 @@ public class PngParser {
 	 * @returns
 	 * True if the position has come to the end; false otherwise.
 	 */
-	private boolean isComplete(ByteHolder holder) {
+	private boolean isComplete(PrimitiveHolder holder) {
 		boolean complete = false;
 		if(holder.isAtEnd()) {
 			complete = true;

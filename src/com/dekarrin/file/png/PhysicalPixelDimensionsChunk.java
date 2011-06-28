@@ -27,7 +27,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public PhysicalPixelDimensionsChunk(byte[] data, int crc) {
+	public PhysicalPixelDimensionsChunk(byte[] data, long crc) {
 		super(new byte[]{112, 72, 89, 115}, data, crc); // pHYs
 		parseData();
 	}
@@ -49,7 +49,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * The width.
 	 */
 	public int getWidth() {
-		return dimensions.getWidth();
+		return (int)dimensions.getWidth();
 	}
 	
 	/**
@@ -59,7 +59,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * The height.
 	 */
 	public int getHeight() {
-		return dimensions.getHeight();
+		return (int)dimensions.getHeight();
 	}
 	
 	/**
@@ -75,7 +75,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	private void parseData() {
 		int x = parser.parseInt();
 		int y = parser.parseInt();
-		dimensions = new Dimensions(x, y);
+		dimensions = new Dimension(x, y);
 		unitSpecifier = parser.parseByte();
 	}
 }

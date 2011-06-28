@@ -1,5 +1,7 @@
 package com.dekarrin.cli;
 
+import com.dekarrin.util.HelperString;
+
 /**
  * Gives information on a command from a CLI program.
  */
@@ -156,8 +158,8 @@ public class CommandDescription {
 	 * The short list form of the command.
 	 */
 	public String getListing(int nameLength) {
-		HelperString nameSegement = new HelperString(name);
-		nameSegement.padRight(nameLength);
+		HelperString nameSegment = new HelperString(name);
+		nameSegment.padRight(nameLength);
 		String listing = nameSegment.toString() + " - " + description;
 		return listing;
 	}

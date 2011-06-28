@@ -26,7 +26,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public SignificantBitsChunk(byte[] data, int crc) {
+	public SignificantBitsChunk(byte[] data, long crc) {
 		super(new byte[]{115, 66, 73, 84}, data, crc); // sBIT
 		parseData();
 	}
@@ -47,7 +47,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * @returns
 	 * The significant bits in the alpha.
 	 */
-	public byte getAlphaBits() {
+	public int getAlphaBits() {
 		return significantAlphaBits;
 	}
 	
@@ -55,29 +55,30 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * Parses chunk data into something usable.
 	 */
 	private void parseData() {
+		int r,g,b;
 		switch(getLength()) {
 			case 1: // grayscale
-				int g = parser.parseInt(1);
+				g = parser.parseInt(1);
 				significantColorBits = new Color(g, g, g);
 				break;
 				
 			case 2: // grayscale + alpha
-				int g = parser.parseInt(1);
+				g = parser.parseInt(1);
 				significantColorBits = new Color(g, g, g);
 				significantAlphaBits = parser.parseInt(1);
 				break;
 				
 			case 3: // color
-				int r = parser.parseInt(1);
-				int g = parser.parseInt(1);
-				int b = parser.parseInt(1);
+				r = parser.parseInt(1);
+				g = parser.parseInt(1);
+				b = parser.parseInt(1);
 				significantColorBits = new Color(r, g, b);
 				break;
 				
 			case 4: // color + alpha
-				int r = parser.parseInt(1);
-				int g = parser.parseInt(1);
-				int b = parser.parseInt(1);
+				r = parser.parseInt(1);
+				g = parser.parseInt(1);
+				b = parser.parseInt(1);
 				significantColorBits = new Color(r, g, b);
 				significantAlphaBits = parser.parseInt(1);
 				break;

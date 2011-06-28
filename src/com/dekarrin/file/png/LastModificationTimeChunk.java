@@ -44,7 +44,7 @@ public class LastModificationTimeChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public LastModificationTimeChunk(byte[] data, int crc) {
+	public LastModificationTimeChunk(byte[] data, long crc) {
 		super(new byte[]{116, 73, 77, 69}, data, crc);
 		parseData();
 	}

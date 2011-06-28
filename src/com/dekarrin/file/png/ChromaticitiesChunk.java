@@ -36,7 +36,7 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public ChromaticitiesChunk(byte[] data, int crc) {
+	public ChromaticitiesChunk(byte[] data, long crc) {
 		super(new byte[]{99, 72, 82, 77}, data, crc); // cHRM
 		parseData();
 	}

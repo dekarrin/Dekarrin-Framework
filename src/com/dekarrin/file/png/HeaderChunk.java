@@ -58,7 +58,7 @@ public class HeaderChunk extends CriticalChunk {
 	 * @param crc
 	 * The CRC for this chunk.
 	 */
-	public HeaderChunk(byte[] data, int crc) {
+	public HeaderChunk(byte[] data, long crc) {
 		super(new byte[]{49, 48, 44, 52}, data, crc); // IHED
 		parseData();
 	}

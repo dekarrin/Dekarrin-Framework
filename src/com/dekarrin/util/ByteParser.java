@@ -120,7 +120,7 @@ public class ByteParser {
 		int parsedInt = 0;
 		switch(width) {
 			case 1:
-				parsedInt = (int)((int)dataBuffer.getByte() & 0xff);
+				parsedInt = (int)((int)dataBuffer.get() & 0xff);
 				break;
 				
 			case 2:
@@ -215,7 +215,7 @@ public class ByteParser {
 	 * @param longArray
 	 * The array to fill with values.
 	 */
-	public void longShorts(long[] longArray) {
+	public void parseLongs(long[] longArray) {
 		for(int i = 0; i < longArray.length; i++) {
 			longArray[i] = parseLong();
 		}
@@ -229,7 +229,7 @@ public class ByteParser {
 	 */
 	public long[] parseFinalLongs() {
 		long[] remainingLongs = new long[remainingLength()];
-		parseLong(remainingLongs);
+		parseLongs(remainingLongs);
 		return remainingLongs;
 	}
 	
@@ -289,7 +289,7 @@ public class ByteParser {
 	 */
 	public void parseDoubles(double[] doubleArray) {
 		for(int i = 0; i < doubleArray.length; i++) {
-			doubleArray[i] = doubleShort();
+			doubleArray[i] = parseDouble();
 		}
 	}
 	
@@ -312,8 +312,8 @@ public class ByteParser {
 	 * The next boolean.
 	 */
 	public boolean parseBoolean() {
-		byte next = dataBuffer.getByte();
-		boolean boolValue = (boolean)next;
+		byte next = dataBuffer.get();
+		boolean boolValue = !(next == 0);
 		return boolValue;
 	}
 	

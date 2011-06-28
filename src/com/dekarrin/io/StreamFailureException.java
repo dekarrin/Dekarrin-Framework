@@ -1,4 +1,4 @@
-package com.dekarrin.parse;
+package com.dekarrin.io;
 
 /**
  * Exception indicating that an error occured with the stream

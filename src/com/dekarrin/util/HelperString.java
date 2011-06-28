@@ -1,7 +1,6 @@
 package com.dekarrin.util;
 
-import java.util.Arrays;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Provides methods for String-related tasks.
@@ -64,7 +63,7 @@ public class HelperString {
 	 * from the given byte array.
 	 */
 	public static HelperString[] createFromBytes(byte[] byteData) {
-		Vector<HelperString> hsList = Vector<HelperString>(3);
+		Vector<HelperString> hsList = new Vector<HelperString>(3);
 		int nullPosition;
 		byte[] stringBytes;
 		int endIndex = -1;
@@ -72,7 +71,7 @@ public class HelperString {
 			byteData = Arrays.copyOfRange(byteData, endIndex+1, byteData.length);
 			nullPosition = Arrays.asList(byteData).indexOf(0);
 			endIndex = (nullPosition != -1) ? nullPosition : byteData.length;
-			stringBytes = Array.copyOfRange(byteData, 0, endIndex);
+			stringBytes = Arrays.copyOfRange(byteData, 0, endIndex);
 			hsList.add(new HelperString(stringBytes));
 		}
 		HelperString[] outputList = hsList.toArray(new HelperString[0]);

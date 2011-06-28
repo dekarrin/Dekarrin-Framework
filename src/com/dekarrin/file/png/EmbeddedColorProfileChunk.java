@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.zip.ZlibDecompresser;
+
 /**
  * Chunk for an embedded ICC color profile.
  */
@@ -34,7 +36,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public EmbeddedColorProfileChunk(byte[] data, int crc) {
+	public EmbeddedColorProfileChunk(byte[] data, long crc) {
 		super(new byte[]{105, 67, 67, 80}, data, crc); // iCCP
 		parseData();
 	}

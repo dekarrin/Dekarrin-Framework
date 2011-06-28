@@ -19,7 +19,7 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public PaletteHistogramChunk(byte[] data, int crc) {
+	public PaletteHistogramChunk(byte[] data, long crc) {
 		super(new byte[]{104, 73, 83, 84}, data, crc); // hIST
 		parseData();
 	}

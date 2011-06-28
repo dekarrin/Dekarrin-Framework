@@ -41,7 +41,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @param colorMode
 	 * The mode of color in the png this chunk is a part of.
 	 */
-	public TransparencyChunk(byte[] data, int crc, int colorMode) {
+	public TransparencyChunk(byte[] data, long crc, int colorMode) {
 		super(new byte[]{116, 82, 78, 83}, data, crc);// tRNS
 		this.colorMode = colorMode;
 		parseData();
@@ -58,7 +58,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @param crc
 	 * The CRC for this chunk.
 	 */
-	public TransparencyChunk(byte[] data, int crc) {
+	public TransparencyChunk(byte[] data, long crc) {
 		super(new byte[]{116, 82, 78, 83}, data, crc);// tRNS
 	}
 	
@@ -115,7 +115,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 */
 	public void parseWithColorMode(int colorMode) {
 		this.colorMode = colorMode;
-		if(color == null && paletteIndex == null) {
+		if(color == null && paletteAlphas == null) {
 			parseData();
 		}
 	}
@@ -132,20 +132,21 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * Only one of the two properties is needed.
 	 */
 	private void parseTransparencyProperty() {
+		int r,g,b;
 		switch(colorMode) {
 			case INDEXED_COLOR_MODE:
-				paletteAlphas = parser.parseLastInts(1);
+				paletteAlphas = parser.parseFinalInts(1);
 				break;
 				
 			case GRAYSCALE_MODE:
-				int g = parser.parseInt(2);
+				g = parser.parseInt(2);
 				color = new Color(g, g, g);
 				break;
 				
 			case TRUECOLOR_MODE:
-				int r = parser.parseInt(2);
-				int g = parser.parseInt(2);
-				int b = parser.parseInt(2);
+				r = parser.parseInt(2);
+				g = parser.parseInt(2);
+				b = parser.parseInt(2);
 				color = new Color(r, g, b);
 				break;
 		}

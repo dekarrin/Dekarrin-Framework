@@ -36,7 +36,7 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public SuggestedPaletteChunk(byte[] data, int crc) {
+	public SuggestedPaletteChunk(byte[] data, long crc) {
 		super(new byte[]{115, 80, 76, 84}, data, crc); // sPLT
 		parseData();
 	}

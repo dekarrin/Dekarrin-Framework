@@ -141,8 +141,8 @@ public class Chunk {
 	 * The read CRC for this chunk. This may not be the actual
 	 * CRC; if it isn't, this chunk is considered corrupted.
 	 */
-	public Chunk(byte[] type, byte[] data, int crc) {
-		this.crc = (long)((long)crc & 0xffffffff);
+	public Chunk(byte[] type, byte[] data, long crc) {
+		this.crc = crc;
 		chunkData = data;
 		chunkType = type;
 		//TODO: check validity of chunk here with generateCrc().
@@ -206,7 +206,7 @@ public class Chunk {
 	 * Whether it is.
 	 */
 	public boolean isAncillary() {
-		return (chunkType[0] & 32 == 32);
+		return ((chunkType[0] & 32) == 32);
 	}
 	
 	/**
@@ -216,7 +216,7 @@ public class Chunk {
 	 * Whether it is.
 	 */
 	public boolean isPrivate() {
-		return (chunkType[1] & 32 == 32);
+		return ((chunkType[1] & 32) == 32);
 	}
 	
 	/**
@@ -226,7 +226,7 @@ public class Chunk {
 	 * Whether it is.
 	 */
 	public boolean isSafeToCopy() {
-		return (chunkType[3] & 32 == 32);
+		return ((chunkType[3] & 32) == 32);
 	}
 		
 	/**

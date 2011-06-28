@@ -21,7 +21,7 @@ public class PaletteChunk extends CriticalChunk {
 	 * @param crc
 	 * The CRC for this chunk.
 	 */
-	public PaletteChunk(byte[] data, int crc) {
+	public PaletteChunk(byte[] data, long crc) {
 		super(new byte[]{80, 76, 84, 69}, data, crc); // PLTE
 		parseData();
 	}

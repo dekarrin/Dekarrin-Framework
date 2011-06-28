@@ -1,286 +1,257 @@
-Buildfile: C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\build.xml
+Buildfile: /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/build.xml
 
 compile:
-    [javac] Compiling 54 source files to C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\bin
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\chem\ChemistryProgram.java:59: addCommandDescription(java.lang.String,java.lang.String,com.dekarrin.cli.ArgumentDescription[],com.dekarrin.cli.FlagDescription[]) in com.dekarrin.program.CliProgram cannot be applied to (java.lang.String,java.lang.String,com.dekarrin.cli.FlagDescription[],com.dekarrin.cli.ArgumentDescription[])
-    [javac] 		addCommandDescription("spell", "Spells a word with element symbols", flags, args);
-    [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\chem\ChemistryProgram.java:62: addCommandDescription(java.lang.String,java.lang.String,com.dekarrin.cli.ArgumentDescription[],com.dekarrin.cli.FlagDescription[]) in com.dekarrin.program.CliProgram cannot be applied to (java.lang.String,java.lang.String,com.dekarrin.cli.ArgumentDescription[])
-    [javac] 		addCommandDescription("info", "Gets info on an element", args);
-    [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\chem\ChemistryProgram.java:186: cannot find symbol
-    [javac] symbol  : class CsvFile
-    [javac] location: class com.dekarrin.chem.ChemistryProgram
-    [javac] 		CsvFile file = new CsvFile("elements.csv");
-    [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\chem\ChemistryProgram.java:186: cannot find symbol
-    [javac] symbol  : class CsvFile
-    [javac] location: class com.dekarrin.chem.ChemistryProgram
-    [javac] 		CsvFile file = new CsvFile("elements.csv");
-    [javac] 		                   ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\Command.java:38: cannot find symbol
-    [javac] symbol  : method FlagArgumentList(java.lang.String[])
-    [javac] location: class com.dekarrin.cli.Command
-    [javac] 		flags = FlagArgumentList(arguments);
-    [javac] 		        ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\Command.java:104: cannot find symbol
-    [javac] symbol  : variable argument
-    [javac] location: class com.dekarrin.cli.Command
-    [javac] 		if(argument.index < arguments.length) {
-    [javac] 		   ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\Command.java:125: cannot find symbol
-    [javac] symbol  : variable argument
-    [javac] location: class com.dekarrin.cli.Command
-    [javac] 		if(argument.index < arguments.length) {
-    [javac] 		   ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\Command.java:183: package ad does not exist
-    [javac] 			if(ad.name.equals(argument)) {
-    [javac] 			     ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\CommandDescription.java:159: cannot find symbol
+    [javac] Compiling 51 source files to /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/bin
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/cli/CommandDescription.java:3: cannot find symbol
+    [javac] symbol  : class StringHelper
+    [javac] location: package com.dekarrin.util
+    [javac] import com.dekarrin.util.StringHelper;
+    [javac]                         ^
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/cli/CommandDescription.java:161: cannot find symbol
     [javac] symbol  : class HelperString
     [javac] location: class com.dekarrin.cli.CommandDescription
     [javac] 		HelperString nameSegement = new HelperString(name);
     [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\CommandDescription.java:159: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/cli/CommandDescription.java:161: cannot find symbol
     [javac] symbol  : class HelperString
     [javac] location: class com.dekarrin.cli.CommandDescription
     [javac] 		HelperString nameSegement = new HelperString(name);
     [javac] 		                                ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\CommandDescription.java:161: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/cli/CommandDescription.java:163: cannot find symbol
     [javac] symbol  : variable nameSegment
     [javac] location: class com.dekarrin.cli.CommandDescription
     [javac] 		String listing = nameSegment.toString() + " - " + description;
     [javac] 		                 ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\FlagDescription.java:59: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/cli/FlagDescription.java:59: cannot find symbol
     [javac] symbol  : variable shortName
     [javac] location: class com.dekarrin.cli.FlagDescription
     [javac] 		name = shortName;
     [javac] 		       ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\cli\FlagDescription.java:101: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/cli/FlagDescription.java:101: cannot find symbol
     [javac] symbol  : variable shortName
     [javac] location: class com.dekarrin.cli.FlagDescription
     [javac] 		name = shortName;
     [javac] 		       ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\Chunk.java:209: operator & cannot be applied to byte,boolean
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/Chunk.java:209: operator & cannot be applied to byte,boolean
     [javac] 		return (chunkType[0] & 32 == 32);
     [javac] 		                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\Chunk.java:219: operator & cannot be applied to byte,boolean
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/Chunk.java:219: operator & cannot be applied to byte,boolean
     [javac] 		return (chunkType[1] & 32 == 32);
     [javac] 		                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\Chunk.java:229: operator & cannot be applied to byte,boolean
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/Chunk.java:229: operator & cannot be applied to byte,boolean
     [javac] 		return (chunkType[3] & 32 == 32);
     [javac] 		                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\ByteParser.java:123: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/ByteParser.java:123: cannot find symbol
     [javac] symbol  : method getByte()
     [javac] location: class java.nio.ByteBuffer
     [javac] 				parsedInt = (int)((int)dataBuffer.getByte() & 0xff);
     [javac] 				                                 ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\ByteParser.java:232: parseLong() in com.dekarrin.util.ByteParser cannot be applied to (long[])
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/ByteParser.java:232: parseLong() in com.dekarrin.util.ByteParser cannot be applied to (long[])
     [javac] 		parseLong(remainingLongs);
     [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\ByteParser.java:292: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/ByteParser.java:292: cannot find symbol
     [javac] symbol  : method doubleShort()
     [javac] location: class com.dekarrin.util.ByteParser
     [javac] 			doubleArray[i] = doubleShort();
     [javac] 			                 ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\ByteParser.java:315: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/ByteParser.java:315: cannot find symbol
     [javac] symbol  : method getByte()
     [javac] location: class java.nio.ByteBuffer
     [javac] 		byte next = dataBuffer.getByte();
     [javac] 		                      ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\ByteParser.java:316: inconvertible types
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/ByteParser.java:316: inconvertible types
     [javac] found   : byte
     [javac] required: boolean
     [javac] 		boolean boolValue = (boolean)next;
     [javac] 		                             ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\BackgroundColorChunk.java:119: g is already defined in parseBackgroundProperty()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/BackgroundColorChunk.java:119: g is already defined in parseBackgroundProperty()
     [javac] 				int g = parser.parseInt(2);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\CompressedTextDataChunk.java:82: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/CompressedTextDataChunk.java:82: cannot find symbol
     [javac] symbol  : class ZlibDecompresser
     [javac] location: class com.dekarrin.file.png.CompressedTextDataChunk
     [javac] 		ZlibDecompresser zd = new ZlibDecompresser(compressedText);
     [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\CompressedTextDataChunk.java:82: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/CompressedTextDataChunk.java:82: cannot find symbol
     [javac] symbol  : class ZlibDecompresser
     [javac] location: class com.dekarrin.file.png.CompressedTextDataChunk
     [javac] 		ZlibDecompresser zd = new ZlibDecompresser(compressedText);
     [javac] 		                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\EmbeddedColorProfileChunk.java:98: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/EmbeddedColorProfileChunk.java:98: cannot find symbol
     [javac] symbol  : class ZlibDecompresser
     [javac] location: class com.dekarrin.file.png.EmbeddedColorProfileChunk
     [javac] 		ZlibDecompresser zd = new ZlibDecompresser(compressedProfile);
     [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\EmbeddedColorProfileChunk.java:98: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/EmbeddedColorProfileChunk.java:98: cannot find symbol
     [javac] symbol  : class ZlibDecompresser
     [javac] location: class com.dekarrin.file.png.EmbeddedColorProfileChunk
     [javac] 		ZlibDecompresser zd = new ZlibDecompresser(compressedProfile);
     [javac] 		                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\InternationalTextDataChunk.java:100: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/InternationalTextDataChunk.java:100: cannot find symbol
     [javac] symbol  : class ZlibDecompresser
     [javac] location: class com.dekarrin.file.png.InternationalTextDataChunk
     [javac] 			ZlibDecompresser zd = new ZlibDecompresser(text);
     [javac] 			^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\InternationalTextDataChunk.java:100: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/InternationalTextDataChunk.java:100: cannot find symbol
     [javac] symbol  : class ZlibDecompresser
     [javac] location: class com.dekarrin.file.png.InternationalTextDataChunk
     [javac] 			ZlibDecompresser zd = new ZlibDecompresser(text);
     [javac] 			                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\PhysicalPixelDimensionsChunk.java:52: possible loss of precision
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/PhysicalPixelDimensionsChunk.java:52: possible loss of precision
     [javac] found   : double
     [javac] required: int
     [javac] 		return dimensions.getWidth();
     [javac] 		                          ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\PhysicalPixelDimensionsChunk.java:62: possible loss of precision
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/PhysicalPixelDimensionsChunk.java:62: possible loss of precision
     [javac] found   : double
     [javac] required: int
     [javac] 		return dimensions.getHeight();
     [javac] 		                           ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\PhysicalPixelDimensionsChunk.java:78: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/PhysicalPixelDimensionsChunk.java:78: cannot find symbol
     [javac] symbol  : class Dimensions
     [javac] location: class com.dekarrin.file.png.PhysicalPixelDimensionsChunk
     [javac] 		dimensions = new Dimensions(x, y);
     [javac] 		                 ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\SignificantBitsChunk.java:51: possible loss of precision
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/SignificantBitsChunk.java:51: possible loss of precision
     [javac] found   : int
     [javac] required: byte
     [javac] 		return significantAlphaBits;
     [javac] 		       ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\SignificantBitsChunk.java:65: g is already defined in parseData()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/SignificantBitsChunk.java:65: g is already defined in parseData()
     [javac] 				int g = parser.parseInt(1);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\SignificantBitsChunk.java:72: g is already defined in parseData()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/SignificantBitsChunk.java:72: g is already defined in parseData()
     [javac] 				int g = parser.parseInt(1);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\SignificantBitsChunk.java:78: r is already defined in parseData()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/SignificantBitsChunk.java:78: r is already defined in parseData()
     [javac] 				int r = parser.parseInt(1);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\SignificantBitsChunk.java:79: g is already defined in parseData()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/SignificantBitsChunk.java:79: g is already defined in parseData()
     [javac] 				int g = parser.parseInt(1);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\SignificantBitsChunk.java:80: b is already defined in parseData()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/SignificantBitsChunk.java:80: b is already defined in parseData()
     [javac] 				int b = parser.parseInt(1);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\TransparencyChunk.java:118: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/TransparencyChunk.java:118: cannot find symbol
     [javac] symbol  : variable paletteIndex
     [javac] location: class com.dekarrin.file.png.TransparencyChunk
     [javac] 		if(color == null && paletteIndex == null) {
     [javac] 		                    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\TransparencyChunk.java:137: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/TransparencyChunk.java:137: cannot find symbol
     [javac] symbol  : method parseLastInts(int)
     [javac] location: class com.dekarrin.util.ByteParser
     [javac] 				paletteAlphas = parser.parseLastInts(1);
     [javac] 				                      ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\file\png\TransparencyChunk.java:147: g is already defined in parseTransparencyProperty()
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/file/png/TransparencyChunk.java:147: g is already defined in parseTransparencyProperty()
     [javac] 				int g = parser.parseInt(2);
     [javac] 				    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:140: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:140: cannot find symbol
     [javac] symbol  : method put(int,com.dekarrin.file.png.Chunk)
     [javac] location: class java.util.ArrayList<com.dekarrin.file.png.Chunk>
     [javac] 			completedChunks.put(i, converted);
     [javac] 			               ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:150: possible loss of precision
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:150: possible loss of precision
     [javac] found   : long
     [javac] required: int
     [javac] 		int crc = pc.getCrc();
     [javac] 		                   ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:164: com.dekarrin.file.png.GammaChunk is not public in com.dekarrin.file.png; cannot be accessed from outside package
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:164: com.dekarrin.file.png.GammaChunk is not public in com.dekarrin.file.png; cannot be accessed from outside package
     [javac] 			newChunk = new GammaChunk(data, crc);
     [javac] 			               ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:182: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:182: cannot find symbol
     [javac] symbol  : class SignficantBitsChunk
     [javac] location: class com.dekarrin.parse.PngParser
     [javac] 			newChunk = new SignficantBitsChunk(data, crc);
     [javac] 			               ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:184: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:184: cannot find symbol
     [javac] symbol  : class SuggestesPaletteChunk
     [javac] location: class com.dekarrin.parse.PngParser
     [javac] 			newChunk = new SuggestesPaletteChunk(data, crc);
     [javac] 			               ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:257: isComplete(com.dekarrin.util.ByteHolder) in com.dekarrin.parse.PngParser cannot be applied to (com.dekarrin.util.IntHolder)
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:257: isComplete(com.dekarrin.util.ByteHolder) in com.dekarrin.parse.PngParser cannot be applied to (com.dekarrin.util.IntHolder)
     [javac] 				if(isComplete(MAGIC_NUMBER)) {
     [javac] 				   ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\parse\PngParser.java:309: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/parse/PngParser.java:309: cannot find symbol
     [javac] symbol  : constructor InvalidFileFormatException(java.lang.String,java.lang.String)
     [javac] location: class com.dekarrin.parse.InvalidFileFormatException
     [javac] 			throw new InvalidFileFormatException("Bad header file!", "png");
     [javac] 			      ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\program\PngReader.java:25: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/program/PngReader.java:25: cannot find symbol
     [javac] symbol  : class InvalidFileFormatException
     [javac] location: class com.dekarrin.program.PngReader
     [javac] 		} catch(InvalidFileFormatException e) {
     [javac] 		        ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\program\PngReader.java:29: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/program/PngReader.java:29: cannot find symbol
     [javac] symbol  : class StreamFailureException
     [javac] location: class com.dekarrin.program.PngReader
     [javac] 		} catch(StreamFailureException e) {
     [javac] 		        ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\program\PngReader.java:36: incompatible types
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/program/PngReader.java:36: incompatible types
     [javac] found   : byte[]
     [javac] required: int[]
     [javac] 			int[] t = pc.getType();
     [javac] 			                    ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\program\PngReader.java:39: possible loss of precision
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/program/PngReader.java:39: possible loss of precision
     [javac] found   : long
     [javac] required: int
     [javac] 			int c = pc.getCrc();
     [javac] 			                 ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\HelperString.java:67: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/HelperString.java:67: cannot find symbol
     [javac] symbol  : variable Vector
     [javac] location: class com.dekarrin.util.HelperString
     [javac] 		Vector<HelperString> hsList = Vector<HelperString>(3);
     [javac] 		                              ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\HelperString.java:67: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/HelperString.java:67: cannot find symbol
     [javac] symbol  : variable HelperString
     [javac] location: class com.dekarrin.util.HelperString
     [javac] 		Vector<HelperString> hsList = Vector<HelperString>(3);
     [javac] 		                                     ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\HelperString.java:67: operator > cannot be applied to boolean,int
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/HelperString.java:67: operator > cannot be applied to boolean,int
     [javac] 		Vector<HelperString> hsList = Vector<HelperString>(3);
     [javac] 		                                                 ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\util\HelperString.java:75: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/util/HelperString.java:75: cannot find symbol
     [javac] symbol  : variable Array
     [javac] location: class com.dekarrin.util.HelperString
     [javac] 			stringBytes = Array.copyOfRange(byteData, 0, endIndex);
     [javac] 			              ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:59: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:59: cannot find symbol
     [javac] symbol  : class UnsupportedEncodingException
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 		} catch(UnsupportedEncodingException e) {
     [javac] 		        ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:106: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:106: cannot find symbol
     [javac] symbol  : class UnsupportedEncodingException
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 		} catch(UnsupportedEncodingException e) {
     [javac] 		        ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:117: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:117: cannot find symbol
     [javac] symbol  : variable input
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 		decompresser.setInput(input);
     [javac] 		                      ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:120: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:120: cannot find symbol
     [javac] symbol  : variable decompressor
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 		while(decompressor.getRemaining() > 0) {
     [javac] 		      ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:124: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:124: cannot find symbol
     [javac] symbol  : variable decompressor
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 		decompressor.finalize();
     [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:137: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:137: cannot find symbol
     [javac] symbol  : variable oldDataLength
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 		oldDataLength = decompressedData.length;
     [javac] 		^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:140: cannot find symbol
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:140: cannot find symbol
     [javac] symbol  : variable oldDataLength
     [javac] location: class com.dekarrin.zip.ZlibDecompresser
     [javac] 			decompressedData [oldDataLength + i] = result[i];
     [javac] 			                  ^
-    [javac] C:\Documents and Settings\Jonathan Palermo\Dekarrin-Framework\src\com\dekarrin\zip\ZlibDecompresser.java:140: incompatible types
+    [javac] /Users/palermoj/Documents/Extra Software/Dekarrin-Framework/src/com/dekarrin/zip/ZlibDecompresser.java:140: incompatible types
     [javac] found   : <nulltype>
     [javac] required: int
     [javac] 			decompressedData [oldDataLength + i] = result[i];
     [javac] 			                                ^
-    [javac] 63 errors
+    [javac] 56 errors

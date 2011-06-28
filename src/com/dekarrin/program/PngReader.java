@@ -2,6 +2,7 @@ package com.dekarrin.program;
 
 import com.dekarrin.parse.PngParser;
 import com.dekarrin.file.png.Chunk;
+import com.dekarrin.io.*;
 import java.io.*;
 
 /**
@@ -33,10 +34,10 @@ public class PngReader extends ConsoleProgram {
 		Chunk[] chunks = parser.getChunks();
 		for(Chunk pc: chunks) {
 			String n = pc.getTypeName();
-			int[] t = pc.getType();
+			byte[] t = pc.getType();
 			byte[] d = pc.getData();
 			int l = pc.getLength();
-			int c = pc.getCrc();
+			long c = pc.getCrc();
 			
 			pl(String.format("Type: %s (%d,%d,%d,%d)", n, t[0], t[1], t[2], t[3]));
 			pl("----------------------");

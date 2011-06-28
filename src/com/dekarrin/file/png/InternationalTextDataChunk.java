@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.zip.ZlibDecompresser;
+
 /**
  * Chunk that holds international characters.
  */
@@ -34,7 +36,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * @param crc
 	 * The chunk CRC.
 	 */
-	public InternationalTextDataChunk(byte[] data, int crc) {
+	public InternationalTextDataChunk(byte[] data, long crc) {
 		super(new byte[]{105, 84, 88, 116}, data, crc);
 		parseData();
 	}

@@ -14,7 +14,7 @@ public class TextDataChunk extends TextChunk {
 	 * @param crc
 	 * The cyclic redundancy check.
 	 */
-	public TextDataChunk(byte[] data, int crc) {
+	public TextDataChunk(byte[] data, long crc) {
 		super(new byte[]{116, 69, 88, 116}, data, crc); // tEXt
 		parseData();
 	}

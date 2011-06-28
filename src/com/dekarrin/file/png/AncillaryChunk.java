@@ -19,7 +19,7 @@ public abstract class AncillaryChunk extends Chunk {
 	 * @param crc
 	 * The cyclic redundancy check read from the chunk.
 	 */
-	public AncillaryChunk(byte[] type, byte[] data, int crc) {
+	public AncillaryChunk(byte[] type, byte[] data, long crc) {
 		super(type, data, crc);
 	}
 }

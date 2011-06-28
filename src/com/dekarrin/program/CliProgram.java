@@ -84,7 +84,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * @param flags
 	 * The flags that the command accepts.
 	 */
-	protected void addCommandDescription(String name, String description, ArgumentDescription[] args, FlagDescription[] flags) {
+	protected void addCommandDefinition(String name, String description, ArgumentDescription[] args, FlagDescription[] flags) {
 		commands.put(name, new CommandDescription(name, description, args, flags));
 	}
 	

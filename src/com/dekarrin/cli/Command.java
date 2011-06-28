@@ -35,7 +35,7 @@ public class Command {
 		String[] words = input.split(" ");
 		String[] arguments = java.util.Arrays.copyOfRange(words, 1, words.length);
 		commandName = words[0];
-		flags = FlagArgumentList(arguments);
+		flags = new FlagArgumentList(arguments);
 		this.arguments = FlagArgumentList.removeFlags(arguments);
 	}
 	
@@ -101,7 +101,7 @@ public class Command {
 	public boolean hasArgument(String name) {
 		boolean has = false;
 		int argIndex = getArgumentIndex(name);
-		if(argument.index < arguments.length) {
+		if(argIndex < arguments.length) {
 			if(arguments[argIndex] != null) {
 				has = true;
 			}
@@ -122,7 +122,7 @@ public class Command {
 	public String getArgument(String name) {
 		String argumentValue = null;
 		int argIndex = getArgumentIndex(name);
-		if(argument.index < arguments.length) {
+		if(argIndex < arguments.length) {
 			argumentValue = arguments[argIndex];
 		}
 		return argumentValue;
@@ -179,7 +179,9 @@ public class Command {
 	private int getArgumentIndex(String argument) {
 		int index = -1;
 		int position = 0;
+		ArgumentDescription ad;
 		while(index == -1 && position < description.arguments.length) {
+			ad = description.arguments[position];
 			if(ad.name.equals(argument)) {
 				index = position;
 			}
