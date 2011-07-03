@@ -1,0 +1,74 @@
+Reading algorithm:
+	Images must be read on a per-scanline basis.
+	
+	1. Decompress the data using the IHDR method
+	2. Defilter the data
+	3. Decode specific pixels from the scanline.
+
+Pixels smaller than a byte will be packed into single bytes:
+{} = 2 bit pixel
+[] = byte
+[{1}{2}{3}{4}]
+
+Multiple samples of one pixel are never packed into one byte:
+[] = byte
+{} = sample
+[{R}][{G}][{B}]
+
+Decoding method depends on color mode:
+	{} = pixel
+	[] = byte/sample
+	<> = scanline
+
+	Indexed Color:
+	Grayscale:
+		Size of pixel is color bit depth.
+		[S]
+		
+	True Color:
+		Size of pixel is bit depth * 3 (1 sample for RGB).
+		[R][G][B]
+		
+Png image:
+Filtering type is added to the beginning of each scanline. It is one byte wide.
+
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+	<[FT]{}{}{}{}{}{}{}{}{}>
+
+Processing is completely different depending on whether the image is interlaced.
+   1 6 4 6 2 6 4 6
+   7 7 7 7 7 7 7 7
+   5 6 5 6 5 6 5 6
+   7 7 7 7 7 7 7 7
+   3 6 4 6 3 6 4 6
+   7 7 7 7 7 7 7 7
+   5 6 5 6 5 6 5 6
+   7 7 7 7 7 7 7 7
+	
+Compressed:
+	
+	
+   1 6 4 6 2 6 4 6 1 6 4 6 2 6 4 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   3 6 4 6 3 6 4 6 3 6 4 6 3 6 4 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   1 6 4 6 2 6 4 6 1 6 4 6 2 6 4 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   3 6 4 6 3 6 4 6 3 6 4 6 3 6 4 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+   5 6 5 6 5 6 5 6 5 6 5 6 5 6 5 6
+   7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7
+
+
