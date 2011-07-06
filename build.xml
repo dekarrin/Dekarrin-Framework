@@ -15,11 +15,25 @@
 			<compilerarg value="-Xlint:none" />
 		</javac>
 	</target>
+	<target name="recompile">
+		<antcall target="clean" />
+		<antcall target="libs" />
+		<antcall target="quiet" />
+	</target>
+	<target name="cleanown">
+		<delete dir="${build}${dekarrin}" />
+	</target>
 	<target name="compile">
 		<mkdir dir="${build}${dekarrin}"/>
 		<javac includeantruntime="false" target="1.6" srcdir="${source}${dekarrin}" destdir="${build}${dekarrin}">
 			<compilerarg value="-Xlint:${warning_count}"/>
 		</javac>
+	</target>
+	<target name="libs">
+		<mkdir dir="${build}/acm" />
+		<mkdir dir="${build}/org/ostermiller" />
+		<javac includeantruntime="false" target="1.6" srcdir="${source}/acm" destdir="${build}/acm" />
+		<javac includeantruntime="false" target="1.6" srcdir="${source}/org/ostermiller" destdir="${build}/org/ostermiller" />
 	</target>
 	<target name="quiet">
 		<mkdir dir="${build}${dekarrin}"/>

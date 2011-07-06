@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import com.dekarrin.graphics.Color;
+import com.dekarrin.graphics.GrayColor;
 
 /**
  * Chunk containing background color data. This will either be an
@@ -109,8 +110,9 @@ public class BackgroundColorChunk extends AncillaryChunk {
 				
 			case GRAYSCALE_MODE:
 				g = parser.parseInt(2);
-				color = new GrayColor();
-				color.setValue(g);
+				GrayColor c = new GrayColor();
+				c.setValue(g);
+				color = c;
 				break;
 				
 			case TRUECOLOR_MODE:

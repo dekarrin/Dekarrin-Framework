@@ -1,5 +1,7 @@
 package com.dekarrin.graphics;
 
+import com.dekarrin.error.ValueOutOfRangeException;
+
 /**
  * Represents a grayscale color at a specific bit depth. This is accomplished
  * by overriding parent methods so that every getter and setter accesses the
@@ -17,6 +19,13 @@ public class GrayColor extends Color {
 	 */
 	public GrayColor(int bitDepth) {
 		super(bitDepth);
+	}
+	
+	/**
+	 * Creates a new GrayColor at the default bit depth of 8.
+	 */
+	public GrayColor() {
+		this(8);
 	}
 	
 	/**

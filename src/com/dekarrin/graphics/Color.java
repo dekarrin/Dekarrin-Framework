@@ -1,5 +1,7 @@
 package com.dekarrin.graphics;
 
+import com.dekarrin.error.ValueOutOfRangeException;
+
 /**
  * Represents a color at a specific bit depth.
  */
@@ -41,6 +43,13 @@ public class Color {
 	public Color(int bitDepth) {
 		this.bitDepth = bitDepth;
 		setSamples(0, 0, 0, maximumValue());
+	}
+	
+	/**
+	 * Creates a new Color at the default bit depth of 8.
+	 */
+	public Color() {
+		this(8);
 	}
 	
 	/**

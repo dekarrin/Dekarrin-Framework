@@ -1,3 +1,5 @@
+package com.dekarrin.graphics;
+
 /**
  * The resolution of an image.
  */

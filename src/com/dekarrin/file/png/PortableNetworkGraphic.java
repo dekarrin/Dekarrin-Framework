@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.util.Calendar;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import com.dekarrin.graphics.*;
 
 /**
@@ -122,7 +123,7 @@ public class PortableNetworkGraphic {
 	/**
 	 * The color type of this image.
 	 */
-	private int colorType;
+	private int colorMode;
 	
 	/**
 	 * Whether or not this png uses interlacing.
@@ -235,38 +236,37 @@ public class PortableNetworkGraphic {
 			String type = c.getTypeName();
 			
 			if(type.equals("IHDR")) {
-				readHeaderChunk(c);
+				readHeaderChunk((HeaderChunk)c);
 			} else if(type.equals("PLTE")) {
-				readPaletteChunk(c);
+				readPaletteChunk((PaletteChunk)c);
 			} else if(type.equals("IDAT")) {
-				idatChunks.add(c);
+				idatChunks.add((ImageDataChunk)c);
 			} else if(type.equals("IEND")) {
 				break;//do not read past an iend, even if there is more data.
 			} else if(type.equals("tRNS")) {
-				c.parseWithColorMode(colorMode);
-				readTransparencyChunk(c);
+				readTransparencyChunk((TransparencyChunk)c);
 			} else if(type.equals("gAMA")) {
-				readGammaChunk(c);
+				readGammaChunk((GammaChunk)c);
 			} else if(type.equals("cHRM")) {
-				readChromaticitiesChunk(c);
+				readChromaticitiesChunk((ChromaticitiesChunk)c);
 			} else if(type.equals("sRGB")) {
-				readStandardRgbColorSpaceChunk(c);
+				readStandardRgbColorSpaceChunk((StandardRgbColorSpaceChunk)c);
 			} else if(type.equals("iCCP")) {
-				readEmbeddedColorProfileChunk(c);
+				readEmbeddedColorProfileChunk((EmbeddedColorProfileChunk)c);
 			} else if(type.equals("tEXt") || type.equals("zTXt") || type.equals("iTXt")) {
-				readTextChunk(c);
+				readTextChunk((TextChunk)c);
 			} else if(type.equals("bKGD")) {
-				readBackgroundColorChunk(c);
+				readBackgroundColorChunk((BackgroundColorChunk)c);
 			} else if(type.equals("pHYs")) {
-				readPhysicalPixelDimensionsChunk(c);
+				readPhysicalPixelDimensionsChunk((PhysicalPixelDimensionsChunk)c);
 			} else if(type.equals("sBIT")) {
-				readSignificantBitsChunk(c);
+				readSignificantBitsChunk((SignificantBitsChunk)c);
 			} else if(type.equals("sPLT")) {
-				readSuggestedPaletteChunk(c);
+				readSuggestedPaletteChunk((SuggestedPaletteChunk)c);
 			} else if(type.equals("hIST")) {
-				readPaletteHistogramChunk(c);
+				readPaletteHistogramChunk((PaletteHistogramChunk)c);
 			} else if(type.equals("tIME")) {
-				readLastModificationTimeChunk(c);
+				readLastModificationTimeChunk((LastModificationTimeChunk)c);
 			}
 		}
 		finishChunkDecoding();
@@ -307,8 +307,7 @@ public class PortableNetworkGraphic {
 					samples = 4;
 					break;
 			}
-			byte[] l = (i > 0) ? (rawData[i-1].getBytes()) : null;
-			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples, l);
+			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples);
 		}
 		constructImage(rawData);
 	}
@@ -348,7 +347,7 @@ public class PortableNetworkGraphic {
 	 * The completed image.
 	 */
 	private Image constructGrayscaleImage(Scanline[] scanlines) {
-		boolean hasAlpha = (colorMode == COLOR_MODE_GRAYSCALE_ALPHA);
+		boolean hasAlpha = (colorMode == COLOR_TYPE_GRAYSCALE_ALPHA);
 		Image img = new Image(width, height, bitDepth, hasAlpha);
 		GrayColor color;
 		for(int y = 0; y < scanlines.length; y++) {
@@ -378,7 +377,7 @@ public class PortableNetworkGraphic {
 	 * The completed image.
 	 */
 	private Image constructColorImage(Scanline[] scanlines) {
-		boolean hasAlpha = (colorMode == COLOR_MODE_COLOR_ALPHA);
+		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
 		Image img = new Image(width, height, bitDepth, hasAlpha);
 		Color color;
 		for(int y = 0; y < scanlines.length; y++) {
@@ -409,13 +408,13 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The completed image.
 	 */
-	private Image consructImageFromPalette(Scanline[] scanlines) {
+	private Image constructImageFromPalette(Scanline[] scanlines) {
 		Image img = new Image(width, height, bitDepth);
 		Color color;
 		for(int y = 0; y < scanlines.length; y++) {
 			int[][] samples = scanlines[y].getSamples();
 			for(int x = 0; x < samples.length; x++) {
-				color = palette.getColor(sample[x][0]);
+				color = palette.getColor(samples[x][0]);
 				img.setColorAt(x, y, color);
 			}
 		}
@@ -434,7 +433,7 @@ public class PortableNetworkGraphic {
 	 * The raw data seperated into scanline series.
 	 */
 	private byte[][] extractScanlines(byte[] data) {
-		scanlineLength = getScanlineLength();
+		int scanlineWidth = getScanlineWidth();
 		byte[][] lines = new byte[height][scanlineWidth];
 		byte[] buffer = new byte[scanlineWidth];
 		int currentByte = 0;
@@ -447,6 +446,49 @@ public class PortableNetworkGraphic {
 			}
 		}
 		return lines;
+	}
+	
+	/**
+	 * Gets the length of a scanline in bytes.
+	 *
+	 * @return
+	 * The length of a scanline.
+	 */
+	private int getScanlineWidth() {
+		int width = (getPixelWidth() * width) + 1;
+		return width;
+	}
+	
+	/**
+	 * Gets the length of a pixel in bytes.
+	 *
+	 * @return
+	 * The length of a pixel.
+	 */
+	private int getPixelWidth() {
+		int pw;
+		switch(colorMode) {
+			case COLOR_TYPE_GRAYSCALE:
+				pw = (bitDepth / 8);
+				break;
+				
+			case COLOR_TYPE_COLOR:
+				pw = 3 * (bitDepth / 8);
+				break;
+				
+			case COLOR_TYPE_COLOR_PALETTE:
+				pw = (bitDepth / 8);
+				break;
+				
+			case COLOR_TYPE_GRAYSCALE_ALPHA:
+				pw = 2 * (bitDepth / 8);
+				break;
+				
+			case COLOR_TYPE_COLOR_ALPHA:
+				pw = 4 * (bitDepth / 8);
+				break;
+		}
+		return pw;
 	}
 	
 	/**
@@ -548,7 +590,7 @@ public class PortableNetworkGraphic {
 		bitDepth = header.getBitDepth();
 		height = header.getHeight();
 		width = header.getWidth();
-		colorType = header.getColorType();
+		colorMode = header.getColorType();
 	}
 	
 	/**
@@ -557,7 +599,7 @@ public class PortableNetworkGraphic {
 	 * @param chunk
 	 * The dimension chunk.
 	 */
-	private void readPhysicalDimensionsChunk(PhysicalDimensionsChunk chunk) {
+	private void readPhysicalPixelDimensionsChunk(PhysicalPixelDimensionsChunk chunk) {
 		resolution = new Resolution(chunk.getWidth(), chunk.getHeight());
 	}
 	
@@ -617,6 +659,7 @@ public class PortableNetworkGraphic {
 	 * The transparency chunk.
 	 */
 	private void readTransparencyChunk(TransparencyChunk chunk) {
+		chunk.parseWithColorMode(colorMode);
 		if(chunk.getColorMode() == colorMode) {
 			switch(chunk.getColorMode()) {
 				case COLOR_TYPE_GRAYSCALE:
