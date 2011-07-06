@@ -34,7 +34,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	/**
 	 * Gets the significant color bits.
 	 *
-	 * @returns
+	 * @return
 	 * The significant bits in the colors.
 	 */
 	public Color getColorBits() {
@@ -44,7 +44,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	/**
 	 * Gets the significant alpha bits.
 	 *
-	 * @returns
+	 * @return
 	 * The significant bits in the alpha.
 	 */
 	public int getAlphaBits() {
@@ -59,12 +59,14 @@ public class SignificantBitsChunk extends AncillaryChunk {
 		switch(getLength()) {
 			case 1: // grayscale
 				g = parser.parseInt(1);
-				significantColorBits = new Color(g, g, g);
+				significantColorBits = new GrayColor();
+				significantColorBits.setValue(g);
 				break;
 				
 			case 2: // grayscale + alpha
 				g = parser.parseInt(1);
-				significantColorBits = new Color(g, g, g);
+				significantColorBits = new GrayColor();
+				significantColorBits.setValue(g);
 				significantAlphaBits = parser.parseInt(1);
 				break;
 				
@@ -72,14 +74,16 @@ public class SignificantBitsChunk extends AncillaryChunk {
 				r = parser.parseInt(1);
 				g = parser.parseInt(1);
 				b = parser.parseInt(1);
-				significantColorBits = new Color(r, g, b);
+				significantColorBits = new Color();
+				significantColorBits.setSamples(r, g, b);
 				break;
 				
 			case 4: // color + alpha
 				r = parser.parseInt(1);
 				g = parser.parseInt(1);
 				b = parser.parseInt(1);
-				significantColorBits = new Color(r, g, b);
+				significantColorBits = new Color();
+				significantColorBits.setSamples(r, g, b);
 				significantAlphaBits = parser.parseInt(1);
 				break;
 		}

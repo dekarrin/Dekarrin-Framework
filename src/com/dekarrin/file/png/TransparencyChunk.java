@@ -65,7 +65,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	/**
 	 * Gets the color mode.
 	 *
-	 * @returns
+	 * @return
 	 * The color mode, or null if it is not set.
 	 */
 	public int getColorMode() {
@@ -75,7 +75,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	/**
 	 * Gets the entire palette alpha list.
 	 *
-	 * @returns
+	 * @return
 	 * The palette alphas, or null if they are not set.
 	 */
 	public int[] getPaletteAlphas() {
@@ -90,7 +90,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @param index
 	 * The index of the palette alpha.
 	 *
-	 * @returns
+	 * @return
 	 * The alpha value.
 	 */
 	public int getPaletteAlpha(int index) {
@@ -100,7 +100,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	/**
 	 * Gets the color.
 	 *
-	 * @returns
+	 * @return
 	 * The color.
 	 */
 	public Color getAlpha() {
@@ -140,14 +140,16 @@ public class TransparencyChunk extends AncillaryChunk {
 				
 			case GRAYSCALE_MODE:
 				g = parser.parseInt(2);
-				color = new Color(g, g, g);
+				color = new GrayColor();
+				color.setValue(g);
 				break;
 				
 			case TRUECOLOR_MODE:
 				r = parser.parseInt(2);
 				g = parser.parseInt(2);
 				b = parser.parseInt(2);
-				color = new Color(r, g, b);
+				color = new Color();
+				color.setSamples(r, g, b);
 				break;
 		}
 	}

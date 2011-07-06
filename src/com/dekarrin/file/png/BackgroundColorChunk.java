@@ -1,6 +1,6 @@
 package com.dekarrin.file.png;
 
-import java.awt.Color;
+import com.dekarrin.graphics.Color;
 
 /**
  * Chunk containing background color data. This will either be an
@@ -46,7 +46,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	/**
 	 * Gets the color mode.
 	 *
-	 * @returns
+	 * @return
 	 * The color mode.
 	 */
 	public int getColorMode() {
@@ -58,18 +58,15 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 *
 	 * @param index
 	 * The index of the color in the palette.
-	 *
-	 * @returns
-	 * The palette index.
 	 */
-	public int getPaletteIndex(int index) {
+	public int getPaletteIndex() {
 		return paletteIndex;
 	}
 	
 	/**
 	 * Gets the color.
 	 *
-	 * @returns
+	 * @return
 	 * The color.
 	 */
 	public Color getColor() {
@@ -112,14 +109,16 @@ public class BackgroundColorChunk extends AncillaryChunk {
 				
 			case GRAYSCALE_MODE:
 				g = parser.parseInt(2);
-				color = new Color(g, g, g);
+				color = new GrayColor();
+				color.setValue(g);
 				break;
 				
 			case TRUECOLOR_MODE:
 				r = parser.parseInt(2);
 				g = parser.parseInt(2);
 				b = parser.parseInt(2);
-				color = new Color(r, g, b);
+				color = new Color();
+				color.setSamples(r, g, b);
 				break;
 		}
 	}

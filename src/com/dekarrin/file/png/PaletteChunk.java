@@ -1,6 +1,6 @@
 package com.dekarrin.file.png;
 
-import java.awt.Color;
+import com.dekarrin.graphics.Color;
 
 /**
  * A palette chunk from a png file.
@@ -29,10 +29,10 @@ public class PaletteChunk extends CriticalChunk {
 	/**
 	 * Gets a palette entry.
 	 *
-	 * @parma index
+	 * @param index
 	 * The index of the color.
 	 *
-	 * @returns
+	 * @return
 	 * The color.
 	 */
 	public Color getColorSwatch(int index) {
@@ -42,7 +42,7 @@ public class PaletteChunk extends CriticalChunk {
 	/**
 	 * Gets all palette entries.
 	 *
-	 * @returns
+	 * @return
 	 * The palette entries.
 	 */
 	public Color[] getPalette() {
@@ -59,7 +59,9 @@ public class PaletteChunk extends CriticalChunk {
 			r = parser.parseInt(1);
 			g = parser.parseInt(1);
 			b = parser.parseInt(1);
-			paletteEntries[i] = new Color(r, g, b);
+			Color color = new Color();
+			color.setSamples(r, g, b);
+			paletteEntries[i] = color;
 		}
 	}
 }

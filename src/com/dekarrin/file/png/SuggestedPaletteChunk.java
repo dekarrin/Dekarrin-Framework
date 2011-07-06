@@ -1,6 +1,6 @@
 package com.dekarrin.file.png;
 
-import java.awt.Color;
+import com.dekarrin.graphics.Color;
 
 /**
  * Holds data on a reduced suggested palette.
@@ -44,7 +44,7 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	/**
 	 * Gets the name of this palette.
 	 *
-	 * @returns
+	 * @return
 	 * The name.
 	 */
 	public String getPaletteName() {
@@ -54,7 +54,7 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	/**
 	 * Gets the sample depth.
 	 *
-	 * @returns
+	 * @return
 	 * The sample depth.
 	 */
 	public int getSampleDepth() {
@@ -64,7 +64,7 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	/**
 	 * Gets all palette entries.
 	 *
-	 * @returns
+	 * @return
 	 * The entries.
 	 */
 	public Color[] getPaletteEntries() {
@@ -77,7 +77,7 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 * @param index
 	 * The index of the entry.
 	 *
-	 * @returns
+	 * @return
 	 * The entry at the specified index.
 	 */
 	public Color getPaletteEntry(int index) {
@@ -87,7 +87,7 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	/**
 	 * Gets all frequencies.
 	 *
-	 * @returns
+	 * @return
 	 * The frequencies.
 	 */
 	public int[] getFrequencies() {
@@ -100,10 +100,10 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 * @param index
 	 * The index of the frequency.
 	 *
-	 * @returns
+	 * @return
 	 * The frequency at the specified index.
 	 */
-	public int getFrequesncy(int index) {
+	public int getFrequency(int index) {
 		return frequencies[index];
 	}
 	
@@ -123,7 +123,8 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 			g = parser.parseInt(sampleWidth);
 			b = parser.parseInt(sampleWidth);
 			a = parser.parseInt(sampleWidth);
-			paletteEntries[i]	= new Color(r, g, b, a);
+			paletteEntries[i]	= new Color();
+			paletteEntries[i].setSamples(r, g, b, a);
 			frequencies[i]		= parser.parseInt(2);
 		}
 	}

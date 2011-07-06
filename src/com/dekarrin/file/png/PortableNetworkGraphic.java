@@ -1,9 +1,9 @@
 package com.dekarrin.file.png;
 
 import java.util.Vector;
-import java.awt.Color;
 import java.awt.Point;
 import java.util.Calendar;
+import java.util.Arrays;
 import java.util.Date;
 import com.dekarrin.graphics.*;
 
@@ -219,273 +219,9 @@ public class PortableNetworkGraphic {
 	private Date lastModified;
 	
 	/**
-	 * A scanline from the png.
+	 * The image contained by this Png.
 	 */
-	private class Scanline {
-	
-		/**
-		 * The filtering method for none.
-		 */
-		public static final int NO_FILTER = 0;
-		
-		/**
-		 * The filtering method for a sub() filter.
-		 */
-		public static final int SUB_FILTER = 1;
-		
-		/**
-		 * The filtering method for an up() filter.
-		 */
-		public static final int UP_FILTER = 2;
-		
-		/**
-		 * The filtering method for an average() filter.
-		 */
-		public static final int AVERAGE_FILTER = 3;
-		
-		/**
-		 * The filtering method for a paeth() filter.
-		 */
-		public static final int PAETH_FILTER = 4;
-		
-		/**
-		 * The pixel class.
-		 */
-		private class Pixel {
-		
-			private int[] samples;
-			
-			public Pixel(byte[] data, int sampleCount, int bitDepth) {
-				ByteParser p = new ByteParser(data);
-				int sampleWidth = bitDepth / 8;
-				samples = new int[sampleCount];
-				int i = 0;
-				while(p.remaining() > 0) {
-					samples[i++] = p.parseByte(sampleWidth);
-				}
-			}
-			
-			public int[] getSamples() {
-				return samples;
-			}
-		}
-	
-		/**
-		 * The pixels that make up this scanline.
-		 */
-		private Pixel[] pixels;
-		
-		/**
-		 * The filtering method used for this Scanline.
-		 */
-		private int filteringMethod;
-		
-		/**
-		 * The bit depth of the containing image.
-		 */
-		private static int bitDepth;
-		
-		/**
-		 * The number of samples in every pixel of data.
-		 */
-		private static int samples;
-		
-		/**
-		 * The total length of a scanline in bytes.
-		 */
-		private static int width;
-		
-		/**
-		 * Creates a new scanline from an unfiltered
-		 * byte stream.
-		 *
-		 * @param byteStream
-		 * The stream to create the scanline from.
-		 *
-		 * @param bitDepth
-		 * The bit depth of the image this Scanline is a part of.
-		 *
-		 * @param sampleCount
-		 * The number of samples per pixel of image data.
-		 *
-		 * @return
-		 * The new Scanline.
-		 */
-		public static getInstanceFromFiltered(byte[] byteStream, int bitDepth, int sampleCount, byte[] lastData) {
-			Scanline.width = byteStream.length;
-			Scanline.bitDepth = bitDepth;
-			Scanline.samples = sampleCount;
-			byte[] dataBytes = new byte[width-1];
-			ByteParser p = new ByteParser(byteStream);
-			int filteringMethod = p.parseInt(1);
-			switch(filteringMethod) {
-				case NO_FILTER:
-					dataBytes = p.parseFinalBytes();
-					break;
-					
-				case SUB_FILTER:
-					dataBytes = Scanline.subDefilter(p.parseFinalBytes());
-					break;
-					
-				case UP_FILTER:
-					dataBytes = Scanline.upDefilter(p.parseFinalBytes(), lastData);
-					break;
-					
-				case AVERAGE_FILTER:
-					dataBytes = Scanline.averageDefilter(p.parseFinalBytes(), lastData);
-					break;
-					
-				case PAETH_FILTER:
-					dataBytes = Scanline.paethDefilter(p.parseFinalBytes());
-					break;
-			}
-			Pixel[] pixels = new Pixel[getImageWidth()];
-			p = new ByteParser(dataBytes);
-			byte[] pixelData = new byte[getPixelWidth()];
-			for(int i = 0; i < width; i++) {
-				pixelData = p.parseBytes(getPixelWidth());
-				pixels[i] = new Pixel(pixelData, Scanline.samples, Scanline.bitDepth);
-			}
-			return new Scanline(pixels, filteringMethod);
-		}
-		
-		/**
-		 * Defilters the data according to the Sub filtering
-		 * algorithm.
-		 *
-		 * @param filteredData
-		 * The data to be defiltered.
-		 *
-		 * @return
-		 * The defiltered data.
-		 */
-		private static byte[] subDefilter(byte[] filteredData) {
-			byte[] data = new byte[filteredData.length];
-			for(int i = 0; i < getPixelWidth(); i++) {
-				data[i] = filteredData[i];
-			}
-			for(int i = getPixelWidth(); i < filteredData.length; i++) {
-				data[i] = filteredData[i] + data[i-getPixelWidth()];
-			}
-			return data;
-		}
-		
-		/**
-		 * Defilters the data according to the Up filtering
-		 * algorithm.
-		 *
-		 * @param filteredData
-		 * The data to be defiltered.
-		 *
-		 * @param lastData
-		 * The set of the last data. This must be the unfiltered
-		 * version.
-		 *
-		 * @return
-		 * The defiltered data.
-		 */
-		private static byte[] upDefilter(byte[] filteredData, byte[] lastData) {
-			byte[] data = new byte[filteredData.length];
-			if(lastData == null) {
-				data = filteredData;
-			} else {
-				for(int i = 0; i < filteredData.length; i++) {
-					data[i] = filteredData[i] + lastData[i];
-				}
-			}
-		}
-		
-		/**
-		 * Defilters the data according to the Average filtering
-		 * algorithm.
-		 *
-		 * @param filteredData
-		 * The data to be defiltered.
-		 *
-		 * @param lastData
-		 * The set of the last data. This must be the unfiltered
-		 * version.
-		 *
-		 * @return
-		 * The defiltered data.
-		 */
-		private static byte[] averageDefilter(byte[] filteredData, byte[] lastData) {
-			byte[] data = new byte[filteredData.length];
-		}
-		
-		/**
-		 * Filters the data according to the Sub filtering
-		 * algorithm.
-		 *
-		 * @param unfilteredData
-		 * The data to be filtered.
-		 *
-		 * @return
-		 * The filtered data.
-		 */
-		private static byte[] subFilter(byte[] unfilteredData) {
-			byte[] filteredData = new byte[unfilteredData.length];
-			for(int i = 0; i < getPixelWidth(); i++) {
-				filteredData[i] = unfilteredData[i];
-			}
-			for(int i = getPixelWidth(); i < unfilteredData.length; i++) {
-				filteredData[i] = unfilteredData[i] + filteredData[i-getPixelWidth()];
-			}
-			return filteredData;
-		}
-		
-		/**
-		 * Gets the width of a single pixel.
-		 *
-		 * @return
-		 * The width of a pixel in bytes.
-		 */
-		private static int getPixelWidth() {
-			int width = Scanline.samples * (Scanline.bitDepth / 8);
-			return width;
-		}
-		
-		/**
-		 * Gets the width in pixels of the entire image.
-		 *
-		 * @return
-		 * The width of the image.
-		 */
-		private static int getImageWidth() {
-			int width = Scanline.width / getPixelWidth();
-			return width;
-		}
-		
-		/**
-		 * Creates a new scanline from a series of pixels.
-		 *
-		 * @param pixels
-		 * The pixels that make up the new Scanline.
-		 */
-		public Scanline(Pixel[] pixels, int filteringMethod) {
-			this.pixels = pixels;
-			this.filteringMethod = filteringMethod;
-		}
-		
-		/**
-		 * Gets the exact bytes of this scanline.
-		 *
-		 * @return
-		 * The bytes.
-		 */
-		public getBytes() {
-			byte[] data = new byte[width];
-			data[0] = (byte)filteringMethod;
-			int p = 1;
-			for(int i = 0; i < pixels.length; i++) {
-				int[] samples = pixels[i].getSamples();
-				for(int j: samples) {
-					data[p++] = (byte)j;
-				}
-			}
-			return data;
-		}
-	}
+	private Image image;
 
 	/**
 	 * Creates a new PNG from a series of chunks.
@@ -507,6 +243,7 @@ public class PortableNetworkGraphic {
 			} else if(type.equals("IEND")) {
 				break;//do not read past an iend, even if there is more data.
 			} else if(type.equals("tRNS")) {
+				c.parseWithColorMode(colorMode);
 				readTransparencyChunk(c);
 			} else if(type.equals("gAMA")) {
 				readGammaChunk(c);
@@ -533,7 +270,7 @@ public class PortableNetworkGraphic {
 			}
 		}
 		finishChunkDecoding();
-		decodeImageData(idatChunks.toArray(new ImageDataChunk[0]);
+		decodeImageData(idatChunks.toArray(new ImageDataChunk[0]));
 	}
 	
 	/**
@@ -574,6 +311,115 @@ public class PortableNetworkGraphic {
 			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples, l);
 		}
 		constructImage(rawData);
+	}
+	
+	/**
+	 * Creates the image from a series of scanlines.
+	 *
+	 * @param scanlines
+	 * The scanlines that make up the image data.
+	 */
+	private void constructImage(Scanline[] scanlines) {
+		switch(colorMode) {
+			case COLOR_TYPE_GRAYSCALE:
+			case COLOR_TYPE_GRAYSCALE_ALPHA:
+				image = constructGrayscaleImage(scanlines);
+				break;
+				
+			case COLOR_TYPE_COLOR:
+			case COLOR_TYPE_COLOR_ALPHA:
+				image = constructColorImage(scanlines);
+				break;
+				
+			case COLOR_TYPE_COLOR_PALETTE:
+				image = constructImageFromPalette(scanlines);
+				break;
+		}
+	}
+	
+	/**
+	 * Creates an image from a series of scanlines using grayscale
+	 * mode.
+	 *
+	 * @param scanline
+	 * The scanlines that make up the image.
+	 *
+	 * @return
+	 * The completed image.
+	 */
+	private Image constructGrayscaleImage(Scanline[] scanlines) {
+		boolean hasAlpha = (colorMode == COLOR_MODE_GRAYSCALE_ALPHA);
+		Image img = new Image(width, height, bitDepth, hasAlpha);
+		GrayColor color;
+		for(int y = 0; y < scanlines.length; y++) {
+			int[][] samples = scanlines[y].getSamples();
+			for(int x = 0; x < samples.length; x++) {
+				color = new GrayColor(bitDepth);
+				color.setValue(samples[x][0]);
+				if(hasAlpha) {
+					color.setAlpha(samples[x][1]);
+				} else if(alphaColor.equals(color)) {
+					color.setAlpha(0);
+				}
+				img.setColorAt(x, y, color);
+			}
+		}
+		return img;
+	}
+	
+	/**
+	 * Creates an image from a series of scanlines using truecolor
+	 * mode.
+	 *
+	 * @param scanline
+	 * The scanlines that make up the image.
+	 *
+	 * @return
+	 * The completed image.
+	 */
+	private Image constructColorImage(Scanline[] scanlines) {
+		boolean hasAlpha = (colorMode == COLOR_MODE_COLOR_ALPHA);
+		Image img = new Image(width, height, bitDepth, hasAlpha);
+		Color color;
+		for(int y = 0; y < scanlines.length; y++) {
+			int[][] samples = scanlines[y].getSamples();
+			for(int x = 0; x < samples.length; x++) {
+				color = new Color(bitDepth);
+				color.setRed(samples[x][0]);
+				color.setGreen(samples[x][1]);
+				color.setBlue(samples[x][2]);
+				if(hasAlpha) {
+					color.setAlpha(samples[x][3]);
+				} else if(alphaColor.equals(color)) {
+					color.setAlpha(0);
+				}
+				img.setColorAt(x, y, color);
+			}
+		}
+		return img;
+	}
+	
+	/**
+	 * Creates an image from a series of scanlines using indexed
+	 * mode.
+	 *
+	 * @param scanline
+	 * The scanlines that make up the image.
+	 *
+	 * @return
+	 * The completed image.
+	 */
+	private Image consructImageFromPalette(Scanline[] scanlines) {
+		Image img = new Image(width, height, bitDepth);
+		Color color;
+		for(int y = 0; y < scanlines.length; y++) {
+			int[][] samples = scanlines[y].getSamples();
+			for(int x = 0; x < samples.length; x++) {
+				color = palette.getColor(sample[x][0]);
+				img.setColorAt(x, y, color);
+			}
+		}
+		return img;
 	}
 	
 	/**
@@ -836,6 +682,25 @@ public class PortableNetworkGraphic {
 	 * completed versions.
 	 */
 	private void finishChunkDecoding() {
+		combinePaletteComponents();
+	}
 	
+	/**
+	 * Combines the components of the palette into a completed palette.
+	 */
+	private void combinePaletteComponents() {
+		Color[] colorList = new Color[colorPalette.length];
+		Arrays.fill(colorList, new Color(bitDepth));
+		if(alphaPalette != null) {
+			for(int i = 0; i < colorPalette.length; i++) {
+				colorList[i].setRed(colorPalette[i].getRed());
+				colorList[i].setGreen(colorPalette[i].getGreen());
+				colorList[i].setBlue(colorPalette[i].getBlue());
+				colorList[i].setAlpha(alphaPalette[i]);
+			}
+		} else {
+			colorList = colorPalette;
+		}
+		palette = new Palette("untitled", bitDepth, colorList, frequencies);
 	}
 }

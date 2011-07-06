@@ -1,7 +1,8 @@
 package com.dekarrin.program;
 
 import com.dekarrin.parse.PngParser;
-import com.dekarrin.file.png.Chunk;
+import com.dekarrin.file.png.*;
+import com.dekarrin.graphics.*;
 import com.dekarrin.io.*;
 import java.io.*;
 
@@ -20,9 +21,10 @@ public class PngReader extends ConsoleProgram {
 		String file = getArgument(0);
 		
 		PngParser parser = null;
+		PortableNetworkGraphic pic;
 		try {
 			parser = new PngParser(file);
-			parser.parse();
+			pic = parser.parse();
 		} catch(InvalidFileFormatException e) {
 			giveFatalError(e.getMessage());
 		} catch(FileNotFoundException e) {
@@ -31,44 +33,25 @@ public class PngReader extends ConsoleProgram {
 			giveFatalError(e.getMessage());
 		}
 		
-		Chunk[] chunks = parser.getChunks();
-		for(Chunk pc: chunks) {
-			String n = pc.getTypeName();
-			byte[] t = pc.getType();
-			byte[] d = pc.getData();
-			int l = pc.getLength();
-			long c = pc.getCrc();
-			
-			pl(String.format("Type: %s (%d,%d,%d,%d)", n, t[0], t[1], t[2], t[3]));
-			pl("----------------------");
-			pl("Data:");
-			
-			boolean flushed = true;
-			String line = "";
-			for(int i = 0; i < d.length; i++) {
-				flushed = false;
-				line += " " + String.format("%03d", (int)((int)d[i] & 0xff));
-				if(i % 10 == 0 && i > 0) {
-					pl(line);
-					flushed = true;
-					line = "";
-				}
+		Image image = pic.getImage();
+		Color color;
+		String colorString;
+		for(int x = 0; x < image.width; x++) {
+			for(int y = 0; y < image.height; y++) {
+				color = image.colorAt(x, y);
+				colorString = String.format("[%i,%i,%i,%i]", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+				p(colorString);
 			}
-			if(!flushed) {
-				pl(line);
-			}
-			
-			pl("----------------------");
-			pl("("+l+" bytes)");
 			pl("");
-			pl("CRC: "+c);
-			pl("==================================================");
-			pl("==================================================");
 		}
 	}
 	
 	private void pl(String message) {
 		System.out.println(message);
+	}
+	
+	private void p(String message) {
+		System.out.print(message);
 	}
 	
 	private void addArgs() {

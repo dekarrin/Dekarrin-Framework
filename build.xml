@@ -1,8 +1,8 @@
 <project name="Dekarrin-Framework" basedir="." default="compile">
 	<property name="source" value="src"/>
-	<property name="build" value="bin"/>
+	<property name="docs" value="docs"/>
+	<property name="build" value="../bin"/>
 	<property name="dekarrin" value="/com/dekarrin"/>
-	<property name="warnings" value="all"/>
 	<condition property="warning_count" value="${warnings}" else="all">
 		<isset property="${warnings}"/>
 	</condition>
@@ -12,13 +12,24 @@
 	<target name="compileall">
 		<mkdir dir="${build}"/>
 		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}">
-			<compilerarg value="-Xlint:unchecked" />
+			<compilerarg value="-Xlint:none" />
 		</javac>
 	</target>
 	<target name="compile">
 		<mkdir dir="${build}${dekarrin}"/>
 		<javac includeantruntime="false" target="1.6" srcdir="${source}${dekarrin}" destdir="${build}${dekarrin}">
-			<compilerarg value="Xlint:${warning_count}"/>
+			<compilerarg value="-Xlint:${warning_count}"/>
 		</javac>
+	</target>
+	<target name="quiet">
+		<mkdir dir="${build}${dekarrin}"/>
+		<javac includeantruntime="false" target="1.6" srcdir="${source}${dekarrin}" destdir="${build}${dekarrin}"/>
+	</target>
+	<target name="cleandocs">
+		<delete dir="${docs}"/>
+	</target>
+	<target name="gendocs" depends="cleandocs">
+		<mkdir dir="${docs}"/>
+		<javadoc excludepackagenames="acm.program,acm.io,acm.gui,acm.util,acm.graphics" sourcepath="${source}" destdir="${docs}" access="private" />
 	</target>
 </project>
