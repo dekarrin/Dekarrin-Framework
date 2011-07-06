@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
-import java.awt.Color;
+import com.dekarrin.graphics.Color;
+import com.dekarrin.graphics.GrayColor;
 
 /**
  * Chunk for transparency data. The format of data varies, so the current
@@ -140,8 +141,9 @@ public class TransparencyChunk extends AncillaryChunk {
 				
 			case GRAYSCALE_MODE:
 				g = parser.parseInt(2);
-				color = new GrayColor();
-				color.setValue(g);
+				GrayColor c = new GrayColor();
+				c.setValue(g);
+				color = c;
 				break;
 				
 			case TRUECOLOR_MODE:

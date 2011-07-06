@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
-import java.awt.Color;
+import com.dekarrin.graphics.Color;
+import com.dekarrin.graphics.GrayColor;
 
 /**
  * Holds information on original significant bits.
@@ -56,17 +57,20 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 */
 	private void parseData() {
 		int r,g,b;
+		GrayColor c;
 		switch(getLength()) {
 			case 1: // grayscale
 				g = parser.parseInt(1);
-				significantColorBits = new GrayColor();
-				significantColorBits.setValue(g);
+				c = new GrayColor();
+				c.setValue(g);
+				significantColorBits = c;
 				break;
 				
 			case 2: // grayscale + alpha
 				g = parser.parseInt(1);
-				significantColorBits = new GrayColor();
-				significantColorBits.setValue(g);
+				c = new GrayColor();
+				c.setValue(g);
+				significantColorBits = c;
 				significantAlphaBits = parser.parseInt(1);
 				break;
 				

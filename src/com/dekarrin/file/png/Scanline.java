@@ -1,5 +1,8 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ByteParser;
+import java.util.Arrays;
+
 /**
  * A scanline from the png.
  */
@@ -33,7 +36,7 @@ class Scanline {
 	/**
 	 * The pixel class.
 	 */
-	private class Pixel {
+	private static class Pixel {
 	
 		private int[] samples;
 		
@@ -43,7 +46,7 @@ class Scanline {
 			samples = new int[sampleCount];
 			int i = 0;
 			while(p.remaining() > 0) {
-				samples[i++] = p.parseByte(sampleWidth);
+				samples[i++] = p.parseInt(sampleWidth);
 			}
 		}
 		
@@ -130,7 +133,7 @@ class Scanline {
 		p = new ByteParser(dataBytes);
 		byte[] pixelData = new byte[getPixelWidth()];
 		for(int i = 0; i < width; i++) {
-			pixelData = p.parseBytes(getPixelWidth());
+			p.parseBytes(pixelData);
 			pixels[i] = new Pixel(pixelData, Scanline.samples, Scanline.bitDepth);
 		}
 		lastData = dataBytes;
@@ -154,7 +157,7 @@ class Scanline {
 			raw[i] = sub[i];
 		}
 		for(int i = bpp; i < sub.length; i++) {
-			raw[i] = sub[i] + raw[i-bpp];
+			raw[i] = addBytes(sub[i], raw[i-bpp]);
 		}
 		return raw;
 	}
@@ -178,10 +181,10 @@ class Scanline {
 		byte[] raw = new byte[up.length];
 		if(prior == null) {
 			prior = new byte[up.length];
-			Arrays.fill(prior, 0);
+			Arrays.fill(prior, (byte)0);
 		}
 		for(int i = 0; i < up.length; i++) {
-			raw[i] = up[i] + prior[i];
+			raw[i] = addBytes(up[i], prior[i]);
 		}
 		return raw;
 	}
@@ -206,13 +209,13 @@ class Scanline {
 		int bpp = getPixelWidth();
 		if(prior == null) {
 			prior = new byte[average.length];
-			Arrays.fill(prior, 0);
+			Arrays.fill(prior, (byte)0);
 		}
 		for(int i = 0; i < bpp && i < average.length; i++) {
-			raw[i] = average[i] + (byte)Math.floor( (double)prior[i] / 2 );
+			raw[i] = addBytes(average[i], (byte)Math.floor( (double)prior[i] / 2 ));
 		}
 		for(int i = bpp; i < average.length; i++) {
-			raw[i] = average[i] + (byte)Math.floor( (double)(raw[i-bpp]+prior[i]) / 2 );
+			raw[i] = addBytes(average[i], (byte)Math.floor( (double)(raw[i-bpp]+prior[i]) / 2 ));
 		}
 		return raw;
 	}
@@ -237,13 +240,13 @@ class Scanline {
 		int bpp = getPixelWidth();
 		if(prior == null) {
 			prior = new byte[paeth.length];
-			Arrays.fill(prior, 0);
+			Arrays.fill(prior, (byte)0);
 		}
 		for(int i = 0; i < bpp && i < paeth.length; i++) {
-			raw[i] = paeth[i] + paethPredictor(0, prior[i], 0);
+			raw[i] = addBytes(paeth[i], paethPredictor((byte)0, prior[i], (byte)0));
 		}
 		for(int i = bpp; i < paeth.length; i++) {
-			raw[i] = paeth[i] + paethPredictor(raw[i-bpp], prior[i], prior[i-bpp]);
+			raw[i] = addBytes(paeth[i], paethPredictor(raw[i-bpp], prior[i], prior[i-bpp]));
 		}
 		return raw;
 	}
@@ -284,24 +287,23 @@ class Scanline {
 	}
 	
 	/**
-	 * Filters the data according to the Sub filtering
-	 * algorithm.
+	 * Adds two bytes together.
 	 *
-	 * @param unfilteredData
-	 * The data to be filtered.
+	 * @param byte1
+	 * One of the bytes to be added together.
+	 *
+	 * @param byte2
+	 * One of the bytes to be added together.
 	 *
 	 * @return
-	 * The filtered data.
+	 * The two bytes added together.
 	 */
-	private static byte[] subFilter(byte[] unfilteredData) {
-		byte[] filteredData = new byte[unfilteredData.length];
-		for(int i = 0; i < getPixelWidth(); i++) {
-			filteredData[i] = unfilteredData[i];
-		}
-		for(int i = getPixelWidth(); i < unfilteredData.length; i++) {
-			filteredData[i] = unfilteredData[i] + filteredData[i-getPixelWidth()];
-		}
-		return filteredData;
+	private static byte addBytes(byte byte1, byte byte2) {
+		int a = byte1;
+		int b = byte2;
+		int c = (a + b) % 256;
+		byte result = (byte)((byte)c & 0xff);
+		return result;
 	}
 	
 	/**

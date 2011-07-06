@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import com.dekarrin.graphics.*;
+import com.dekarrin.zip.*;
 
 /**
  * Represents a PNG file. This class is attempting to be compliant
@@ -274,6 +275,16 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Gets the image data from this png.
+	 *
+	 * @return
+	 * The image data.
+	 */
+	public Image getImage() {
+		return image;
+	}
+	
+	/**
 	 * Builds an image from image data chunks.
 	 *
 	 * @param chunks
@@ -284,29 +295,8 @@ public class PortableNetworkGraphic {
 		byte[] decompressedData = decompressData(compressedData);
 		byte[][] lines = extractScanlines(decompressedData);
 		Scanline[] rawData = new Scanline[compressedData.length];
+		int samples = samplesPerPixel();
 		for(int i = 0; i < lines.length; i++) {
-			int samples;
-			switch(colorMode) {
-				case COLOR_TYPE_GRAYSCALE:
-					samples = 1;
-					break;
-					
-				case COLOR_TYPE_COLOR:
-					samples = 3;
-					break;
-
-				case COLOR_TYPE_COLOR_PALETTE:
-					samples = 1;
-					break;
-			
-				case COLOR_TYPE_GRAYSCALE_ALPHA:
-					samples = 2;
-					break;
-	
-				case COLOR_TYPE_COLOR_ALPHA:
-					samples = 4;
-					break;
-			}
 			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples);
 		}
 		constructImage(rawData);
@@ -455,8 +445,8 @@ public class PortableNetworkGraphic {
 	 * The length of a scanline.
 	 */
 	private int getScanlineWidth() {
-		int width = (getPixelWidth() * width) + 1;
-		return width;
+		int sw = (getPixelWidth() * width) + 1;
+		return sw;
 	}
 	
 	/**
@@ -466,29 +456,40 @@ public class PortableNetworkGraphic {
 	 * The length of a pixel.
 	 */
 	private int getPixelWidth() {
-		int pw;
+		int pw = samplesPerPixel() * (bitDepth / 8);
+		return pw;
+	}
+	
+	/**
+	 * Gets the number of samples in each pixel.
+	 *
+	 * @return
+	 * The number of samples.
+	 */
+	private int samplesPerPixel() {
+		int samples = 0;
 		switch(colorMode) {
 			case COLOR_TYPE_GRAYSCALE:
-				pw = (bitDepth / 8);
+				samples = 1;
 				break;
 				
 			case COLOR_TYPE_COLOR:
-				pw = 3 * (bitDepth / 8);
+				samples = 3;
 				break;
 				
 			case COLOR_TYPE_COLOR_PALETTE:
-				pw = (bitDepth / 8);
+				samples = 1;
 				break;
 				
 			case COLOR_TYPE_GRAYSCALE_ALPHA:
-				pw = 2 * (bitDepth / 8);
+				samples = 2;
 				break;
 				
 			case COLOR_TYPE_COLOR_ALPHA:
-				pw = 4 * (bitDepth / 8);
+				samples = 4;
 				break;
 		}
-		return pw;
+		return samples;
 	}
 	
 	/**
@@ -683,7 +684,7 @@ public class PortableNetworkGraphic {
 	 * The gamma chunk.
 	 */
 	private void readGammaChunk(GammaChunk chunk) {
-		gamma = getGamma();
+		gamma = chunk.getGamma();
 	}
 	
 	/**

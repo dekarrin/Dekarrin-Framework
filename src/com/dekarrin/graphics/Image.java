@@ -216,7 +216,7 @@ public class Image {
 	 */
 	public int channelCount() {
 		int chans = 0;
-		for(int i = 0; i < channels.count; i++) {
+		for(int i = 0; i < channels.length; i++) {
 			if(hasChannel(i)) {
 				chans++;
 			}

@@ -14,12 +14,12 @@ public class Channel {
 	/**
 	 * Keeps track of the height of this Channel.
 	 */
-	private int height;
+	public int height;
 	
 	/**
 	 * Keeps track of the width of this Channel.
 	 */
-	private int width;
+	public int width;
 	
 	/**
 	 * Creates a new channel of a specified size.
@@ -33,7 +33,7 @@ public class Channel {
 	public Channel(int width, int height) {
 		this.width = width;
 		this.height = height;
-		pixels = new Color[height][width];
+		pixels = new int[height][width];
 		initializePixels();
 	}
 	

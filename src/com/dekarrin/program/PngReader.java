@@ -21,7 +21,7 @@ public class PngReader extends ConsoleProgram {
 		String file = getArgument(0);
 		
 		PngParser parser = null;
-		PortableNetworkGraphic pic;
+		PortableNetworkGraphic pic = null;
 		try {
 			parser = new PngParser(file);
 			pic = parser.parse();

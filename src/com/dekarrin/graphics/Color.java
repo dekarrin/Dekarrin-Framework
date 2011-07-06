@@ -93,6 +93,16 @@ public class Color {
 	}
 	
 	/**
+	 * Gets the bit depth that this Color is set to.
+	 *
+	 * @return
+	 * The bit depth.
+	 */
+	public int bitDepth() {
+		return bitDepth;
+	}
+	
+	/**
 	 * Changes the bit depth of this color. The sample values
 	 * are changed into whatever value at the new bit depth is
 	 * closest to the sample value at the old bit depth.

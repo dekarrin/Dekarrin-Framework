@@ -1,6 +1,5 @@
 package com.dekarrin.graphics;
 
-import java.awt.Color;
 import java.util.Arrays;
 
 /**
