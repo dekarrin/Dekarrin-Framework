@@ -22,7 +22,6 @@ public class PngReader extends ConsoleProgram {
 		
 		PngParser parser = null;
 		PortableNetworkGraphic pic = null;
-		Chunk[] chunks = null;
 		try {
 			parser = new PngParser(file);
 			pic = parser.parse();
@@ -37,17 +36,13 @@ public class PngReader extends ConsoleProgram {
 		Image image = pic.getImage();
 		Color color;
 		String colorString;
-		for(int x = 0; x < image.width; x++) {
-			for(int y = 0; y < image.height; y++) {
+		for(int y = 0; y < image.width; y++) {
+			for(int x = 0; x < image.height; x++) {
 				color = image.colorAt(x, y);
 				colorString = String.format("[%d,%d,%d,%d]", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
 				p(colorString);
 			}
 			pl("");
-		}
-		pl(""+chunks.length);
-		for(Chunk c: chunks) {
-			pl(c.getTypeName());
 		}
 	}
 	
