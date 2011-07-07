@@ -235,7 +235,6 @@ public class PortableNetworkGraphic {
 		Vector<ImageDataChunk> idatChunks = new Vector<ImageDataChunk>();
 		for(Chunk c: chunks) {
 			String type = c.getTypeName();
-			
 			if(type.equals("IHDR")) {
 				readHeaderChunk((HeaderChunk)c);
 			} else if(type.equals("PLTE")) {
@@ -294,7 +293,7 @@ public class PortableNetworkGraphic {
 		byte[] compressedData = extractData(chunks);
 		byte[] decompressedData = decompressData(compressedData);
 		byte[][] lines = extractScanlines(decompressedData);
-		Scanline[] rawData = new Scanline[compressedData.length];
+		Scanline[] rawData = new Scanline[lines.length];
 		int samples = samplesPerPixel();
 		for(int i = 0; i < lines.length; i++) {
 			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples);
@@ -733,18 +732,20 @@ public class PortableNetworkGraphic {
 	 * Combines the components of the palette into a completed palette.
 	 */
 	private void combinePaletteComponents() {
-		Color[] colorList = new Color[colorPalette.length];
-		Arrays.fill(colorList, new Color(bitDepth));
-		if(alphaPalette != null) {
-			for(int i = 0; i < colorPalette.length; i++) {
-				colorList[i].setRed(colorPalette[i].getRed());
-				colorList[i].setGreen(colorPalette[i].getGreen());
-				colorList[i].setBlue(colorPalette[i].getBlue());
-				colorList[i].setAlpha(alphaPalette[i]);
+		if(colorPalette != null) {
+			Color[] colorList = new Color[colorPalette.length];
+			Arrays.fill(colorList, new Color(bitDepth));
+			if(alphaPalette != null) {
+				for(int i = 0; i < colorPalette.length; i++) {
+					colorList[i].setRed(colorPalette[i].getRed());
+					colorList[i].setGreen(colorPalette[i].getGreen());
+					colorList[i].setBlue(colorPalette[i].getBlue());
+					colorList[i].setAlpha(alphaPalette[i]);
+				}
+			} else {
+				colorList = colorPalette;
 			}
-		} else {
-			colorList = colorPalette;
+			palette = new Palette("untitled", bitDepth, colorList, frequencies);
 		}
-		palette = new Palette("untitled", bitDepth, colorList, frequencies);
 	}
 }

@@ -132,7 +132,7 @@ class Scanline {
 		Pixel[] pixels = new Pixel[getImageWidth()];
 		p = new ByteParser(dataBytes);
 		byte[] pixelData = new byte[getPixelWidth()];
-		for(int i = 0; i < width; i++) {
+		for(int i = 0; i < getImageWidth(); i++) {
 			p.parseBytes(pixelData);
 			pixels[i] = new Pixel(pixelData, Scanline.samples, Scanline.bitDepth);
 		}

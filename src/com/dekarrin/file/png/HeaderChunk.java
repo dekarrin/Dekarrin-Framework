@@ -59,14 +59,14 @@ public class HeaderChunk extends CriticalChunk {
 	 * The CRC for this chunk.
 	 */
 	public HeaderChunk(byte[] data, long crc) {
-		super(new byte[]{49, 48, 44, 52}, data, crc); // IHED
+		super(new byte[]{73, 72, 68, 82}, data, crc); // IHDR
 		parseData();
 	}
 	
 	/**
 	 * Gets the width of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The width.
 	 */
 	public int getWidth() {
@@ -76,7 +76,7 @@ public class HeaderChunk extends CriticalChunk {
 	/**
 	 * Gets the height of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The height.
 	 */
 	public int getHeight() {
@@ -86,7 +86,7 @@ public class HeaderChunk extends CriticalChunk {
 	/**
 	 * Gets the bit depth of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The bit depth.
 	 */
 	public int getBitDepth() {
@@ -96,7 +96,7 @@ public class HeaderChunk extends CriticalChunk {
 	/**
 	 * Gets the color type of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The color type.
 	 */
 	public int getColorType() {
@@ -106,7 +106,7 @@ public class HeaderChunk extends CriticalChunk {
 	/**
 	 * Gets the compression method of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The compression method.
 	 */
 	public int getCompressionMethod() {
@@ -116,7 +116,7 @@ public class HeaderChunk extends CriticalChunk {
 	/**
 	 * Gets the filter method of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The filter method.
 	 */
 	public int getFilterMethod() {
@@ -126,7 +126,7 @@ public class HeaderChunk extends CriticalChunk {
 	/**
 	 * Gets the interlace method of this png.
 	 *
-	 * @returns
+	 * @return
 	 * The interlace method.
 	 */
 	public int getInterlaceMethod() {

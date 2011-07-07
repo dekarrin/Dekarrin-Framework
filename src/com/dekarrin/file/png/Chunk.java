@@ -2,6 +2,7 @@ package com.dekarrin.file.png;
 
 import com.dekarrin.util.ByteParser;
 import java.util.zip.CRC32;
+import java.util.HashMap;
 
 /**
  * Represents a chunk from a png file.
@@ -152,7 +153,7 @@ public class Chunk {
 	/**
 	 * Gets the type of this chunk as a four-character String.
 	 *
-	 * @returns
+	 * @return
 	 * The name.
 	 */
 	public String getTypeName() {
@@ -162,7 +163,7 @@ public class Chunk {
 	/**
 	 * Gets the type of this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The type.
 	 */
 	public byte[] getType() {
@@ -172,7 +173,7 @@ public class Chunk {
 	/**
 	 * Gets the length of this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The length.
 	 */
 	public int getLength() {
@@ -182,7 +183,7 @@ public class Chunk {
 	/**
 	 * Gets the data of this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The data.
 	 */
 	public byte[] getData() {
@@ -192,7 +193,7 @@ public class Chunk {
 	/**
 	 * Gets the crc of this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The CRC.
 	 */
 	public long getCrc() {
@@ -202,7 +203,7 @@ public class Chunk {
 	/**
 	 * Checks if this chunk is ancillary.
 	 *
-	 * @returns
+	 * @return
 	 * Whether it is.
 	 */
 	public boolean isAncillary() {
@@ -212,7 +213,7 @@ public class Chunk {
 	/**
 	 * Checks if this chunk is private.
 	 *
-	 * @returns
+	 * @return
 	 * Whether it is.
 	 */
 	public boolean isPrivate() {
@@ -222,7 +223,7 @@ public class Chunk {
 	/**
 	 * Checks if this chunk is safe to copy.
 	 *
-	 * @returns
+	 * @return
 	 * Whether it is.
 	 */
 	public boolean isSafeToCopy() {
@@ -232,7 +233,7 @@ public class Chunk {
 	/**
 	 * Generates CRC code for this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The generated CRC.
 	 */
 	private long generateCrc() {

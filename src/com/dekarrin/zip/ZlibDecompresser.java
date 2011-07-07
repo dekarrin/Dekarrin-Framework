@@ -66,11 +66,12 @@ public class ZlibDecompresser {
 	 * Decompresses the data. If the data has already been decompressed,
 	 * the stored output is returned and the decompression is skipped.
 	 *
-	 * @returns
+	 * @return
 	 * The uncompressed data.
 	 */
 	public byte[] decompress() {
 		if(decompressedData == null) {
+			decompressedData = new byte[0];
 			decompressInputData();
 		}
 		return decompressedData;
@@ -80,7 +81,7 @@ public class ZlibDecompresser {
 	 * Decompresses the data into a String. Th string uses the default
 	 * encoding for the system.
 	 *
-	 * @returns
+	 * @return
 	 * The string.
 	 */
 	public String decompressString() {
@@ -96,7 +97,7 @@ public class ZlibDecompresser {
 	 * The encoding to use. If this is invalid, the String will be
 	 * encoded using the default character set.
 	 *
-	 * @returns
+	 * @return
 	 * The string.
 	 */
 	public String decompressString(String encoding) {

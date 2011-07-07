@@ -11,7 +11,7 @@
 	</target>
 	<target name="compileall">
 		<mkdir dir="${build}"/>
-		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}">
+		<javac includeantruntime="false" debug="on" debuglevel="lines,vars,source" target="1.6" srcdir="${source}" destdir="${build}">
 			<compilerarg value="-Xlint:none" />
 		</javac>
 	</target>

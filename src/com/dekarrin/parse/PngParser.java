@@ -112,18 +112,20 @@ public class PngParser {
 	/**
 	 * Parses the png file into a PNG object.
 	 *
-	 * @returns
+	 * @return
 	 * The png object.
 	 */
-	public void parse() throws InvalidFileFormatException, StreamFailureException {
+	public PortableNetworkGraphic parse() throws InvalidFileFormatException, StreamFailureException {
 		parseChunksFromFile();
 		parseIndividualChunks();
+		PortableNetworkGraphic g = new PortableNetworkGraphic(getChunks());
+		return g;
 	}
 	
 	/**
 	 * Gets the parsed chunks as an array.
 	 *
-	 * @returns
+	 * @return
 	 * The chunks.
 	 */
 	public Chunk[] getChunks() {
@@ -137,7 +139,7 @@ public class PngParser {
 	private void parseIndividualChunks() {
 		for(int i = 0; i < completedChunks.size(); i++) {
 			Chunk converted = parseChunk(completedChunks.get(i));
-			completedChunks.add(i, converted);
+			completedChunks.set(i, converted);
 		}
 	}
 	
@@ -336,7 +338,7 @@ public class PngParser {
 	 * @param holder
 	 * The holder to check.
 	 *
-	 * @returns
+	 * @return
 	 * True if the position has come to the end; false otherwise.
 	 */
 	private boolean isComplete(PrimitiveHolder holder) {
@@ -374,7 +376,7 @@ public class PngParser {
 	 * Creates a new Chunk object from the chunk that was read.
 	 * After the Chunk is created, the old chunk data is deleted.
 	 *
-	 * @returns
+	 * @return
 	 * The created Chunk.
 	 */
 	private Chunk createNewChunk() {
@@ -402,7 +404,7 @@ public class PngParser {
 	 * @param subject
 	 * The bytes to convert.
 	 *
-	 * @returns
+	 * @return
 	 * The int, made up of the first four bytes in the array.
 	 */
 	private int getIntFromBytes(byte[] subject) {
@@ -414,7 +416,7 @@ public class PngParser {
 	/**
 	 * Gets the next byte from the png stream.
 	 *
-	 * @returns
+	 * @return
 	 * The read byte.
 	 */
 	private int getNextByte() throws StreamFailureException {
