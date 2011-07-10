@@ -171,7 +171,7 @@ public class PortableNetworkGraphic {
 			} else if(type.equals("hIST")) {
 				newChunk = new PaletteHistogramChunk(data, crc);
 			} else if(type.equals("tIME")) {
-				newChunk = new LastModificationTimeChunk(data, crc);
+				newChunk = new ModificationTimeChunk(data, crc);
 			} else {
 				newChunk = new Chunk(type, data, crc);
 			}
@@ -476,9 +476,8 @@ public class PortableNetworkGraphic {
 		 * The chunk to write.
 		 */
 		private void writeChunk(Chunk c) throws StreamFailureException {
-			byte[] outgoingBytes = c.getBytes();
 			try {
-				pngStream.write(outgoingBytes);
+				pngStream.write(c.toBytes());
 			} catch(IOException e) {
 				throw new StreamFailureException(e.getMessage());
 			}
@@ -640,6 +639,11 @@ public class PortableNetworkGraphic {
 	private int gamma;
 	
 	/**
+	 * Whether the image gamma is set.
+	 */
+	private boolean gammaSet = false;
+	
+	/**
 	 * The color space for this Image;
 	 */
 	private Chromaticity chromaticity;
@@ -648,6 +652,11 @@ public class PortableNetworkGraphic {
 	 * The rendering intent of this image.
 	 */
 	private int renderingIntent;
+	
+	/**
+	 * Whether the rendering intent is set.
+	 */
+	private int intentSet = false;
 	
 	/**
 	 * The color profile for this png.
@@ -685,6 +694,11 @@ public class PortableNetworkGraphic {
 	 * channel.
 	 */
 	private int significantAlphaBits;
+	
+	/**
+	 * Whether the significant bits were set.
+	 */
+	private boolean sigBitsSet = false;
 	
 	/**
 	 * The suggested reduced palette for this image if the actual
@@ -904,6 +918,7 @@ public class PortableNetworkGraphic {
 	 */
 	public void setGamma(int gamma) {
 		this.gamma = gamma;
+		gammaSet = true;
 	}
 	
 	/**
@@ -944,6 +959,7 @@ public class PortableNetworkGraphic {
 	 */
 	public void setRenderingIntent(int renderingIntent) {
 		this.renderingIntent = renderingIntent;
+		intentSet = true;
 	}
 	
 	/**
@@ -1237,6 +1253,148 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Checks to see if this png has chromaticity data.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasChromaticity() {
+		return (chromaticity != null);
+	}
+	
+	/**
+	 * Checks to see if this png has gamma set.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasGamma() {
+		return gammaSet;
+	}
+	
+	/**
+	 * Checks to see if this png has a color profile.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasProfile() {
+		return (profile != null);
+	}
+	
+	/**
+	 * Checks to see if this png has a rendering intent.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasRenderingIntent() {
+		return intentSet;
+	}
+	
+	/**
+	 * Checks to see if this png has a palette.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasPalette() {
+		return (colorMode == COLOR_TYPE_COLOR_INDEXED);
+	}
+	
+	/**
+	 * Checks to see if this png has a background color.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasBackgroundColor() {
+		return (backgroundColor != null);
+	}
+	
+	/**
+	 * Checks to see if this png has a histogram.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasHistogram() {
+		boolean has = false;
+		if(hasPalette()) {
+			if(palette.hasFrequencies()) {
+				has = true;
+			}
+		}
+		return has;
+	}
+	
+	/**
+	 * Checks to see if this png should output
+	 * a tRNS chunk.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasTransparency() {
+		boolean has;
+		switch(colorMode) {
+			case COLOR_TYPE_COLOR:
+			case COLOR_TYPE_GRAYSCALE:
+				has = (alphaColor != null);
+				break;
+				
+			case COLOR_TYPE_COLOR_INDEXED:
+				has = (alphaPalette != null);
+				break;
+			
+			default:
+				has = false;
+		}
+		return has;
+	}
+	
+	/**
+	 * Checks to see if this png has resolution data.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasResolution() {
+		return (resolution != null);
+	}
+	
+	/**
+	 * Checks to see if this png has a suggested palette.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasSuggestedPalette() {
+		return (suggestedPalette != null);
+	}
+	
+	/**
+	 * Checks to see if this png has text data.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasTextData() {
+		return (textData != null);
+	}
+	
+	/**
+	 * Checks to see if this png has significat bits
+	 * data.
+	 *
+	 * @return
+	 * Whether it does.
+	 */
+	public boolean hasSignificantBits() {
+		return sigBitsSet;
+	}
+	
+	/**
 	 * Sets this png to not copy unsafe to copy chunks when
 	 * it saves.
 	 */
@@ -1352,6 +1510,41 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Converts the last modification time to a chunk.
+	 *
+	 * @return
+	 * The resulting ModificationTimeChunk.
+	 */
+	private ModificationTimeChunk modificationTimeToChunk() {
+		ModificationTimeChunk mtc = new ModificationTimeChunk(lastModified);
+		return mtc;
+	}
+	
+	/**
+	 * Converts all text data and tags into text chunks.
+	 *
+	 * @return
+	 * The resulting TextChunk array.
+	 */
+	private TextChunk[] textDataToChunks() {
+		Vector<TextChunk> chunks = new Vector<TextChunk>();
+		for(Map.Entry<String,ArrayList<String>> keywordSet: textData.entrySet()) {
+			String keyword = keywordSet.getKey();
+			ArrayList<String> texts = keywordSet.getValue();
+			for(String contents: texts) {
+				TextChunk tc = null;
+				if(t.length() > UNCOMPRESSED_TEXT_LIMIT) {
+					tc = new CompressedTextDataChunk(keyword, contents, COMPRESSION_METHOD_ZLIB);
+				} else {
+					tc = new TextDataChunk(keyword, contents);
+				}
+				chunks.add(tc);
+			}
+		}
+		return chunks.toArray(new TextData[0]);
+	}
+	 
+	/**
 	 * Converts the suggested palette data into a chunk.
 	 *
 	 * @return
@@ -1397,7 +1590,7 @@ public class PortableNetworkGraphic {
 		if(colorMode == COLOR_TYPE_COLOR_INDEXED) {
 			int[] transparencies = extractTransparencies();
 			tc = new TransparencyChunk(transparencies);
-		} else if(colorMode == COLOR_TYPE_COLOR) {
+		} else if(colorMode == COLOR_TYPE_GRAYSCALE) {
 			tc = new TransparencyChunk(alphaColor.getRed());
 		} else {
 			tc = new TransparencyChunk(alphaColor.getRed(), alphaColor.getGreen(), alphaColor.getBlue());
@@ -1545,6 +1738,21 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Gets all transparency values from each of the palette
+	 * colors.
+	 *
+	 * @return
+	 * The transparency values.
+	 */
+	private int[] extractTransparencies() {
+		int[] trans = new int[palette.length()];
+		for(int i = 0; i < palette.length(); i++) {
+			trans[i] = palette.getColor(i).getAlpha();
+		}
+		return trans;
+	}
+	
+	/**
 	 * Checks if image data needs to be preserved.
 	 *
 	 * @return
@@ -1623,7 +1831,7 @@ public class PortableNetworkGraphic {
 			} else if(type.equals("hIST")) {
 				readPaletteHistogramChunk((PaletteHistogramChunk)c);
 			} else if(type.equals("tIME")) {
-				readLastModificationTimeChunk((LastModificationTimeChunk)c);
+				readModificationTimeChunk((ModificationTimeChunk)c);
 			} else {
 				if(c.isAncillary()) {
 					unknown.add(c);
@@ -1652,6 +1860,30 @@ public class PortableNetworkGraphic {
 			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples);
 		}
 		constructImage(rawData);
+	}
+	
+	/**
+	 * Builds image chunks from the image data.
+	 *
+	 * @return
+	 * The ImageDataChunks that decode to the image data.
+	 */
+	private ImageDataChunk[] encodeImageData() {
+		Scanline[] rawData = deconstructImage(rawData);
+		byte[][] lines = new byte[rawData.length][];
+		for(int i = 0; i < rawData.length; i++) {
+			lines[i] = rawData[i].getFilteredBytes();
+		}
+		Vector<Byte> holder = new Vector<Byte>();
+		for(int[] line: lines) {
+			for(int i = 0; i < line.length; i++) {
+				holder.add(new Byte(line[i]));
+			}
+		}
+		byte[] uncompressedData = new byte[holder.size()];
+		for(Byte b: holder) {
+			
+		}
 	}
 	
 	/**
@@ -1891,7 +2123,7 @@ public class PortableNetworkGraphic {
 	 * @param chunk
 	 * The last modification time chunk.
 	 */
-	private void readLastModificationTimeChunk(LastModificationTimeChunk chunk) {
+	private void readModificationTimeChunk(ModificationTimeChunk chunk) {
 		Calendar c = Calendar.getInstance();
 		c.set(chunk.getYear(), chunk.getMonth(), chunk.getDay(), chunk.getHour(), chunk.getMinute(), chunk.getSecond());
 		lastModified = c.getTime();
@@ -1931,6 +2163,7 @@ public class PortableNetworkGraphic {
 		if(colorMode == COLOR_TYPE_GRAYSCALE_ALPHA || colorMode == COLOR_TYPE_COLOR_ALPHA) {
 			significantAlphaBits = chunk.getAlphaBits();
 		}
+		sigBitsSet = true;
 	}
 	
 	/**
@@ -2037,6 +2270,7 @@ public class PortableNetworkGraphic {
 	 */
 	private void readGammaChunk(GammaChunk chunk) {
 		gamma = chunk.getGamma();
+		gammaSet = true;
 	}
 	
 	/**
@@ -2048,6 +2282,7 @@ public class PortableNetworkGraphic {
 	 */
 	private void readStandardRgbColorSpaceChunk(StandardRgbColorSpaceChunk chunk) {
 		renderingIntent = chunk.getRenderingIntent();
+		intentSet = true;
 	}
 	
 	/**

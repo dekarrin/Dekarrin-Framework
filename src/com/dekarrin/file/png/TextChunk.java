@@ -32,9 +32,22 @@ public abstract class TextChunk extends AncillaryChunk {
 	}
 	
 	/**
+	 * Creates a new TextChunk from only data and a type name.
+	 *
+	 * @param type
+	 * The type name.
+	 *
+	 * @param data
+	 * The chunk data.
+	 */
+	public TextChunk(byte[] type, byte[] data) {
+		super(type, data);
+	}
+	
+	/**
 	 * Retrieves the keyword from this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The keyword.
 	 */
 	protected String getKeyword() {
@@ -44,7 +57,7 @@ public abstract class TextChunk extends AncillaryChunk {
 	/**
 	 * Retrieves the actual text data from this chunk.
 	 *
-	 * @returns
+	 * @return
 	 * The text data.
 	 */
 	public abstract String getText();

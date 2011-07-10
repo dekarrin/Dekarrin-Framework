@@ -144,22 +144,23 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 * Parses the chunk data.
 	 */
 	private void parseData() {
-		paletteName = parser.parseString();
-		sampleDepth = parser.parseInt(1);
+		String name = parser.parseString();
+		int depth = parser.parseInt(1);
 		int sampleWidth = sampleDepth / 8;
 		int paletteCount = parser.remaining() / (sampleWidth * 4 + 2);
-		paletteEntries = new Color[paletteCount];
-		frequencies = new int[paletteCount];
-		int r, g, b, a, freq;
+		int[] freq = new int[paletteCount];
+		int[] red = new int[paletteCount];
+		int[] green = new int[paletteCount];
+		int[] blue = new int[paletteCount];
+		int[] alpha = new int[paletteCount];
 		for(int i = 0; i < paletteCount; i++) {
-			r = parser.parseInt(sampleWidth);
-			g = parser.parseInt(sampleWidth);
-			b = parser.parseInt(sampleWidth);
-			a = parser.parseInt(sampleWidth);
-			paletteEntries[i]	= new Color();
-			paletteEntries[i].setSamples(r, g, b, a);
-			frequencies[i]		= parser.parseInt(2);
+			red[i]		=	parser.parseInt(sampleWidth);
+			green[i]	=	parser.parseInt(sampleWidth);
+			blue[i]		=	parser.parseInt(sampleWidth);
+			alpha[i]	=	parser.parseInt(sampleWidth);
+			freq[i]		=	parser.parseInt(2);
 		}
+		setProperties(name, depth, red, green, blue, alpha, freq);
 	}
 	
 	/**
