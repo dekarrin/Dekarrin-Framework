@@ -8,6 +8,11 @@ import com.dekarrin.zip.ZlibDecompresser;
 public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	
 	/**
+	 * The type of this chunk.
+	 */
+	public static final byte[] TYPE_CODE = {105, 67, 67, 80}; // iCCP
+	
+	/**
 	 * The name of the ICC Profile.
 	 */
 	private String profileName;
@@ -37,14 +42,27 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * The chunk CRC.
 	 */
 	public EmbeddedColorProfileChunk(byte[] data, long crc) {
-		super(new byte[]{105, 67, 67, 80}, data, crc); // iCCP
+		super(TYPE_CODE, data, crc);
 		parseData();
+	}
+	
+	/**
+	 * Creates a new EmbeddedColorProfileChunk from data.
+	 *
+	 * @param name
+	 * The name of the profile.
+	 *
+	 * @parma data
+	 * The profile data.
+	 */
+	public EmbeddedColorProfileChunk(String name, byte[] data) {
+		super(TYPE_CODE, generateData());
 	}
 	
 	/**
 	 * Gets the profile name.
 	 *
-	 * @returns
+	 * @return
 	 * The name.
 	 */
 	public String getProfileName() {
@@ -54,7 +72,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	/**
 	 * Gets the profile compression method.
 	 *
-	 * @returns
+	 * @return
 	 * The compression method.
 	 */
 	public int getCompressionMethod() {
@@ -64,7 +82,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	/**
 	 * Gets the compressed profile.
 	 *
-	 * @returns
+	 * @return
 	 * The compressed profile.
 	 */
 	public byte[] getCompressedProfile() {
@@ -74,7 +92,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	/**
 	 * Gets the uncompressed profile.
 	 *
-	 * @returns
+	 * @return
 	 * The uncompressed profile.
 	 */
 	public byte[] getProfile() {
@@ -85,12 +103,82 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	}
 	
 	/**
+	 * Generates the data bytes for the given data.
+	 *
+	 * @param name
+	 * The name of the profile.
+	 *
+	 * @param data
+	 * The data of the profile.
+	 *
+	 * @return
+	 * The data bytes of the chunk.
+	 */
+	private byte[] generateData(String name, byte[] data) {
+		setProperties(name, data, null, 0);
+		dataBytes = createDataBytes();
+		return dataBytes;
+	}
+	
+	/**
+	 * Sets the internal properties of this chunk.
+	 *
+	 * @param name
+	 * The name of the profile.
+	 *
+	 * @param data
+	 * The data in the profile. If this is null, it will be
+	 * generated from the compressed data. This cannot be null
+	 * if compressedData is also null.
+	 *
+	 * @param compressedData
+	 * The compressed data in the profile. If this is null,
+	 * it will be generated from the data. This cannot be null
+	 * if data is also null.
+	 *
+	 * @param compressionMethod
+	 * The compression method to use for compressing the data.
+	 */
+	private void setProperties(String name, byte[] data, byte[] compressedData, int compressionMethod) {
+		this.profileName = name;
+		this.compressionMethod = compressionMethod;
+		if(data != null) {
+			this.profile = data;
+		}
+		if(compressedData != null) {
+			this.compressedProfile = compressedData;
+		}
+		if(data == null) {
+			decompressData();
+		}
+		if(compressedData == null) {
+			compressData();
+		}
+	}
+	
+	/**
+	 * Creates the actual data bytes from the internal properties.
+	 *
+	 * @return
+	 * The data bytes.
+	 */
+	private byte[] createDataBytes() {
+		int dataLength = 2 + profileName.length() + compressedProfile.length;
+		ByteComposer bytes = new ByteComposer(dataLength);
+		bytes.composeString(profileName, true);
+		bytes.composeInt(compressionMethod, 1);
+		bytes.composeBytes(compressedProfile);
+		return bytes.toArray();
+	}
+	
+	/**
 	 * Parses data.
 	 */
 	private void parseData() {
-		profileName			= parser.parseString();
-		compressionMethod	= parser.parseInt(1);
-		compressedProfile	= parser.parseFinalBytes();
+		String profileName			= parser.parseString();
+		int compressionMethod		= parser.parseInt(1);
+		byte[] compressedProfile	= parser.parseFinalBytes();
+		setProperties(profileName, null, compressedProfile, compressionMethod);
 	}
 	
 	/**
@@ -99,5 +187,13 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	private void decompressProfile() {
 		ZlibDecompresser zd = new ZlibDecompresser(compressedProfile);
 		profile = zd.decompress();
+	}
+	
+	/**
+	 * Compresses profile data.
+	 */
+	private void compressProfile() {
+		ZlibCompresser zc = new ZlibCompresser(profile);
+		compressedProfile = zc.compress();
 	}
 }

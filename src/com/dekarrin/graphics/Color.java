@@ -53,6 +53,33 @@ public class Color {
 	}
 	
 	/**
+	 * Checks if a color has a bit depth and samples that are
+	 * equivilent to this Color's values.
+	 *
+	 * @param color
+	 * The color to compare this one with.
+	 *
+	 * @return
+	 * Whether the given color has the same samples and bit depth
+	 * as this one.
+	 */
+	public boolean equals(Color color) {
+		boolean same = false;
+		if(color.bitDepth() == bitDepth) {
+			if(color.getRed() == red) {
+				if(color.getGreen() == green) {
+					if(color.getBlue() == blue) {
+						if(color.getAlpha() == alpha) {
+							same = true;
+						}
+					}
+				}
+			}
+		}
+		return same;
+	}
+	
+	/**
 	 * Sets all the color samples of this Color in one method.
 	 *
 	 * @param red
@@ -90,6 +117,13 @@ public class Color {
 		setGreen(green);
 		setBlue(blue);
 		setAlpha(alpha);
+	}
+	
+	/**
+	 * Resets the alpha sample to maximum.
+	 */
+	public void resetAlpha() {
+		setAlpha(maximumValue());
 	}
 	
 	/**

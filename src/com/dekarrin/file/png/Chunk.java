@@ -3,6 +3,7 @@ package com.dekarrin.file.png;
 import com.dekarrin.util.ByteParser;
 import java.util.zip.CRC32;
 import java.util.HashMap;
+import com.dekarrin.util.ByteHolder;
 
 /**
  * Represents a chunk from a png file.
@@ -101,7 +102,7 @@ public class Chunk {
 	public static final int COLOR_TYPE_COLOR_ALPHA = 6;
 	
 	/**
-	 * Used for parsing primitives from chunkData.
+	 * Used for parsing properties from chunk data.
 	 */
 	protected ByteParser parser;
 	
@@ -122,14 +123,6 @@ public class Chunk {
 	protected long crc;
 	
 	/**
-	 * Creates a new empty Chunk.
-	 */
-	public Chunk() {
-		super();
-		parser = new ByteParser(chunkData);
-	}
-	
-	/**
 	 * Creates a new Chunk.
 	 *
 	 * @param type
@@ -141,12 +134,33 @@ public class Chunk {
 	 * @param crc
 	 * The read CRC for this chunk. This may not be the actual
 	 * CRC; if it isn't, this chunk is considered corrupted.
+	 *
+	 * @throws InvalidChunkException
+	 * If the given crc does not match the generated crc.
 	 */
-	public Chunk(byte[] type, byte[] data, long crc) {
+	public Chunk(byte[] type, byte[] data, long crc) throws InvalidChunkException {
 		this.crc = crc;
 		chunkData = data;
 		chunkType = type;
-		//TODO: check validity of chunk here with generateCrc().
+		if(!isValid()) {
+			throw new InvalidChunkException("Cyclic redundancy checksum mismatch.");
+		}
+		parser = new ByteParser(chunkData);
+	}
+	
+	/**
+	 * Creates a new Chunk from only data and a type name.
+	 *
+	 * @param type
+	 * The type name.
+	 *
+	 * @param data
+	 * The chunk data.
+	 */
+	public Chunk(byte[] type, byte[] data) {
+		this.type = type;
+		this.data = data;
+		crc = generateCrc();
 		parser = new ByteParser(chunkData);
 	}
 	
@@ -168,6 +182,21 @@ public class Chunk {
 	 */
 	public byte[] getType() {
 		return chunkType;
+	}
+	
+	/**
+	 * Serialiazes this chunk's contents into a byte array.
+	 *
+	 * @return
+	 * The byte array representation of this Chunk.
+	 */
+	public byte[] toBytes() {
+		ByteHolder bytes = new ByteHolder(12 + getLength());
+		copyBytes(bytes, intToBytes(getLength(), 4));
+		copyBytes(bytes, type);
+		copyBytes(bytes, data);
+		copyBytes(bytes, intToBytes((int)crc, 4));
+		return bytes.toArray();
 	}
 	
 	/**
@@ -242,5 +271,20 @@ public class Chunk {
 		checker.update(chunkData);
 		long crc = checker.getValue();
 		return crc;
+	}
+	
+	/**
+	 * Checks if this Chunk is valid by checking the crc read to file
+	 * against the generated crc.
+	 *
+	 * @return
+	 * Whether this Chunk is valid.
+	 */
+	private boolean isValid() {
+		boolean valid = false;
+		if(generateCrc() == crc) {
+			valid = true;
+		}
+		return valid;
 	}
 }

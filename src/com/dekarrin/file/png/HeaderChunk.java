@@ -64,6 +64,35 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
+	 * Creates a new HeaderChunk and generates the internal
+	 * data from the parameters.
+	 *
+	 * @param width
+	 * The width of this png.
+	 *
+	 * @param height
+	 * The height of this png.
+	 *
+	 * @param bitDepth
+	 * The bit depth of this png.
+	 *
+	 * @param colorType
+	 * The color type of this png.
+	 *
+	 * @param compressionMethod
+	 * The compression method to use for this png's data.
+	 *
+	 * @param filterMethod
+	 * The image data filtering method to use for this png.
+	 *
+	 * @param interlaceMethod
+	 * The interlace method to use for this png.
+	 */
+	public HeaderChunk(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
+		super(new byte[]{73, 72, 68, 82}, generateDataBytes(width, height, bitDepth, colorType, compressionMethod, filterMethod, interlaceMethod));
+	}
+	
+	/**
 	 * Gets the width of this png.
 	 *
 	 * @return
@@ -144,6 +173,60 @@ public class HeaderChunk extends CriticalChunk {
 		compressionMethod	= parser.parseInt(1);
 		filterMethod		= parser.parseInt(1);
 		interlaceMethod		= parser.parseInt(1);
+	}
+	
+	/**
+	 * Creates the databytes from the input data.
+	 *
+	 * @param width
+	 * The width of this png.
+	 *
+	 * @param height
+	 * The height of this png.
+	 *
+	 * @param bitDepth
+	 * The bit depth of this png.
+	 *
+	 * @param colorType
+	 * The color type of this png.
+	 *
+	 * @param compressionMethod
+	 * The compression method to use for this png's data.
+	 *
+	 * @param filterMethod
+	 * The image data filtering method to use for this png.
+	 *
+	 * @param interlaceMethod
+	 * The interlace method to use for this png.
+	 *
+	 * @return
+	 * The data field.
+	 */
+	private byte[] generateDataBytes(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
+		this.width = width;
+		this.height = height;
+		this.bitDepth = bitDepth;
+		this.colorType = colorType;
+		this.compressionMethod = compressionMethod;
+		this.filterMethod = filterMethod;
+		this.interlaceMethod = interlaceMethod;
+		createDataField();
+		return data;
+	}
+	
+	/**
+	 * Writes the data bytes for this chunk.
+	 */
+	private void createDataField() {
+		ByteHolder data = new ByteHolder(13);
+		copyBytes(data, intToBytes(width, 4));
+		copyBytes(data, intToBytes(height, 4));
+		data.add((byte)bitDepth);
+		data.add((byte)colorType);
+		data.add((byte)compressionMethod);
+		data.add((byte)filterMethod);
+		data.add((byte)interlaceMethod);
+		this.data = data.toArray();
 	}
 	
 }

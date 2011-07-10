@@ -1,5 +1,7 @@
 package com.dekarrin.util;
 
+import java.util.Arrays;
+
 /**
  * Holds ints and remembers its current location.
  */
@@ -65,12 +67,26 @@ public class IntHolder implements PrimitiveHolder {
 	}
 	
 	/**
+	 * Inserts ints at the end of the holder. The ints are
+	 * inserted and the position pointer is incremented by
+	 * the length of the given array.
+	 *
+	 * @param data
+	 * The ints to be inserted.
+	 */
+	public void add(int[] data) {
+		for(int i = 0; i < data.length; i++) {
+			add(data[i]);
+		}
+	}
+	
+	/**
 	 * Gets the int at the specified index.
 	 *
 	 * @param index
 	 * The index to retrieve the int from.
 	 *
-	 * @returns
+	 * @return
 	 * The specified int.
 	 */
 	public int get(int index) {
@@ -78,9 +94,19 @@ public class IntHolder implements PrimitiveHolder {
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 */
+	public void resize(int size) {
+		holder = Arrays.copyOfRange(holder, 0, size);
+		if(pointer > holder.length) {
+			reset();
+		}
+	}
+	
+	/**
 	 * Gets the entire internal array.
 	 *
-	 * @returns
+	 * @return
 	 * The array.
 	 */
 	public int[] toArray() {
@@ -88,47 +114,35 @@ public class IntHolder implements PrimitiveHolder {
 	}
 	
 	/**
-	 * Gets the position of the internal pointer.
-	 *
-	 * @returns
-	 * The current position.
+	 * {@inheritDoc}
 	 */
 	public int position() {
 		return pointer;
 	}
 	
 	/**
-	 * Sets the internal pointer to a position.
-	 *
-	 * @param index
-	 * The new index to set the pointer to.
+	 * {@inheritDoc}
 	 */
 	public void move(int index) {
 		pointer = index;
 	}
 	
 	/**
-	 * Resets the internal pointer to 0.
+	 * {@inheritDoc}
 	 */
 	public void reset() {
 		move(0);
 	}
 	
 	/**
-	 * Checks if the pointer is at the end of the array.
-	 *
-	 * @returns
-	 * True if the pointer is at the end; false otherwise.
+	 * {@inheritDoc}
 	 */
 	public boolean isAtEnd() {
 		return (pointer == holder.length);
 	}
 	
 	/**
-	 * Gets the size of this IntHolder.
-	 *
-	 * @returns
-	 * The size.
+	 * {@inheritDoc}
 	 */
 	public int size() {
 		return holder.length;
@@ -137,7 +151,7 @@ public class IntHolder implements PrimitiveHolder {
 	/**
 	 * Gets the next int.
 	 *
-	 * @returns
+	 * @return
 	 * The int.
 	 */
 	public int next() {

@@ -12,6 +12,11 @@ import com.dekarrin.graphics.GrayColor;
 public class BackgroundColorChunk extends AncillaryChunk {
 	
 	/**
+	 * The chunk type.
+	 */
+	public static final byte[] TYPE_CODE = {98, 75, 71, 68}; // bKGD
+	
+	/**
 	 * The mode of this background chunk. This is dependent on
 	 * the color type of the png, but the amount of data in this
 	 * chunk varies with each type, so it can use this
@@ -40,8 +45,34 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * The chunk crc.
 	 */
 	public BackgroundColorChunk(byte[] data, long crc) {
-		super(new byte[]{98, 75, 71, 68}, data, crc); // bKGD
+		super(TYPE_CODE, data, crc);
 		parseData();
+	}
+	
+	/**
+	 * Creates a new BackgroundColorChunk from existing
+	 * data.
+	 *
+	 * @param color
+	 * The background color.
+	 *
+	 * @param colorMode
+	 * THe color mode to process the color as.
+	 */
+	public BackgroundColorChunk(Color color, int colorMode) {
+		super(TYPE_CODE, generateData(color, colorMode));
+	}
+	
+	/**
+	 * Creates a new BackgroundColorChunk from existing
+	 * data.
+	 *
+	 * @param index
+	 * The index of the the palette color that is to act
+	 * as the background color.
+	 */
+	public BackgroundColorChunk(int index) {
+		super(TYPE_CODE, generateData(index));
 	}
 	
 	/**
@@ -105,23 +136,110 @@ public class BackgroundColorChunk extends AncillaryChunk {
 		int r,g,b;
 		switch(colorMode) {
 			case INDEXED_COLOR_MODE:
-				paletteIndex = parser.parseByte();
+				setProperties(parser.parseInt(1));
 				break;
 				
 			case GRAYSCALE_MODE:
 				g = parser.parseInt(2);
 				GrayColor c = new GrayColor();
 				c.setValue(g);
-				color = c;
+				setProperties(c);
 				break;
 				
 			case TRUECOLOR_MODE:
 				r = parser.parseInt(2);
 				g = parser.parseInt(2);
 				b = parser.parseInt(2);
-				color = new Color();
-				color.setSamples(r, g, b);
+				Color color = new Color();
+				Color color.setSamples(r, g, b);
+				setProperties(color);
 				break;
 		}
+	}
+	
+	/**
+	 * Generates the internal properties and creates the data byte
+	 * array.
+	 *
+	 * @param color
+	 * The background color to set as this chunk's data.
+	 *
+	 * @param colorMode
+	 * The color mode to compose the data with.
+	 *
+	 * @return
+	 * The data byte array.
+	 */
+	private byte[] generateData(Color color, int colorMode) {
+		this.colorMode = colorMode;
+		setProperties(color);
+		byte[] data = createDataBytes();
+		return data;
+	}
+	
+	/**
+	 * Generates the internal properties and creates the data byte
+	 * array.
+	 *
+	 * @param index
+	 * The index of the palette color to use as the background color.
+	 
+	 * @return
+	 * The data byte array.
+	 */
+	private byte[] generateData(int index) {
+		this.colorMode = INDEXED_COLOR_MODE;
+		setProperties(index);
+		byte[] data = createDataBytes();
+		return data;
+	}
+	
+	/**
+	 * Sets the internal properties for this background color.
+	 *
+	 * @param color
+	 * The color to set the background to.
+	 */
+	private void setProperties(Color color) {
+		this.color = color;
+	}
+	
+	/**
+	 * Sets the internal properties for this background color.
+	 *
+	 * @param index
+	 * The index of the background color.
+	 */
+	private void setProperties(int index) {
+		paletteIndex = index;
+	}
+	
+	/**
+	 * Creats the data byte array from the internal properties.
+	 *
+	 * @return
+	 * The data bytes.
+	 */
+	private byte[] createDataBytes() {
+		ByteComposer composer = null;
+		switch(colorMode) {
+			case INDEXED_COLOR_MODE:
+				composer = new ByteComposer(1);
+				composer.composeInt(paletteIndex, 1);
+				break;
+				
+			case GRAYSCALE_MODE:
+				composer = new ByteComposer(2);
+				composer.composeInt(color.getRed(), 2);
+				break;
+				
+			case TRUECOLOR_MODE:
+				composer = new ByteComposer(6);
+				composer.composeInt(color.getRed(), 2);
+				composer.composeInt(color.getGreen(), 2);
+				composer.composeInt(color.getBlue(), 2);
+				break;
+		}
+		return composer.toArray();
 	}
 }

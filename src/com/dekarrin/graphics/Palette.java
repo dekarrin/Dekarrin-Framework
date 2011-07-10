@@ -124,7 +124,7 @@ public class Palette {
 	 * @return
 	 * The number of colors.
 	 */
-	public int getSize() {
+	public int size() {
 		return colors.length;
 	}
 	

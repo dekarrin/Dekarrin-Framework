@@ -6,6 +6,11 @@ import java.awt.Point;
  * Png chunk for referencing chromaticities.
  */
 public class ChromaticitiesChunk extends AncillaryChunk {
+	
+	/**
+	 * The type of this chunk.
+	 */
+	public static final byte[] TYPE_CODE = {99, 72, 82, 77}; // cHRM
 
 	/**
 	 * White point chromaticity.
@@ -37,14 +42,34 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	 * The chunk CRC.
 	 */
 	public ChromaticitiesChunk(byte[] data, long crc) {
-		super(new byte[]{99, 72, 82, 77}, data, crc); // cHRM
+		super(TYPE_CODE, data, crc);
 		parseData();
+	}
+	
+	/**
+	 * Creates a new ChromaticitiesChunk that generates its
+	 * own internal data array.
+	 *
+	 * @param whitePoint
+	 * The white point.
+	 *
+	 * @param red
+	 * The red point.
+	 *
+	 * @param green
+	 * The green point.
+	 *
+	 * @param blue
+	 * The blue point.
+	 */
+	public ChromaticitiesChunk(Point whitePoint, Point red, Point green, Point blue) {
+		super(TYPE_CODE, generateData(whitePoint, red, green, blue));
 	}
 	
 	/**
 	 * Gets the white point chromaticity.
 	 *
-	 * @returns
+	 * @return
 	 * The white point chromaticity.
 	 */
 	public Point getWhitePoint() {
@@ -54,7 +79,7 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	/**
 	 * Gets the red chromaticity.
 	 *
-	 * @returns
+	 * @return
 	 * The red chromaticity.
 	 */
 	public Point getRed() {
@@ -64,7 +89,7 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	/**
 	 * Gets the green chromaticity.
 	 *
-	 * @returns
+	 * @return
 	 * The green chromaticity.
 	 */
 	public Point getGreen() {
@@ -74,10 +99,10 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	/**
 	 * Gets the blue chromaticity.
 	 *
-	 * @returns
+	 * @return
 	 * The blue chromaticity.
 	 */
-	public Point getblue() {
+	public Point getBlue() {
 		return blue;
 	}
 	
@@ -94,9 +119,71 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 		int gX	= parser.parseInt();
 		int gY	= parser.parseInt();
 		
-		whitePoint	= new Point(wX, wY);
-		red			= new Point(rX, rY);
-		green		= new Point(gX, gY);
-		blue		= new Point(bX, bY);
+		setProperties(new Point(wX, wY), new Point(rX, rY), new Point(gX, gY), new Point(bX, bY));
+	}
+	
+	/**
+	 * Creates the databytes from the input data.
+	 *
+	 * @param whitePoint
+	 * The white point.
+	 *
+	 * @param red
+	 * The red point.
+	 *
+	 * @param green
+	 * The green point.
+	 *
+	 * @param blue
+	 * The blue point.
+	 *
+	 * @return
+	 * The data field.
+	 */
+	private byte[] generateData(Point whitePoint, Point red, Point green, Point blue) {
+		setProperties(whitePoint, red, green, blue);
+		data = createDataBytes();
+		return data;
+	}
+	
+	/**
+	 * Sets the internal properties of this chunk.
+	 *
+	 * @param whitePoint
+	 * The white point.
+	 *
+	 * @param red
+	 * The red point.
+	 *
+	 * @param green
+	 * The green point.
+	 *
+	 * @param blue
+	 * The blue point.
+	 */
+	private void setProperties(Point whitePoint, Point red, Point green, Point blue) {
+		this.whitePoint = whitePoint;
+		this.red = red;
+		this.green = green;
+		this.blue = blue;
+	}
+	
+	/**
+	 * Writes the data bytes for this chunk.
+	 *
+	 * @return
+	 * The byte array from the internal data.
+	 */
+	private byte[] createDataBytes() {
+		ByteComposer bytes = new ByteComposer(32);
+		bytes.composeInt(whitePoint.x);
+		bytes.composeInt(whitePoint.y);
+		bytes.composeInt(red.x);
+		bytes.composeInt(red.y);
+		bytes.composeInt(green.x);
+		bytes.composeInt(green.y);
+		bytes.composeInt(blue.x);
+		bytes.composeInt(blue.y);
+		return bytes.toArray();
 	}
 }

@@ -65,12 +65,26 @@ public class ByteHolder implements PrimitiveHolder {
 	}
 	
 	/**
+	 * Inserts bytes at the end of the holder. The bytes are
+	 * inserted and the position pointer is incremented by
+	 * the length of the given array.
+	 *
+	 * @param data
+	 * The bytes to be inserted.
+	 */
+	public void add(byte[] data) {
+		for(int i = 0; i < data.length; i++) {
+			add(data[i]);
+		}
+	}
+	
+	/**
 	 * Gets the byte at the specified index.
 	 *
 	 * @param index
 	 * The index to retrieve the byte from.
 	 *
-	 * @returns
+	 * @return
 	 * The specified byte.
 	 */
 	public byte get(int index) {
@@ -78,9 +92,19 @@ public class ByteHolder implements PrimitiveHolder {
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 */
+	public void resize(int size) {
+		holder = Arrays.copyOfRange(holder, 0, size);
+		if(pointer > holder.length) {
+			reset();
+		}
+	}
+	
+	/**
 	 * Gets the entire internal array.
 	 *
-	 * @returns
+	 * @return
 	 * The array.
 	 */
 	public byte[] toArray() {
@@ -88,47 +112,35 @@ public class ByteHolder implements PrimitiveHolder {
 	}
 	
 	/**
-	 * Gets the position of the internal pointer.
-	 *
-	 * @returns
-	 * The current position.
+	 * {@inheritDoc}
 	 */
 	public int position() {
 		return pointer;
 	}
 	
 	/**
-	 * Sets the internal pointer to a position.
-	 *
-	 * @param index
-	 * The new index to set the pointer to.
+	 * {@inheritDoc}
 	 */
 	public void move(int index) {
 		pointer = index;
 	}
 	
 	/**
-	 * Resets the internal pointer to 0.
+	 * {@inheritDoc}
 	 */
 	public void reset() {
 		move(0);
 	}
 	
 	/**
-	 * Checks if the pointer is at the end of the array.
-	 *
-	 * @returns
-	 * True if the pointer is at the end; false otherwise.
+	 * {@inheritDoc}
 	 */
 	public boolean isAtEnd() {
 		return (pointer == holder.length);
 	}
 	
 	/**
-	 * Gets the size of this ByteHolder.
-	 *
-	 * @returns
-	 * The size.
+	 * {@inheritDoc}
 	 */
 	public int size() {
 		return holder.length;
@@ -137,7 +149,7 @@ public class ByteHolder implements PrimitiveHolder {
 	/**
 	 * Gets the next byte.
 	 *
-	 * @returns
+	 * @return
 	 * The byte.
 	 */
 	public byte next() {

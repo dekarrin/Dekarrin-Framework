@@ -8,6 +8,11 @@ import com.dekarrin.graphics.Color;
 public class SuggestedPaletteChunk extends AncillaryChunk {
 	
 	/**
+	 * The type code for this chunk.
+	 */
+	public static final byte[] TYPE_CODE = {115, 80, 76, 84}; // sPLT
+	
+	/**
 	 * The name of the palette.
 	 */
 	private String paletteName;
@@ -37,8 +42,36 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 * The chunk CRC.
 	 */
 	public SuggestedPaletteChunk(byte[] data, long crc) {
-		super(new byte[]{115, 80, 76, 84}, data, crc); // sPLT
+		super(TYPE_CODE, data, crc);
 		parseData();
+	}
+	
+	/**
+	 * Creates a new SuggestedPaletteChunk from existing data.
+	 *
+	 * @param name
+	 * The name of the palette.
+	 *
+	 * @param bitDepth
+	 * The sample depth of the palette.
+	 *
+	 * @param redSamples
+	 * The red color samples from the palette.
+	 *
+	 * @param greenSamples
+	 * The green color samples from the palette.
+	 *
+	 * @param blueSamples
+	 * The blue color samples from the palette.
+	 *
+	 * @param alphaSamples
+	 * The alpha color samples from the palette.
+	 * 
+	 * @param frequencies
+	 * The frequencies of each palette entry.
+	 */
+	public SuggestedPaletteChunk(String name, int bitDepth, int[] redSamples, int[] greenSamples, int[] blueSamples, int[] alphaSamples, int[] frequencies) {
+		super(TYPE_CODE, generateData(name, bitDepth, redSamples, greenSamples, blueSamples, alphaSamples, frequencies));
 	}
 	
 	/**
@@ -127,5 +160,93 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 			paletteEntries[i].setSamples(r, g, b, a);
 			frequencies[i]		= parser.parseInt(2);
 		}
+	}
+	
+	/**
+	 * Creates the internal properties and generates the
+	 * data byte array.
+	 *
+	 * @param name
+	 * The name of the palette.
+	 *
+	 * @param bitDepth
+	 * The sample depth of the palette.
+	 *
+	 * @param redSamples
+	 * The red color samples from the palette.
+	 *
+	 * @param greenSamples
+	 * The green color samples from the palette.
+	 *
+	 * @param blueSamples
+	 * The blue color samples from the palette.
+	 *
+	 * @param alphaSamples
+	 * The alpha color samples from the palette.
+	 * 
+	 * @param frequencies
+	 * The frequencies of each palette entry.
+	 */
+	private byte[] generateData(String name, int bitDepth, int[] redSamples, int[] greenSamples, int[] blueSamples, int[] alphaSamples, int[] frequencies) {
+		setProperties(name, bitDepth, redSamples, greenSamples, blueSamples, alphaSamples, frequencies);
+		byte[] data = createDataBytes();
+		return data;
+	}
+	
+	/**
+	 * Sets the internal properties.
+	 *
+	 * @param name
+	 * The name of the palette.
+	 *
+	 * @param bitDepth
+	 * The sample depth of the palette.
+	 *
+	 * @param redSamples
+	 * The red color samples from the palette.
+	 *
+	 * @param greenSamples
+	 * The green color samples from the palette.
+	 *
+	 * @param blueSamples
+	 * The blue color samples from the palette.
+	 *
+	 * @param alphaSamples
+	 * The alpha color samples from the palette.
+	 * 
+	 * @param frequencies
+	 * The frequencies of each palette entry.
+	 */
+	private void setProperties(String name, int bitDepth, int[] redSamples, int[] greenSamples, int[] blueSamples, int[] alphaSamples, int[] frequencies) {
+		paletteName = name;
+		sampleDepth = bitDepth;
+		this.frequencies = frequencies;
+		paletteEntries = new Color[redSamples.length];
+		for(int i = 0; i < redSamples.length; i++) {
+			paletteEntries[i] = new Color();
+			paletteEntries[i].setSamples(redSamples[i], greenSamples[i], blueSamples[i], alphaSamples[i]);
+		}
+	}
+	
+	/**
+	 * Creates the data byte array.
+	 *
+	 * @return
+	 * The data byte array.
+	 */
+	private byte[] createDataBytes() {
+		int sampleWidth = sampleDepth / 8;
+		int dataLength = paletteName.length() + 2 + ((sampleWidth * 4 + 2) * paletteEntries.length);
+		ByteComposer composer = new ByteComposer(dataLength);
+		composer.composeString(paletteName, true);
+		composer.composeInt(sampleDepth, 1);
+		for(int i = 0; i < paletteEntries.length; i++) {
+			composer.composeInt(paletteEntries[i].getRed(), sampleWidth);
+			composer.composeInt(paletteEntries[i].getGreen(), sampleWidth);
+			composer.composeInt(paletteEntries[i].getBlue(), sampleWidth);
+			composer.composeInt(paletteEntries[i].getAlpha(), sampleWidth);
+			composer.composeInt(frequencies[i], 2);
+		}
+		return composer.toArray();
 	}
 }
