@@ -6,6 +6,11 @@ package com.dekarrin.file.png;
 public class HeaderChunk extends CriticalChunk {
 	
 	/**
+	 * The type code for this chunk.
+	 */
+	public static final byte[] TYPE_CODE = {73, 72, 68, 82}; // IHDR
+	
+	/**
 	 * The width of the image.
 	 */
 	private int width;
@@ -59,7 +64,7 @@ public class HeaderChunk extends CriticalChunk {
 	 * The CRC for this chunk.
 	 */
 	public HeaderChunk(byte[] data, long crc) {
-		super(new byte[]{73, 72, 68, 82}, data, crc); // IHDR
+		super(TYPE_CODE, data, crc);
 		parseData();
 	}
 	
@@ -89,7 +94,9 @@ public class HeaderChunk extends CriticalChunk {
 	 * The interlace method to use for this png.
 	 */
 	public HeaderChunk(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
-		super(new byte[]{73, 72, 68, 82}, generateDataBytes(width, height, bitDepth, colorType, compressionMethod, filterMethod, interlaceMethod));
+		super(TYPE_CODE);
+		setProperties(width, height, bitDepth, colorType, compressionMethod, filterMethod, interlaceMethod);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -166,17 +173,18 @@ public class HeaderChunk extends CriticalChunk {
 	 * Parses chunk data for header information.
 	 */
 	private void parseData() {
-		width				= parser.parseInt();
-		height				= parser.parseInt();
-		bitDepth			= parser.parseInt(1);
-		colorType			= parser.parseInt(1);
-		compressionMethod	= parser.parseInt(1);
-		filterMethod		= parser.parseInt(1);
-		interlaceMethod		= parser.parseInt(1);
+		int w			= parser.parseInt();
+		int h			= parser.parseInt();
+		int depth		= parser.parseInt(1);
+		int mode		= parser.parseInt(1);
+		int compression	= parser.parseInt(1);
+		int filter		= parser.parseInt(1);
+		int interlace	= parser.parseInt(1);
+		setProperties(w, h, depth, mode, compression, filter, interlace);
 	}
 	
 	/**
-	 * Creates the databytes from the input data.
+	 * Sets the internal properties for this chunk.
 	 *
 	 * @param width
 	 * The width of this png.
@@ -198,11 +206,8 @@ public class HeaderChunk extends CriticalChunk {
 	 *
 	 * @param interlaceMethod
 	 * The interlace method to use for this png.
-	 *
-	 * @return
-	 * The data field.
 	 */
-	private byte[] generateDataBytes(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
+	private void setProperties(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
 		this.width = width;
 		this.height = height;
 		this.bitDepth = bitDepth;
@@ -210,23 +215,24 @@ public class HeaderChunk extends CriticalChunk {
 		this.compressionMethod = compressionMethod;
 		this.filterMethod = filterMethod;
 		this.interlaceMethod = interlaceMethod;
-		createDataField();
-		return data;
 	}
 	
 	/**
-	 * Writes the data bytes for this chunk.
+	 * Creates the data byte array for this chunk.
+	 *
+	 * @return
+	 * The data byte array.
 	 */
-	private void createDataField() {
-		ByteHolder data = new ByteHolder(13);
-		copyBytes(data, intToBytes(width, 4));
-		copyBytes(data, intToBytes(height, 4));
-		data.add((byte)bitDepth);
-		data.add((byte)colorType);
-		data.add((byte)compressionMethod);
-		data.add((byte)filterMethod);
-		data.add((byte)interlaceMethod);
-		this.data = data.toArray();
+	private byte[] createDataBytes() {
+		ByteComposer composer = new ByteComposer(13);
+		composer.composeInt(width);
+		composer.composeInt(height);
+		composer.composeInt(bitDepth, 1);
+		composer.composeInt(colorType, 1);
+		composer.composeInt(compressionMethod, 1);
+		composer.composeInt(filterMethod, 1);
+		composer.composeInt(interlaceMethod, 1);
+		return composer.toArray();
 	}
 	
 }

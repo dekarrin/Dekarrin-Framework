@@ -11,6 +11,13 @@ import com.dekarrin.util.ByteHolder;
 public class Chunk {
 	
 	/**
+	 * The type code for this chunk. Since this is the general
+	 * Chunk superclass, it is null, but still set to make
+	 * externally unknown subclasses' type codes accessible.
+	 */
+	public static final byte[] TYPE_CODE = null;
+	
+	/**
 	 * Unit specifier for unknown.
 	 */
 	public static final int UNKNOWN_UNIT = 0;
@@ -114,13 +121,13 @@ public class Chunk {
 	/**
 	 * The data bytes appropriate to the chunk type. This may be null.
 	 */
-	protected byte[] chunkData;
+	private byte[] chunkData;
 	
 	/**
 	 * Cyclic redundancy check. This does not include the the length
 	 * field.
 	 */
-	protected long crc;
+	private long crc;
 	
 	/**
 	 * Creates a new Chunk.
@@ -149,19 +156,13 @@ public class Chunk {
 	}
 	
 	/**
-	 * Creates a new Chunk from only data and a type name.
+	 * Creates a new Chunk with only a type name.
 	 *
 	 * @param type
 	 * The type name.
-	 *
-	 * @param data
-	 * The chunk data.
 	 */
-	public Chunk(byte[] type, byte[] data) {
+	public Chunk(byte[] type) {
 		this.type = type;
-		this.data = data;
-		crc = generateCrc();
-		parser = new ByteParser(chunkData);
 	}
 	
 	/**
@@ -191,12 +192,12 @@ public class Chunk {
 	 * The byte array representation of this Chunk.
 	 */
 	public byte[] toBytes() {
-		ByteHolder bytes = new ByteHolder(12 + getLength());
-		copyBytes(bytes, intToBytes(getLength(), 4));
-		copyBytes(bytes, type);
-		copyBytes(bytes, data);
-		copyBytes(bytes, intToBytes((int)crc, 4));
-		return bytes.toArray();
+		ByteComposer composer = new ByteComposer(12 + getLength());
+		composer.composeInt(getLength());
+		composer.composeBytes(chunkType);
+		composer.composeBytes(chunkData);
+		composer.composeInt((int)crc);
+		return composer.toArray();
 	}
 	
 	/**
@@ -265,12 +266,24 @@ public class Chunk {
 	 * @return
 	 * The generated CRC.
 	 */
-	private long generateCrc() {
+	protected long generateCrc() {
 		CRC32 checker = new CRC32();
 		checker.update(chunkType);
 		checker.update(chunkData);
 		long crc = checker.getValue();
 		return crc;
+	}
+	
+	/**
+	 * Sets the chunkData field.
+	 *
+	 * @param data
+	 * What to set the chunk data to.
+	 */
+	protected void setChunkData(byte[] data) {
+		chunkData = data;
+		crc = generateCrc();
+		parser = new ByteParser(chunkData);
 	}
 	
 	/**

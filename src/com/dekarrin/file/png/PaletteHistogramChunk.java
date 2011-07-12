@@ -37,7 +37,9 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 * The frequencies of each color.
 	 */
 	public PaletteHistogramChunk(int[] frequencies) {
-		super(TYPE_CODE, generateData());
+		super(TYPE_CODE);
+		setProperties(frequencies);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -68,19 +70,6 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 */
 	private void parseData() {
 		setProperties(parser.parseFinalInts(2));
-	}
-	
-	/**
-	 * Sets the internal properties and creates the data
-	 * byte array.
-	 *
-	 * @param frequencies
-	 * The frequencies of each color.
-	 */
-	private byte[] generateData(int[] frequencies) {
-		setProperties(frequencies);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

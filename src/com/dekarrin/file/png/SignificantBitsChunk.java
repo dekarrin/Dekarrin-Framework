@@ -53,7 +53,9 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the alpha channel.
 	 */
 	public SignificantBitsChunk(int redBits, int greenBits, int blueBits, int alphaBits) {
-		super(TYPE_CODE, generateData(redBits, greenBits, blueBits, alphaBits));
+		super(TYPE_CODE);
+		setProperties(redBits, greenBits, blueBits, alphaBits);
+		setChunkData(createColorDataBytes());
 	}
 	
 	/**
@@ -69,7 +71,9 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the blue channel.
 	 */
 	public SignificantBitsChunk(int redBits, int greenBits, int blueBits) {
-		super(TYPE_CODE, generateData(redBits, greenBits, blueBits));
+		super(TYPE_CODE);
+		setProperties(redBits, greenBits, blueBits, 0);
+		setChunkData(createColorDataBytes());
 	}
 	
 	/**
@@ -82,7 +86,9 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the alpha channel.
 	 */
 	public SignificantBitsChunk(int grayBits, int alphaBits) {
-		super(TYPE_CODE, generateData(grayBits, alphaBits));
+		super(TYPE_CODE);
+		setProperties(grayBits, grayBits, grayBits, alphaBits);
+		setChunkData(createGrayscaleDataBytes());
 	}
 	
 	/**
@@ -92,7 +98,9 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the grayscale data.
 	 */
 	public SignificantBitsChunk(int grayBits) {
-		super(TYPE_CODE, generateData(grayBits));
+		super(TYPE_CODE);
+		setProperties(grayBits, grayBits, grayBits, 0);
+		setChunkData(createGrayscaleDataBytes());
 	}
 	
 	/**
@@ -150,88 +158,6 @@ public class SignificantBitsChunk extends AncillaryChunk {
 				setProperties(r, g, b, a);
 				break;
 		}
-	}
-	
-	/**
-	 * Creates the internal data array from existing data for
-	 * truecolor with alpha channel mode.
-	 * 
-	 * @param redBits
-	 * The number of significant bits in the red channel.
-	 *
-	 * @param greenBits
-	 * The number of significant bits in the green channel.
-	 *
-	 * @param blueBits
-	 * The number of significant bits in the blue channel.
-	 *
-	 * @param alphaBits
-	 * The number of significant bits in the alpha channel.
-	 *
-	 * @return
-	 * The data array.
-	 */
-	private byte[] generateData(int redBits, int greenBits, int blueBits, int alphaBits) {
-		setProperties(redBits, greenBits, blueBits, alphaBits);
-		byte[] data = createColorDataBytes();
-		return data;
-	}
-	
-	/**
-	 * Creates the internal data array from existing data for
-	 * truecolor and indexed color modes.
-	 * 
-	 * @param redBits
-	 * The number of significant bits in the red channel.
-	 *
-	 * @param greenBits
-	 * The number of significant bits in the green channel.
-	 *
-	 * @param blueBits
-	 * The number of significant bits in the blue channel.
-	 *
-	 * @return
-	 * The data array.
-	 */
-	private byte[] generateData(int redBits, int greenBits, int blueBits) {
-		setProperties(redBits, greenBits, blueBits, 0);
-		byte[] data = createColorDataBytes();
-		return data;
-	}
-	
-	/**
-	 * Creates the internal data array from existing data for
-	 * grayscale with alpha channel mode.
-	 * 
-	 * @param grayBits
-	 * The number of significant bits in the grayscale data.
-	 *
-	 * @param alphaBits
-	 * The number of significant bits in the alpha channel.
-	 *
-	 * @return
-	 * The data array.
-	 */
-	private byte[] generateData(int grayBits, int alphaBits) {
-		setProperties(grayBits, grayBits, grayBits, alphaBits);
-		byte[] data = createGrayscaleDataBytes();
-		return data;
-	}
-	
-	/**
-	 * Creates the internal data array from existing data for
-	 * grayscale mode.
-	 * 
-	 * @param grayBits
-	 * The number of significant bits in the grayscale data.
-	 *
-	 * @return
-	 * The data array.
-	 */
-	private byte[] generateData(int grayBits) {
-		setProperties(grayBits, grayBits, grayBits, 0);
-		byte[] data = createGrayscaleDataBytes();
-		return data;
 	}
 	
 	/**

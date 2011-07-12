@@ -19,12 +19,11 @@ public class PngReader extends ConsoleProgram {
 		super(args);
 		addArgs();
 		String file = getArgument(0);
+		String output = getArgument(1);
 		
-		PngParser parser = null;
 		PortableNetworkGraphic pic = null;
 		try {
-			parser = new PngParser(file);
-			pic = parser.parse();
+			pic = new PortableNetworkGraphic(file);
 		} catch(InvalidFileFormatException e) {
 			giveFatalError(e.getMessage());
 		} catch(FileNotFoundException e) {
@@ -44,6 +43,11 @@ public class PngReader extends ConsoleProgram {
 			}
 			pl("");
 		}
+		
+		pl("-----------");
+		pl("reading test complete.");
+		pl("Writing...");
+		pic.save(output);
 	}
 	
 	private void pl(String message) {
@@ -56,5 +60,6 @@ public class PngReader extends ConsoleProgram {
 	
 	private void addArgs() {
 		addArgument("filename", false);
+		addArgument("output", false);
 	}
 }

@@ -63,7 +63,9 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	 * The blue point.
 	 */
 	public ChromaticitiesChunk(Point whitePoint, Point red, Point green, Point blue) {
-		super(TYPE_CODE, generateData(whitePoint, red, green, blue));
+		super(TYPE_CODE);
+		setProperties(whitePoint, red, green, blue);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -120,30 +122,6 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 		int gY	= parser.parseInt();
 		
 		setProperties(new Point(wX, wY), new Point(rX, rY), new Point(gX, gY), new Point(bX, bY));
-	}
-	
-	/**
-	 * Creates the databytes from the input data.
-	 *
-	 * @param whitePoint
-	 * The white point.
-	 *
-	 * @param red
-	 * The red point.
-	 *
-	 * @param green
-	 * The green point.
-	 *
-	 * @param blue
-	 * The blue point.
-	 *
-	 * @return
-	 * The data field.
-	 */
-	private byte[] generateData(Point whitePoint, Point red, Point green, Point blue) {
-		setProperties(whitePoint, red, green, blue);
-		data = createDataBytes();
-		return data;
 	}
 	
 	/**

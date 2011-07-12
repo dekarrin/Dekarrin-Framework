@@ -24,15 +24,12 @@ public abstract class CriticalChunk extends Chunk {
 	}
 	
 	/**
-	 * Creates a new Chunk from only data and a type name.
+	 * Creates a new Chunk from only a type name.
 	 *
 	 * @param type
 	 * The type name.
-	 *
-	 * @param data
-	 * The chunk data.
 	 */
-	public CriticalChunk(byte[] type, byte[] data) {
-		super(type, data);
+	public CriticalChunk(byte[] type) {
+		super(type);
 	}
 }

@@ -212,6 +212,26 @@ public class Palette {
 	}
 	
 	/**
+	 * Gets the index of a specific color.
+	 *
+	 * @param search
+	 * The color to get the index of.
+	 *
+	 * @return
+	 * The index of the specified color.
+	 */
+	public int indexOf(Color search) {
+		int index = -1;
+		for(int i = 0; i < colors.length; i++) {
+			if(search.equals(colors[i])) {
+				index = i;
+				break;
+			}
+		}
+		return index;
+	}
+	
+	/**
 	 * Increases the length of the color and frequency arrays.
 	 *
 	 * @param growthSize

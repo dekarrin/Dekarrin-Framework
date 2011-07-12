@@ -32,16 +32,13 @@ public abstract class TextChunk extends AncillaryChunk {
 	}
 	
 	/**
-	 * Creates a new TextChunk from only data and a type name.
+	 * Creates a new TextChunk from only a type name.
 	 *
 	 * @param type
 	 * The type name.
-	 *
-	 * @param data
-	 * The chunk data.
 	 */
-	public TextChunk(byte[] type, byte[] data) {
-		super(type, data);
+	public TextChunk(byte[] type) {
+		super(type);
 	}
 	
 	/**

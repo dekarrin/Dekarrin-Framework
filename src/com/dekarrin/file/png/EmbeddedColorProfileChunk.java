@@ -57,6 +57,8 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 */
 	public EmbeddedColorProfileChunk(String name, byte[] data) {
 		super(TYPE_CODE, generateData());
+		setProperties(name, data, null, 0);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -100,24 +102,6 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 			decompressProfile();
 		}
 		return profile;
-	}
-	
-	/**
-	 * Generates the data bytes for the given data.
-	 *
-	 * @param name
-	 * The name of the profile.
-	 *
-	 * @param data
-	 * The data of the profile.
-	 *
-	 * @return
-	 * The data bytes of the chunk.
-	 */
-	private byte[] generateData(String name, byte[] data) {
-		setProperties(name, data, null, 0);
-		dataBytes = createDataBytes();
-		return dataBytes;
 	}
 	
 	/**

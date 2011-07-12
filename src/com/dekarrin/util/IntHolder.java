@@ -10,12 +10,12 @@ public class IntHolder implements PrimitiveHolder {
 	/**
 	 * The internal array for holding elements.
 	 */
-	private int[] holder;
+	protected int[] holder;
 	
 	/**
 	 * The pointer for remembering the current position.
 	 */
-	private int pointer = 0;
+	protected int position = 0;
 	
 	/**
 	 * Creates a new IntHolder of a specified size.
@@ -50,8 +50,8 @@ public class IntHolder implements PrimitiveHolder {
 	 */
 	public void set(int data, int index) {
 		holder[index] = data;
-		if(index > pointer) {
-			pointer = index + 1;
+		if(index > position) {
+			position = index + 1;
 		}
 	}
 	
@@ -63,7 +63,7 @@ public class IntHolder implements PrimitiveHolder {
 	 * The int to be inserted.
 	 */
 	public void add(int data) {
-		holder[pointer++] = data;
+		holder[position++] = data;
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class IntHolder implements PrimitiveHolder {
 	 */
 	public void resize(int size) {
 		holder = Arrays.copyOfRange(holder, 0, size);
-		if(pointer > holder.length) {
+		if(position > holder.length) {
 			reset();
 		}
 	}
@@ -117,14 +117,14 @@ public class IntHolder implements PrimitiveHolder {
 	 * {@inheritDoc}
 	 */
 	public int position() {
-		return pointer;
+		return position;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void move(int index) {
-		pointer = index;
+		position = index;
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public class IntHolder implements PrimitiveHolder {
 	 * {@inheritDoc}
 	 */
 	public boolean isAtEnd() {
-		return (pointer == holder.length);
+		return (position == holder.length);
 	}
 	
 	/**
@@ -155,7 +155,7 @@ public class IntHolder implements PrimitiveHolder {
 	 * The int.
 	 */
 	public int next() {
-		int nextInt = holder[pointer++];
+		int nextInt = holder[position++];
 		return nextInt;
 	}
 }

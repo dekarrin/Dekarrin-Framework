@@ -9,6 +9,11 @@ package com.dekarrin.file.png;
 public class ImageDataChunk extends CriticalChunk {
 	
 	/**
+	 * The type code for this chunk.
+	 */
+	public static final byte[] TYPE_CODE = {73, 68, 65, 84}; // IDAT
+	
+	/**
 	 * Creates a new ImageDataChunk.
 	 *
 	 * @param data
@@ -18,6 +23,18 @@ public class ImageDataChunk extends CriticalChunk {
 	 * The CRC for this chunk.
 	 */
 	public ImageDataChunk(byte[] data, long crc) {
-		super(new byte[]{73, 68, 65, 84}, data, crc);// IDAT
+		super(TYPE_CODE, data, crc);
+	}
+	
+	/**
+	 * Creates a new ImageDataChunk from existing
+	 * data.
+	 *
+	 * @param imageData
+	 * The image data to use in this chunk.
+	 */
+	public ImageDataChunk(byte[] imageData) {
+		super(TYPE_CODE);
+		setChunkData(imageData);
 	}
 }

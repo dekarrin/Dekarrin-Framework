@@ -35,7 +35,9 @@ public class TextDataChunk extends TextChunk {
 	 * The actual text data making up this chunk.
 	 */
 	public TextDataChunk(String keyword, String contents) {
-		super(TYPE_CODE, generateData(keyword, contents));
+		super(TYPE_CODE);
+		setProperties(keyword, contents);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -51,26 +53,6 @@ public class TextDataChunk extends TextChunk {
 	private void parseData() {
 		keyword	= parser.parseString();
 		text	= parser.parseFinalString();
-	}
-	
-	/**
-	 * Creates the data byte array and sets the internal
-	 * properties.
-	 *
-	 * @param keyword
-	 * The keyword that this TextDataChunk's contents are
-	 * to be associated with.
-	 *
-	 * @param contents
-	 * The actual text data making up this chunk.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(String keyword, String contents) {
-		setProperties(keyword, contents);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

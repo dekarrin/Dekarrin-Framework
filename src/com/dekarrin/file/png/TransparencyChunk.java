@@ -12,7 +12,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	/**
 	 * The type code of this chunk.
 	 */
-	public static final byte[] TYPE_CODE = {116, 82, 78, 83};
+	public static final byte[] TYPE_CODE = {116, 82, 78, 83}; // tRNS
 	
 	/**
 	 * The mode of this background chunk. This is dependent on
@@ -48,7 +48,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The mode of color in the png this chunk is a part of.
 	 */
 	public TransparencyChunk(byte[] data, long crc, int colorMode) {
-		super(TYPE_CODE, data, crc);// tRNS
+		super(TYPE_CODE, data, crc);
 		this.colorMode = colorMode;
 		parseData();
 	}
@@ -69,13 +69,17 @@ public class TransparencyChunk extends AncillaryChunk {
 	}
 	
 	/**
-	 * Creates a new TransparencyChunk using existing data.
+	 * Creates a new TransparencyChunk using existing data in
+	 * indexed color mode.
 	 *
 	 * @param transparencies
 	 * The tranparency value for each palette color.
 	 */
 	public TransparencyChunk(int[] transparencies) {
-		super(TYPE_CODE, generateData(transparencies));
+		super(TYPE_CODE);
+		colorMode = INDEXED_COLOR_MODE;
+		setProperties(transparencies);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -86,7 +90,10 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The value of the gray color used as the transparent color.
 	 */
 	public TransparencyChunk(int grayValue) {
-		super(TYPE_CODE, generateData(grayValue));
+		super(TYPE_CODE);
+		colorMode = GRAYSCALE_MODE;
+		setProperties(grayValue);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -103,7 +110,10 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The value of the blue color used as the transparent color.
 	 */
 	public TransparencyChunk(int redValue, int greenValue, int blueValue) {
-		super(TYPE_CODE, generateData(redValue, greenValue, blueValue));
+		super(TYPE_CODE);
+		colorMode = TRUECOLOR_MODE;
+		setProperties(redValue, greenValue, blueValue);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -190,63 +200,6 @@ public class TransparencyChunk extends AncillaryChunk {
 				setProperties(parser.parseInt(2), parser.parseInt(2), parser.parseInt(2));
 				break;
 		}
-	}
-	
-	/**
-	 * Sets the internal properties and creates a data byte array
-	 * in indexed color mode.
-	 *
-	 * @param transparencies
-	 * The transparency of each of the palette entries.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(int[] transparencies) {
-		colorMode = INDEXED_COLOR_MODE;
-		setProperties(transparencies);
-		byte[] data = createDataBytes();
-		return data;
-	}
-	
-	/**
-	 * Sets the internal properties and creates a data byte array
-	 * in grayscale mode.
-	 *
-	 * @param grayValue
-	 * The value of the color acting as the transparent color.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(int grayValue) {
-		colorMode = GRAYSCALE_MODE;
-		setProperties(grayValue);
-		byte[] data = createDataBytes();
-		return data;
-	}
-	
-	/**
-	 * Sets the internal properties and creates a data byte array
-	 * in truecolor mode.
-	 *
-	 * @param redValue
-	 * The red value of the color acting as the transparent color.
-	 *
-	 * @param greenValue
-	 * The green value of the color acting as the transparent color.
-	 *
-	 * @param blueValue
-	 * The blue value of the color acting as the transparent color.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(int redValue, int greenValue, int blueValue) {
-		colorMode = TRUECOLOR_MODE;
-		setProperties(redValue, greenValue, blueValue);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

@@ -24,15 +24,12 @@ public abstract class AncillaryChunk extends Chunk {
 	}
 	
 	/**
-	 * Creates a new AncillaryChunk from only data and a type name.
+	 * Creates a new AncillaryChunk from only a type name.
 	 *
 	 * @param type
 	 * The type name.
-	 *
-	 * @param data
-	 * The chunk data.
 	 */
-	public AncillaryChunk(byte[] type, byte[] data) {
-		super(type, data);
+	public AncillaryChunk(byte[] type) {
+		super(type);
 	}
 }

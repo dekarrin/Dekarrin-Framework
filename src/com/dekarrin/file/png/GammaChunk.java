@@ -36,7 +36,9 @@ public class GammaChunk extends AncillaryChunk {
 	 * The gamma value.
 	 */
 	public GammaChunk(int gamma) {
-		super(TYPE_CODE, generateData(gamma))
+		super(TYPE_CODE);
+		setProperties(gamma);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -47,21 +49,6 @@ public class GammaChunk extends AncillaryChunk {
 	 */
 	public int getGamma() {
 		return gamma;
-	}
-	
-	/**
-	 * Creates the data field for this chunk.
-	 *
-	 * @param gamma
-	 * The gamma value for this chunk.
-	 *
-	 * @return
-	 * The data field.
-	 */
-	private byte[] generateData(int gamma) {
-		setProperties()
-		data = createDataBytes();
-		return data;
 	}
 	
 	/**

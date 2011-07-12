@@ -60,7 +60,10 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * THe color mode to process the color as.
 	 */
 	public BackgroundColorChunk(Color color, int colorMode) {
-		super(TYPE_CODE, generateData(color, colorMode));
+		super(TYPE_CODE);
+		this.colorMode = colorMode;
+		setProperties(color);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -72,7 +75,10 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * as the background color.
 	 */
 	public BackgroundColorChunk(int index) {
-		super(TYPE_CODE, generateData(index));
+		super(TYPE_CODE);
+		this.colorMode = INDEXED_COLOR_MODE;
+		setProperties(index);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -155,43 +161,6 @@ public class BackgroundColorChunk extends AncillaryChunk {
 				setProperties(color);
 				break;
 		}
-	}
-	
-	/**
-	 * Generates the internal properties and creates the data byte
-	 * array.
-	 *
-	 * @param color
-	 * The background color to set as this chunk's data.
-	 *
-	 * @param colorMode
-	 * The color mode to compose the data with.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(Color color, int colorMode) {
-		this.colorMode = colorMode;
-		setProperties(color);
-		byte[] data = createDataBytes();
-		return data;
-	}
-	
-	/**
-	 * Generates the internal properties and creates the data byte
-	 * array.
-	 *
-	 * @param index
-	 * The index of the palette color to use as the background color.
-	 
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(int index) {
-		this.colorMode = INDEXED_COLOR_MODE;
-		setProperties(index);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

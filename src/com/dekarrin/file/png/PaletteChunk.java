@@ -38,7 +38,9 @@ public class PaletteChunk extends CriticalChunk {
 	 * The colors to be in this PaletteChunk.
 	 */
 	public PaletteChunk(Color[] colors) {
-		super(TYPE_CODE, generateData(colors));
+		super(TYPE_CODE);
+		setProperties(colors);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -84,22 +86,6 @@ public class PaletteChunk extends CriticalChunk {
 			colors[i].setSamples(parser.parseInt(1), parser.parseInt(1), parser.parseInt(1));
 		}
 		setProperties(colors);
-	}
-	
-	/**
-	 * Generates the internal byte data from an external source
-	 * of data.
-	 *
-	 * @param colors
-	 * The colors to be in this PaletteChunk.
-	 *
-	 * @return
-	 * The internal data bytes.
-	 */
-	private byte[] generateData(Color[] colors) {
-		setProperties(colors);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

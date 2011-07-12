@@ -10,7 +10,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	/**
 	 * The type code for this chunk.
 	 */
-	public static final byte[] TYPE_CODE = {105, 84, 88, 116};
+	public static final byte[] TYPE_CODE = {105, 84, 88, 116}; // iTXt
 
 	/**
 	 * Whether the text data contained is compressed.
@@ -72,7 +72,10 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * field.
 	 */
 	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, int compressionMethod) {
-		super(TYPE_CODE, generateData(keyword, translatedKeyword, contents, language, compressionMethod));
+		super(TYPE_CODE);
+		boolean compressed = (contents > UNCOMPRESSED_TEXT_LIMIT) ? true : false;
+		setProperties(keyword, translatedKeyword, contents, null, language, compressionMethod, compressed);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -156,36 +159,6 @@ public class InternationalTextDataChunk extends TextChunk {
 	private void compressText() {
 		ZlibCompresser zc = new ZlibCompresser(text);
 		compressedText = zc.compressString("UTF-8");
-	}
-	
-	/**
-	 * Generates the internal byte data array and
-	 * sets the internal properties.
-	 *
-	 * @param keyword
-	 * The keyword in the native platform langauge.
-	 *
-	 * @param translatedKeyword
-	 * The keyword translated into this chunk's language.
-	 *
-	 * @param contents
-	 * The text data contents of this chunk.
-	 *
-	 * @param language
-	 * The RFC-1766 language tag for this text data.
-	 *
-	 * @param compressionMethod
-	 * The compression method to use for this chunk's text
-	 * field.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(String keyword, String translatedKeyword, String contents, String language, int compressionMethod) {
-		boolean compressed = (contents > UNCOMPRESSED_TEXT_LIMIT) ? true : false;
-		setProperties(keyword, translatedKeyword, contents, null, language, compressionMethod, compressed);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

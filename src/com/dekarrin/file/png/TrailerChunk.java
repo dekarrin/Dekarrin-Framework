@@ -6,6 +6,11 @@ package com.dekarrin.file.png;
 public class TrailerChunk extends CriticalChunk {
 	
 	/**
+	 * The type code for this chunk.
+	 */
+	public static final byte[] TYPE_CODE = {73, 69, 78, 68}; // IEND
+	
+	/**
 	 * Creates a new TrailerChunk.
 	 *
 	 * @param data
@@ -15,6 +20,14 @@ public class TrailerChunk extends CriticalChunk {
 	 * The CRC for this chunk.
 	 */
 	public TrailerChunk(byte[] data, long crc) {
-		super(new byte[]{73, 69, 78, 68}, data, crc);// IEND
+		super(TYPE_CODE, data, crc);
+	}
+	
+	/**
+	 * Creates a new, blank TrailerChunk.
+	 */
+	public TrailerChunk() {
+		super(TYPE_CODE);
+		setChunkData(new byte[0]);
 	}
 }

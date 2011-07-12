@@ -1807,7 +1807,7 @@ public class PortableNetworkGraphic {
 				idatChunks.add((ImageDataChunk)c);
 				unknown = unknownPostDataChunks;
 			} else if(type.equals("IEND")) {
-				break;//do not read past an iend, even if there is more data.
+				break; //do not read past an IEND chunk, even if there is more data.
 			} else if(type.equals("tRNS")) {
 				readTransparencyChunk((TransparencyChunk)c);
 			} else if(type.equals("gAMA")) {
@@ -1860,6 +1860,7 @@ public class PortableNetworkGraphic {
 			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples);
 		}
 		constructImage(rawData);
+		Scanline.reset();
 	}
 	
 	/**
@@ -1869,21 +1870,70 @@ public class PortableNetworkGraphic {
 	 * The ImageDataChunks that decode to the image data.
 	 */
 	private ImageDataChunk[] encodeImageData() {
-		Scanline[] rawData = deconstructImage(rawData);
-		byte[][] lines = new byte[rawData.length][];
-		for(int i = 0; i < rawData.length; i++) {
-			lines[i] = rawData[i].getFilteredBytes();
+		Scanline[] rawData = deconstructImage();
+		byte[] uncompressedData = deconstructScanlines(rawData);
+		byte[] compressedData = compressData(uncompressedData);
+		ImageDataChunk[] chunks = createIdatChunks(compressedData);
+		Scanline.reset();
+		return chunks;
+	}
+	
+	/**
+	 * Creates as many IDAT chunks as necessary from a series
+	 * of bytes.
+	 *
+	 * @param data
+	 * The data that makes up the image, pre-compressed and
+	 * pre-filtered.
+	 *
+	 * @return
+	 * The IDAT chunks generated from the data.
+	 */
+	private ImageDataChunk[] createIdatChunks(byte[] data) {
+		int dataLength = data.length / IDAT_BUFFER_LENGTH;
+		if(data.length % IDAT_BUFFER_LENGTH != 0) {
+			dataLength++;
 		}
-		Vector<Byte> holder = new Vector<Byte>();
-		for(int[] line: lines) {
-			for(int i = 0; i < line.length; i++) {
-				holder.add(new Byte(line[i]));
+		ImageDataChunk[] chunks = new ImageDataChunk[dataLength];
+		int chunksPointer = 0;
+		ByteHolder idatBuffer;
+		for(int i = 0; i < data.length; i += IDAT_BUFFER_LENGTH) {
+			if(i + IDAT_BUFFER_LENGTH < data.length) {
+				idatBuffer = new ByteHolder(IDAT_BUFFER_LENGTH);
+			} else {
+				idatBuffer = new byte(data.length - i);
+			}
+			for(int j = 0; j < IDAT_BUFFER_LENGTH && i+j < data.length; j++) {
+				idatBuffer[j] = data[i+j];
+			}
+			chunks[chunksPointer++] = new ImageDataChunk(idatBuffer);
+		}
+	}
+	
+	/**
+	 * Turns scanlines into a single array of bytes.
+	 *
+	 * @param scanlines
+	 * The scanlines to deconstruct.
+	 *
+	 * @return
+	 * The data of the scanlines.
+	 */
+	private byte[] deconstructScanlines(Scanline[] lines) {
+		int count = 0;
+		for(int i = 0; i < lines.length; i++) {
+			count += lines[i].getBytes().length;
+		}
+		byte[] deconstructed = new byte[count];
+		byte[] nextBytes;
+		int k = 0;
+		for(int i = 0; i < lines.length; i++) {
+			nextBytes = lines[i].getFilteredBytes();
+			for(int j = 0; j < nextBytes.length) {
+				deconstructed[k++] = nextBytes[j];
 			}
 		}
-		byte[] uncompressedData = new byte[holder.size()];
-		for(Byte b: holder) {
-			
-		}
+		return deconstructed;
 	}
 	
 	/**
@@ -1911,10 +1961,36 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Creates a series of scanlines from the image.
+	 *
+	 * @return
+	 * The scanlines that make up the image data.
+	 */
+	private Scanline[] deconstructImage() {
+		Scanline[] scanlines = null;
+		switch(colorMode) {
+			case COLOR_TYPE_GRAYSCALE:
+			case COLOR_TYPE_GRAYSCALE_ALPHA:
+				scanlines = deconstructGrayscaleImage(image);
+				break;
+				
+			case COLOR_TYPE_COLOR:
+			case COLOR_TYPE_COLOR_ALPHA:
+				scanlines = deconstructColorImage(image);
+				break;
+				
+			case COLOR_TYPE_COLOR_PALETTE:
+				scanlines = deconstructImageFromPalette(image);
+				break;
+		}
+		return scanlines;
+	}
+	
+	/**
 	 * Creates an image from a series of scanlines using grayscale
 	 * mode.
 	 *
-	 * @param scanline
+	 * @param scanlines
 	 * The scanlines that make up the image.
 	 *
 	 * @return
@@ -1923,11 +1999,10 @@ public class PortableNetworkGraphic {
 	private Image constructGrayscaleImage(Scanline[] scanlines) {
 		boolean hasAlpha = (colorMode == COLOR_TYPE_GRAYSCALE_ALPHA);
 		Image img = new Image(width, height, bitDepth, hasAlpha);
-		GrayColor color;
+		GrayColor color = new GrayColor(bitDepth);
 		for(int y = 0; y < scanlines.length; y++) {
 			int[][] samples = scanlines[y].getSamples();
 			for(int x = 0; x < samples.length; x++) {
-				color = new GrayColor(bitDepth);
 				color.setValue(samples[x][0]);
 				if(hasAlpha) {
 					color.setAlpha(samples[x][1]);
@@ -1941,10 +2016,37 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Creates a series of scanlines from an image using grayscale
+	 * mode.
+	 *
+	 * @param img
+	 * The completed image.
+	 *
+	 * @return
+	 * The scanlines that make up the image.
+	 */
+	private Scanline[] deconstructGrayscaleImage(Image img) {
+		boolean hasAlpha = (colorMode == COLOR_TYPE_GRAYSCALE_ALPHA);
+		Scanline[] lines = new Scanline[height];
+		GrayColor color;
+		for(int y = 0; y < height; y++) {
+			lines[y] = new Scanline();
+			for(int x = 0; x < width; x++) {
+				color = (GrayColor)img.colorAt(x, y);
+				lines[y].addSample(x, 0, color.getValue());
+				if(hasAlpha) {
+					lines[y].addSample(x, 1, color.getAlpha());
+				}
+			}
+		}
+		return lines;
+	}
+	
+	/**
 	 * Creates an image from a series of scanlines using truecolor
 	 * mode.
 	 *
-	 * @param scanline
+	 * @param scanlines
 	 * The scanlines that make up the image.
 	 *
 	 * @return
@@ -1953,11 +2055,10 @@ public class PortableNetworkGraphic {
 	private Image constructColorImage(Scanline[] scanlines) {
 		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
 		Image img = new Image(width, height, bitDepth, hasAlpha);
-		Color color;
+		Color color = new Color(bitDepth);
 		for(int y = 0; y < scanlines.length; y++) {
 			int[][] samples = scanlines[y].getSamples();
 			for(int x = 0; x < samples.length; x++) {
-				color = new Color(bitDepth);
 				color.setRed(samples[x][0]);
 				color.setGreen(samples[x][1]);
 				color.setBlue(samples[x][2]);
@@ -1973,10 +2074,39 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Creates a series of scanlines from an image using truecolor
+	 * mode.
+	 *
+	 * @param img
+	 * The completed image.
+	 *
+	 * @return
+	 * The scanlines that make up the image.
+	 */
+	private Scanline[] deconstructColorImage(Image img) {
+		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
+		Scanline[] lines = new Scanline[height];
+		Color color;
+		for(int y = 0; y < height; y++) {
+			lines[y] = new Scanline();
+			for(int x = 0; x < width; x++) {
+				color = img.colorAt(x, y);
+				lines[y].addSample(x, 0, color.getRed());
+				lines[y].addSample(x, 1, color.getGreen());
+				lines[y].addSample(x, 2, color.getBlue());
+				if(hasAlpha) {
+					lines[y].addSample(x, 3, color.getAlpha());
+				}
+			}
+		}
+		return lines;
+	}
+	
+	/**
 	 * Creates an image from a series of scanlines using indexed
 	 * mode.
 	 *
-	 * @param scanline
+	 * @param scanlines
 	 * The scanlines that make up the image.
 	 *
 	 * @return
@@ -1993,6 +2123,30 @@ public class PortableNetworkGraphic {
 			}
 		}
 		return img;
+	}
+	
+	/**
+	 * Creates a series of scanlines from an image using indexed
+	 * mode.
+	 *
+	 * @param img
+	 * The completed image.
+	 *
+	 * @return
+	 * The scanlines that make up the image.
+	 */
+	private Scanline[] deconstructImageFromPalette(Image img) {
+		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
+		Scanline[] lines = new Scanline[height];
+		Color color;
+		for(int y = 0; y < height; y++) {
+			lines[y] = new Scanline();
+			for(int x = 0; x < width; x++) {
+				color = img.colorAt(x, y);
+				lines[y].addSample(x, 0, (byte)palette.indexOf(color));
+			}
+		}
+		return lines;
 	}
 	
 	/**
@@ -2088,6 +2242,20 @@ public class PortableNetworkGraphic {
 	private byte[] decompressData(byte[] data) {
 		ZlibDecompresser decompresser = new ZlibDecompresser(data);
 		return decompresser.decompress();
+	}
+	
+	/**
+	 * Compresses a byte array.
+	 *
+	 * @param data
+	 * The uncompressed data.
+	 *
+	 * @return
+	 * The compressed data.
+	 */
+	private byte[] compressData(byte[] data) {
+		ZlibCompresser compresser = new ZlibCompresser(data);
+		return compresser.compress();
 	}
 	
 	/**

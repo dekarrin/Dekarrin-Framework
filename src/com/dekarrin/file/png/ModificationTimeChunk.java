@@ -10,7 +10,7 @@ public class ModificationTimeChunk extends AncillaryChunk {
 	/**
 	 * The type code for this chunk.
 	 */
-	public static final byte[] TYPE_CODE = {116, 73, 77, 69};
+	public static final byte[] TYPE_CODE = {116, 73, 77, 69}; // tIME
 	
 	/**
 	 * The year of the last modification.
@@ -63,7 +63,14 @@ public class ModificationTimeChunk extends AncillaryChunk {
 	 * The date to set this ModificationTimeChunk to.
 	 */
 	public ModificationTimeChunk(Date modificationDate) {
-		super(TYPE_CODE, generateData(modificationDate));
+		super(TYPE_CODE);
+		Calendar c = Calendar.getInstance();
+		c.setTime(modificationDate);
+		setProperties(	c.get(Calendar.YEAR), c.get(Calendar.MONTH),
+						c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY),
+						c.get(Calendar.MINUTE), c.get(Calendar.SECOND)
+					);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -136,27 +143,6 @@ public class ModificationTimeChunk extends AncillaryChunk {
 		hour	= parser.parseInt(1);
 		minute	= parser.parseInt(1);
 		second	= parser.parseInt(1);
-	}
-	
-	/**
-	 * Creates the data byte array and sets the internal
-	 * properties of this chunk.
-	 *
-	 * @param modificationDate
-	 * The date to set this chunk to.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(Date modificationDate) {
-		Calendar c = Calendar.getInstance();
-		c.setTime(modificationDate);
-		setProperties(	c.get(Calendar.YEAR), c.get(Calendar.MONTH),
-						c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY),
-						c.get(Calendar.MINUTE), c.get(Calendar.SECOND)
-					);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

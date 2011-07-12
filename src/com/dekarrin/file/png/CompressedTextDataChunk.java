@@ -10,7 +10,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	/**
 	 * The type code for this chunk.
 	 */
-	public static final byte[] TYPE_CODE = {122, 84, 88, 116};
+	public static final byte[] TYPE_CODE = {122, 84, 88, 116}; // zTXt
 	
 	/**
 	 * The raw, compressed text.
@@ -33,7 +33,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * The cyclic redundancy code for the chunk.
 	 */
 	public CompressedTextDataChunk(byte[] data, long crc) {
-		super(TYPE_CODE, data, crc); // zTXt
+		super(TYPE_CODE, data, crc);
 		parseData();
 	}
 	
@@ -51,7 +51,9 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * data.
 	 */
 	public CompressedTextDataChunk(String keyword, String contents, int compressionMethod) {
-		super(TYPE_CODE, generateData(keyword, contents, compressionMethod));
+		super(TYPE_CODE);
+		setProperties(keyword, contents, null, compressionMethod);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -114,25 +116,6 @@ public class CompressedTextDataChunk extends TextChunk {
 	private void compressText() {
 		ZlibCompresser zc = new ZlibCompresser(text);
 		compressedText = zc.compressString();
-	}
-	
-	/**
-	 * Generates the data and sets the internal properties.
-	 *
-	 * @param keyword
-	 * The keyword to store this chunk under.
-	 *
-	 * @param contents
-	 * The actual text contents of this chunk.
-	 *
-	 * @param compressionMethod
-	 * The method to use for compression/decompression of the text
-	 * data.
-	 */
-	private byte[] generateData(String keyword, String contents, int compressionMethod) {
-		setProperties(keyword, contents, null, compressionMethod);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

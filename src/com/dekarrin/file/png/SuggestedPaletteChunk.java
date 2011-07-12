@@ -71,7 +71,9 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 * The frequencies of each palette entry.
 	 */
 	public SuggestedPaletteChunk(String name, int bitDepth, int[] redSamples, int[] greenSamples, int[] blueSamples, int[] alphaSamples, int[] frequencies) {
-		super(TYPE_CODE, generateData(name, bitDepth, redSamples, greenSamples, blueSamples, alphaSamples, frequencies));
+		super(TYPE_CODE);
+		setProperties(name, bitDepth, redSamples, greenSamples, blueSamples, alphaSamples, frequencies);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -161,37 +163,6 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 			freq[i]		=	parser.parseInt(2);
 		}
 		setProperties(name, depth, red, green, blue, alpha, freq);
-	}
-	
-	/**
-	 * Creates the internal properties and generates the
-	 * data byte array.
-	 *
-	 * @param name
-	 * The name of the palette.
-	 *
-	 * @param bitDepth
-	 * The sample depth of the palette.
-	 *
-	 * @param redSamples
-	 * The red color samples from the palette.
-	 *
-	 * @param greenSamples
-	 * The green color samples from the palette.
-	 *
-	 * @param blueSamples
-	 * The blue color samples from the palette.
-	 *
-	 * @param alphaSamples
-	 * The alpha color samples from the palette.
-	 * 
-	 * @param frequencies
-	 * The frequencies of each palette entry.
-	 */
-	private byte[] generateData(String name, int bitDepth, int[] redSamples, int[] greenSamples, int[] blueSamples, int[] alphaSamples, int[] frequencies) {
-		setProperties(name, bitDepth, redSamples, greenSamples, blueSamples, alphaSamples, frequencies);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

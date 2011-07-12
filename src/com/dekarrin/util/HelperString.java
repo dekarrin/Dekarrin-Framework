@@ -58,7 +58,7 @@ public class HelperString {
 	 * @param byteData
 	 * The byte data to parse.
 	 *
-	 * @returns
+	 * @return
 	 * An array of HelperStrings created by extracting String data
 	 * from the given byte array.
 	 */
@@ -88,7 +88,7 @@ public class HelperString {
 	 * @param padChar
 	 * The character that this HelperString will be padded with.
 	 *
-	 * @returns
+	 * @return
 	 * This HelperString.
 	 */
 	public HelperString padRight(int count, char padChar) {
@@ -109,7 +109,7 @@ public class HelperString {
 	 * The number of characters that this HelperString should be
 	 * padded to.
 	 *
-	 * @returns
+	 * @return
 	 * This HelperString.
 	 */
 	public HelperString padRight(int count) {
@@ -126,7 +126,7 @@ public class HelperString {
 	 * @param padChar
 	 * The character that this HelperString will be padded with.
 	 *
-	 * @returns
+	 * @return
 	 * This HelperString.
 	 */
 	public HelperString padLeft(int count, char padChar) {
@@ -147,7 +147,7 @@ public class HelperString {
 	 * The number of characters that this HelperString should be
 	 * padded to.
 	 *
-	 * @returns
+	 * @return
 	 * This HelperString.
 	 */
 	public HelperString padLeft(int count) {
@@ -157,7 +157,7 @@ public class HelperString {
 	/**
 	 * Capitalizes all first letters of words in this HelperString.
 	 *
-	 * @returns
+	 * @return
 	 * This HelperString.
 	 */
 	public HelperString capitalize(String subject) {
@@ -175,7 +175,7 @@ public class HelperString {
 	/**
 	 * Gets this HelperString's String representation.
 	 *
-	 * @returns
+	 * @return
 	 * This HelperString as a String.
 	 */
 	public String toString() {
@@ -188,7 +188,7 @@ public class HelperString {
 	 * @param data
 	 * The String array to convert from.
 	 *
-	 * @returns
+	 * @return
 	 * All of the given Strings concatenated into a single String.
 	 */
 	private String arrayToString(String[] data) {

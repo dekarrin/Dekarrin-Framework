@@ -11,7 +11,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	/**
 	 * The type code of this chunk.
 	 */
-	public static final byte[] TYPE_CODE = {112, 72, 89, 115};
+	public static final byte[] TYPE_CODE = {112, 72, 89, 115}; // pHYs
 	
 	/**
 	 * The dimensions of the pixels.
@@ -33,7 +33,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * The chunk CRC.
 	 */
 	public PhysicalPixelDimensionsChunk(byte[] data, long crc) {
-		super(TYPE_CODE, data, crc); // pHYs
+		super(TYPE_CODE, data, crc);
 		parseData();
 	}
 	
@@ -51,7 +51,9 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * The unit that the pixel dimensions are in.
 	 */
 	public PhysicalPixelDimensionsChunk(int x, int y, int unitSpecifier) {
-		super(TYPE_CODE, generateData(x, y, unitSpecifier));
+		super(TYPE_CODE);
+		setProperties(x, y, unitSpecifier);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -99,28 +101,6 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 		int y = parser.parseInt();
 		dimensions = new Dimension(x, y);
 		unitSpecifier = parser.parseByte();
-	}
-	
-	/**
-	 * Creates the internal properties and creates the data
-	 * byte array.
-	 *
-	 * @param x
-	 * The width of a pixel.
-	 *
-	 * @param y
-	 * The height of a pixel.
-	 *
-	 * @param unitSpecifier
-	 * The unit that the pixel dimensions are in.
-	 *
-	 * @return
-	 * The data byte array.
-	 */
-	private byte[] generateData(int x, int y, int unitSpecifier) {
-		setProperties(x, y, unitSpecifier);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**

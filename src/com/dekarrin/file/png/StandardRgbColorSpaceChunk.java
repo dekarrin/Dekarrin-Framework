@@ -36,7 +36,9 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * What the rendering intent is to be.
 	 */
 	public StandardRgbColorSpaceChunk(int renderingIntent) {
-		super(TYPE_CODE, genereateData(renderingIntent));
+		super(TYPE_CODE);
+		setProperties(renderingIntent);
+		setChunkData(createDataBytes());
 	}
 	
 	/**
@@ -55,22 +57,6 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	private void parseData() {
 		int intent = parser.parseInt(1);
 		setProperties(intent);
-	}
-	
-	/**
-	 * Creates the internal databytes of this chunk.
-	 *
-	 * @param renderingIntent
-	 * The renderingIntent of this chunk.
-	 *
-	 * @return
-	 * The data structure to become the internal
-	 * representation of chunk data.
-	 */
-	private byte[] generateData(int renderingIntent) {
-		setProperties(renderingIntent);
-		byte[] data = createDataBytes();
-		return data;
 	}
 	
 	/**
