@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import com.dekarrin.graphics.Color;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Holds data on a reduced suggested palette.
@@ -40,8 +41,12 @@ public class SuggestedPaletteChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public SuggestedPaletteChunk(byte[] data, long crc) {
+	public SuggestedPaletteChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}

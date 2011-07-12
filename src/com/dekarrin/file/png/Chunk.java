@@ -1,9 +1,10 @@
 package com.dekarrin.file.png;
 
 import com.dekarrin.util.ByteParser;
+import com.dekarrin.util.ByteComposer;
+import com.dekarrin.util.ByteHolder;
 import java.util.zip.CRC32;
 import java.util.HashMap;
-import com.dekarrin.util.ByteHolder;
 
 /**
  * Represents a chunk from a png file.
@@ -143,7 +144,8 @@ public class Chunk {
 	 * CRC; if it isn't, this chunk is considered corrupted.
 	 *
 	 * @throws InvalidChunkException
-	 * If the given crc does not match the generated crc.
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
 	public Chunk(byte[] type, byte[] data, long crc) throws InvalidChunkException {
 		this.crc = crc;
@@ -162,7 +164,7 @@ public class Chunk {
 	 * The type name.
 	 */
 	public Chunk(byte[] type) {
-		this.type = type;
+		chunkType = type;
 	}
 	
 	/**

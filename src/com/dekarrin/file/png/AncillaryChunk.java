@@ -18,8 +18,12 @@ public abstract class AncillaryChunk extends Chunk {
 	 *
 	 * @param crc
 	 * The cyclic redundancy check read from the chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public AncillaryChunk(byte[] type, byte[] data, long crc) {
+	public AncillaryChunk(byte[] type, byte[] data, long crc) throws InvalidChunkException {
 		super(type, data, crc);
 	}
 	

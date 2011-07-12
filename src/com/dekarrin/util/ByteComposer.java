@@ -172,7 +172,7 @@ public class ByteComposer {
 	 */
 	public void composeLongs(long[] values) {
 		for(int i = 0; i < values.length; i++) {
-			composeLongs(values[i]);
+			composeLong(values[i]);
 		}
 	}
 	
@@ -227,7 +227,7 @@ public class ByteComposer {
 	 * The boolen to add.
 	 */
 	public void composeBoolean(boolean value) {
-		byte byteValue = value ? 0 : 1;
+		byte byteValue = (byte)((value) ? 1 : 0);
 		dataBuffer.put(byteValue);
 	}
 	
@@ -285,7 +285,7 @@ public class ByteComposer {
 		byte[] characterBytes = new byte[characterWidth];
 		ByteHolder stringBytes = new ByteHolder(stringChars.length * characterWidth);
 		for(char c: stringChars) {
-			characterBytes = charToBytes(c);
+			characterBytes = charToBytes(c, characterWidth);
 			stringBytes.add(characterBytes);
 		}
 		composeBytes(stringBytes.toArray());

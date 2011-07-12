@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.zip.ZlibDecompresser;
+import com.dekarrin.zip.*;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk that holds international characters.
@@ -45,8 +46,12 @@ public class InternationalTextDataChunk extends TextChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public InternationalTextDataChunk(byte[] data, long crc) {
+	public InternationalTextDataChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -73,7 +78,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	 */
 	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, int compressionMethod) {
 		super(TYPE_CODE);
-		boolean compressed = (contents > UNCOMPRESSED_TEXT_LIMIT) ? true : false;
+		boolean compressed = (contents.length() > PortableNetworkGraphic.UNCOMPRESSED_DATA_LIMIT) ? true : false;
 		setProperties(keyword, translatedKeyword, contents, null, language, compressionMethod, compressed);
 		setChunkData(createDataBytes());
 	}
@@ -137,7 +142,7 @@ public class InternationalTextDataChunk extends TextChunk {
 		int method				= parser.parseInt(1);
 		String lang				= parser.parseString();
 		String transKeyword		= parser.parseString();
-		String readText			= parser.parseFinalString();
+		String readText			= parser.parseRemainingString();
 		if(compressed) {
 			setProperties(keyword, transKeyword, null, readText, lang, method, compressed);
 		} else {

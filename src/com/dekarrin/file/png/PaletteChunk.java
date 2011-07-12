@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import com.dekarrin.graphics.Color;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * A palette chunk from a png file.
@@ -25,8 +26,12 @@ public class PaletteChunk extends CriticalChunk {
 	 *
 	 * @param crc
 	 * The CRC for this chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public PaletteChunk(byte[] data, long crc) {
+	public PaletteChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -80,7 +85,7 @@ public class PaletteChunk extends CriticalChunk {
 	 * Parses palette information from chunk data.
 	 */
 	private void parseData() {
-		Color[] colors = new Color[chunkData.length / 3];
+		Color[] colors = new Color[getLength() / 3];
 		for(int i = 0; i < paletteEntries.length; i++) {
 			colors[i] = new Color();
 			colors[i].setSamples(parser.parseInt(1), parser.parseInt(1), parser.parseInt(1));
@@ -110,11 +115,11 @@ public class PaletteChunk extends CriticalChunk {
 	 * The data bytes.
 	 */
 	private byte[] createDataBytes() {
-		ByteHolder data = new ByteHolder(paletteEntries.length * 3);
+		ByteComposer data = new ByteComposer(paletteEntries.length * 3);
 		for(Color c: paletteEntries) {
-			data.add(c.getRed());
-			data.add(c.getGreen());
-			data.add(c.getBlue());
+			data.composeInt(c.getRed(), 1);
+			data.composeInt(c.getGreen(), 1);
+			data.composeInt(c.getBlue(), 1);
 		}
 		return data.toArray();
 	}

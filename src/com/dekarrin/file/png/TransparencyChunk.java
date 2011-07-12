@@ -2,6 +2,7 @@ package com.dekarrin.file.png;
 
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk for transparency data. The format of data varies, so the current
@@ -46,8 +47,12 @@ public class TransparencyChunk extends AncillaryChunk {
 	 *
 	 * @param colorMode
 	 * The mode of color in the png this chunk is a part of.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public TransparencyChunk(byte[] data, long crc, int colorMode) {
+	public TransparencyChunk(byte[] data, long crc, int colorMode) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		this.colorMode = colorMode;
 		parseData();
@@ -63,9 +68,13 @@ public class TransparencyChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The CRC for this chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public TransparencyChunk(byte[] data, long crc) {
-		super(TYPE_CODE, data, crc);// tRNS
+	public TransparencyChunk(byte[] data, long crc) throws InvalidChunkException {
+		super(TYPE_CODE, data, crc);
 	}
 	
 	/**
@@ -250,7 +259,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The data byte array.
 	 */
 	private byte[] createDataBytes() {
-		ByteComposer composer;
+		ByteComposer composer = null;
 		switch(colorMode) {
 			case INDEXED_COLOR_MODE:
 				composer = new ByteComposer(paletteAlphas.length);

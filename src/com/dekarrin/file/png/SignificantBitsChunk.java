@@ -2,6 +2,7 @@ package com.dekarrin.file.png;
 
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Holds information on original significant bits.
@@ -31,8 +32,12 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public SignificantBitsChunk(byte[] data, long crc) {
+	public SignificantBitsChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -127,7 +132,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * Parses chunk data into something usable.
 	 */
 	private void parseData() {
-		int r,g,b;
+		int r,g,b,a;
 		GrayColor c;
 		switch(getLength()) {
 			// lengths are used here, so the cases cannot correspond to to the color
@@ -190,7 +195,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The data bytes.
 	 */
 	private byte[] createGrayscaleDataBytes() {
-		dataLength = (significantAlphaBits == 0) ? 2 : 1;	// there will never be a channel with 0 sig bits;
+		int dataLength = (significantAlphaBits == 0) ? 2 : 1; // there will never be a channel with 0 sig bits;
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeInt(((GrayColor)significantColorBits).getValue(), 1);
 		if(dataLength > 1) {
@@ -206,7 +211,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The data bytes.
 	 */
 	private byte[] createColorDataBytes() {
-		dataLength = (significatAlphaBits == 0) ? 4 : 3;	// there will never be a channel with 0 sig bits;
+		int dataLength = (significantAlphaBits == 0) ? 4 : 3; // there will never be a channel with 0 sig bits;
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeInt(significantColorBits.getRed(), 1);
 		composer.composeInt(significantColorBits.getGreen(), 1);

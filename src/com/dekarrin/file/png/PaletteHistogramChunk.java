@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ByteComposer;
+
 /**
  * Holds information on the frequency of each palette color.
  */
@@ -23,8 +25,12 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public PaletteHistogramChunk(byte[] data, long crc) {
+	public PaletteHistogramChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -69,7 +75,7 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 * Parses chunk data.
 	 */
 	private void parseData() {
-		setProperties(parser.parseFinalInts(2));
+		setProperties(parser.parseRemainingInts(2));
 	}
 	
 	/**
@@ -90,7 +96,7 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 */
 	private byte[] createDataBytes() {
 		ByteComposer composer = new ByteComposer(frequencies.length * 2);
-		for(int f: frequecies) {
+		for(int f: frequencies) {
 			composer.composeInt(f, 2);
 		}
 		return composer.toArray();

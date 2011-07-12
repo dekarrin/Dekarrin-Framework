@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.zip.ZlibDecompresser;
+import com.dekarrin.zip.*;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk holding compressed text data.
@@ -31,8 +32,12 @@ public class CompressedTextDataChunk extends TextChunk {
 	 *
 	 * @param crc
 	 * The cyclic redundancy code for the chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public CompressedTextDataChunk(byte[] data, long crc) {
+	public CompressedTextDataChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -96,9 +101,9 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * Parses data into meaningful contents.
 	 */
 	private void parseData() {
-		Sring keyword = paraser.parseString();
+		String keyword = parser.parseString();
 		int compressionMethod = parser.parseInt(1);
-		String compressed = parser.parseFinalString();
+		String compressed = parser.parseRemainingString();
 		setProperties(keyword, null, compressed, compressionMethod);
 	}
 	

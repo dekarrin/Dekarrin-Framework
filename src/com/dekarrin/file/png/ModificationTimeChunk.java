@@ -1,6 +1,8 @@
 package com.dekarrin.file.png;
 
 import java.util.Date;
+import java.util.Calendar;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Holds last modification time information.
@@ -50,8 +52,12 @@ public class ModificationTimeChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public ModificationTimeChunk(byte[] data, long crc) {
+	public ModificationTimeChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -66,10 +72,7 @@ public class ModificationTimeChunk extends AncillaryChunk {
 		super(TYPE_CODE);
 		Calendar c = Calendar.getInstance();
 		c.setTime(modificationDate);
-		setProperties(	c.get(Calendar.YEAR), c.get(Calendar.MONTH),
-						c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY),
-						c.get(Calendar.MINUTE), c.get(Calendar.SECOND)
-					);
+		setProperties(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
 		setChunkData(createDataBytes());
 	}
 	

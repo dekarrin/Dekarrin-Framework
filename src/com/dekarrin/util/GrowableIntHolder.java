@@ -1,5 +1,7 @@
 package com.dekarrin.util;
 
+import java.util.Arrays;
+
 /**
  * Holds int primitives and grows if the limit of the array
  * is hit. Even though all PrimitiveHolder-implementing classes

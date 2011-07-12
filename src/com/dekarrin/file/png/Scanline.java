@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import com.dekarrin.util.ByteParser;
+import com.dekarrin.util.ByteHolder;
 import java.util.Arrays;
 
 /**
@@ -136,30 +137,30 @@ class Scanline {
 		int filteringMethod = p.parseInt(1);
 		switch(filteringMethod) {
 			case NO_FILTER:
-				dataBytes = p.parseFinalBytes();
+				dataBytes = p.parseRemainingBytes();
 				break;
 				
 			case SUB_FILTER:
-				dataBytes = Scanline.subDefilter(p.parseFinalBytes());
+				dataBytes = Scanline.subDefilter(p.parseRemainingBytes());
 				break;
 				
 			case UP_FILTER:
-				dataBytes = Scanline.upDefilter(p.parseFinalBytes(), lastData);
+				dataBytes = Scanline.upDefilter(p.parseRemainingBytes(), lastData);
 				break;
 				
 			case AVERAGE_FILTER:
-				dataBytes = Scanline.averageDefilter(p.parseFinalBytes(), lastData);
+				dataBytes = Scanline.averageDefilter(p.parseRemainingBytes(), lastData);
 				break;
 				
 			case PAETH_FILTER:
-				dataBytes = Scanline.paethDefilter(p.parseFinalBytes(), lastData);
+				dataBytes = Scanline.paethDefilter(p.parseRemainingBytes(), lastData);
 				break;
 		}
 		Pixel[] pixels = new Pixel[getImageWidth()];
 		p = new ByteParser(dataBytes);
-		byte[] pixelData = new byte[getPixelWidth()];
+		byte[] pixelData;
 		for(int i = 0; i < getImageWidth(); i++) {
-			p.parseBytes(pixelData);
+			pixelData = p.parseBytes(getPixelWidth());
 			pixels[i] = new Pixel(pixelData, Scanline.samples, Scanline.bitDepth);
 		}
 		lastData = dataBytes;
@@ -539,8 +540,8 @@ class Scanline {
 		} else {
 			growPixelArray(pixelIndex + 1);
 		}
-		if(pixels[pixelsIndex] == null) {
-			pixels[pixelIndex] = new Pixel(pixelsIndex);
+		if(pixels[pixelIndex] == null) {
+			pixels[pixelIndex] = new Pixel(pixelIndex);
 		}
 		pixels[pixelIndex].setSample(sampleIndex, value);
 	}
@@ -590,9 +591,9 @@ class Scanline {
 	 */
 	public byte[] getFilteredBytes() {
 		byte[] bytes = getBytes();
-		ByteHolder filteredBytes = ByteHolder(bytes.length + 1);
+		ByteHolder filteredBytes = new ByteHolder(bytes.length + 1);
 		int filterAlgorithm = selectFilterAlgorithm();
-		filteredBytes.add(filterAlgorithm);
+		filteredBytes.add((byte)filterAlgorithm);
 		switch(filterAlgorithm) {
 			case NO_FILTER:
 				filteredBytes.add(bytes);
@@ -630,15 +631,15 @@ class Scanline {
 			sum = sum2;
 			method = SUB_FILTER;
 		}
-		if((sum2 = byteSum(upFilter(getBytes()))) < sum) {
+		if((sum2 = byteSum(upFilter(getBytes(), lastData))) < sum) {
 			sum = sum2;
 			method = UP_FILTER;
 		}
-		if((sum2 = byteSum(averageFilter(getBytes()))) < sum) {
+		if((sum2 = byteSum(averageFilter(getBytes(), lastData))) < sum) {
 			sum = sum2;
 			method = AVERAGE_FILTER;
 		}
-		if((sum2 = byteSum(paethFilter(getBytes()))) < sum) {
+		if((sum2 = byteSum(paethFilter(getBytes(), lastData))) < sum) {
 			sum = sum2;
 			method = PAETH_FILTER;
 		}

@@ -15,17 +15,23 @@
 			<compilerarg value="-Xlint:none" />
 		</javac>
 	</target>
-	<target name="recompile">
+	<target name="recompileall">
 		<antcall target="clean" />
 		<antcall target="libs" />
-		<antcall target="quiet" />
+		<antcall target="compile" />
+	</target>
+	<target name="recompile">
+		<antcall target="cleanown" />
+		<antcall target="compile" />
 	</target>
 	<target name="cleanown">
 		<delete dir="${build}${dekarrin}" />
 	</target>
 	<target name="compile">
 		<mkdir dir="${build}"/>
-		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}" debuglevel="lines,vars,source" debug="on"/>
+		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}" debuglevel="lines,vars,source" debug="on">
+			<compilerarg line="-Xmaxerrs 1000" />
+		</javac>
 	</target>
 	<target name="libs">
 		<mkdir dir="${build}/acm" />

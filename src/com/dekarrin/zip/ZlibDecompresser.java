@@ -172,6 +172,6 @@ public class ZlibDecompresser {
 	 * True if it has been decompressed; false otherwise.
 	 */
 	private boolean alreadyDecompressed() {
-		return (decompressedData != null):
+		return (decompressedData != null);
 	}
 }

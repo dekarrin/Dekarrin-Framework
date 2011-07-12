@@ -15,7 +15,7 @@ public interface PrimitiveHolder {
 	 * @param size
 	 * The new size.
 	 */
-	public void resize();
+	public void resize(int size);
 	
 	/**
 	 * Gets the position of the internal pointer.

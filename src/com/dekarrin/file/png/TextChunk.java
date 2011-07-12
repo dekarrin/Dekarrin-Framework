@@ -26,8 +26,12 @@ public abstract class TextChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The CRC for the chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public TextChunk(byte[] type, byte[] data, long crc) {
+	public TextChunk(byte[] type, byte[] data, long crc) throws InvalidChunkException {
 		super(type, data, crc);
 	}
 	

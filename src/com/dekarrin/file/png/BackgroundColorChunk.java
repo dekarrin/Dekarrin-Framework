@@ -2,6 +2,7 @@ package com.dekarrin.file.png;
 
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk containing background color data. This will either be an
@@ -43,8 +44,12 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk crc.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public BackgroundColorChunk(byte[] data, long crc) {
+	public BackgroundColorChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}

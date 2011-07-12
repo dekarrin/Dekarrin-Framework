@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ByteComposer;
+
 /**
  * Represents a gamma chunk.
  */
@@ -23,8 +25,12 @@ public class GammaChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk crc.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public GammaChunk(byte[] data, long crc) {
+	public GammaChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -52,10 +58,12 @@ public class GammaChunk extends AncillaryChunk {
 	}
 	
 	/**
-	 * Creates the data field for this chunk from the internal
-	 * properties.
+	 * Creates the internal data byte array for this chunk.
+	 *
+	 * @return
+	 * The data byte array.
 	 */
-	private void createDataBytes() {
+	private byte[] createDataBytes() {
 		ByteComposer bytes = new ByteComposer(4);
 		bytes.composeInt(gamma);
 		return bytes.toArray();

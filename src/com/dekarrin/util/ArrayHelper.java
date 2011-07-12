@@ -24,9 +24,9 @@ public class ArrayHelper {
 	 */
 	public static int[][] split(int[] subject, int value) {
 		int occurances = count(subject, value);
-		int[][] subarrays = new int[occurance+1][];
+		int[][] subarrays = new int[occurances+1][];
 		int[] sub;
-		int start;
+		int start = -1;
 		for(int i = 0; i < subject.length; i++) {
 			if(i != value) {
 				start = i;
@@ -66,8 +66,8 @@ public class ArrayHelper {
 	 */
 	public static byte[][] split(byte[] subject, byte value) {
 		int occurances = count(subject, value);
-		byte[][] subarrays = new byte[occurance+1][];
-		int start;
+		byte[][] subarrays = new byte[occurances+1][];
+		int start = -1;
 		for(int i = 0; i < subject.length; i++) {
 			if(i != value) {
 				start = i;

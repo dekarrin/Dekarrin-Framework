@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import java.awt.Point;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Png chunk for referencing chromaticities.
@@ -40,8 +41,12 @@ public class ChromaticitiesChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public ChromaticitiesChunk(byte[] data, long crc) {
+	public ChromaticitiesChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}

@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import java.awt.Dimension;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Stores the intended pixel size or aspect ratio. Holds pixels
@@ -31,8 +32,12 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public PhysicalPixelDimensionsChunk(byte[] data, long crc) {
+	public PhysicalPixelDimensionsChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}

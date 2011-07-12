@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.zip.ZlibDecompresser;
+import com.dekarrin.zip.*;
+import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk for an embedded ICC color profile.
@@ -40,8 +41,12 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The chunk CRC.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public EmbeddedColorProfileChunk(byte[] data, long crc) {
+	public EmbeddedColorProfileChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -56,7 +61,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * The profile data.
 	 */
 	public EmbeddedColorProfileChunk(String name, byte[] data) {
-		super(TYPE_CODE, generateData());
+		super(TYPE_CODE);
 		setProperties(name, data, null, 0);
 		setChunkData(createDataBytes());
 	}
@@ -133,10 +138,10 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 			this.compressedProfile = compressedData;
 		}
 		if(data == null) {
-			decompressData();
+			decompressProfile();
 		}
 		if(compressedData == null) {
-			compressData();
+			compressProfile();
 		}
 	}
 	
@@ -161,7 +166,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	private void parseData() {
 		String profileName			= parser.parseString();
 		int compressionMethod		= parser.parseInt(1);
-		byte[] compressedProfile	= parser.parseFinalBytes();
+		byte[] compressedProfile	= parser.parseRemainingBytes();
 		setProperties(profileName, null, compressedProfile, compressionMethod);
 	}
 	

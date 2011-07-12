@@ -1,6 +1,7 @@
 package com.dekarrin.util;
 
 import java.nio.ByteBuffer;
+import java.util.Vector;
 
 /**
  * A wrapper for the ByteBuffer class that serves as a more
@@ -86,7 +87,7 @@ public class ByteParser {
 	 * An array of the specified number of shorts.
 	 */
 	public short[] parseShorts(int count) {
-		short shortArray = new short[count];
+		short[] shortArray = new short[count];
 		for(int i = 0; i < count; i++) {
 			shortArray[i] = parseShort();
 		}
@@ -127,7 +128,7 @@ public class ByteParser {
 	 */
 	public int parseInt(int width) {
 		byte[] holder = parseBytes(width);
-		parsedInt = arrayToInt(holder);
+		int parsedInt = arrayToInt(holder);
 		return parsedInt;
 	}
 	
@@ -537,7 +538,7 @@ public class ByteParser {
 		String nextCharacter;
 		while(remaining() > characterWidth) {
 			characterBytes = parseBytes(characterWidth);
-			if(isNullSeparator(nextCharacter)) {
+			if(isNullSeparator(characterBytes)) {
 				results.add(buffer.toString());
 				buffer = new StringBuffer();
 			} else {
@@ -668,7 +669,7 @@ public class ByteParser {
 			for(int j = 0; j < characterWidth; j++) {
 				characterBuffer[j] = subject[i+j];
 			}
-			codePoints.add(arrayToInteger(characterBuffer));
+			codePoints.add(arrayToInt(characterBuffer));
 		}
 		String result = new String(codePoints.toArray(), 0, codePoints.size());
 		return result;
@@ -683,7 +684,7 @@ public class ByteParser {
 	 * @return
 	 * The resulting integer.
 	 */
-	private int arrayToInteger(byte[] intBytes) {
+	private int arrayToInt(byte[] intBytes) {
 		int result = 0;
 		for(int i = 0; i < intBytes.length; i++) {
 			result = (result << 8) + (intBytes[i] & 0xff);

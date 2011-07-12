@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ByteComposer;
+
 /**
  * The header chunk from a png file.
  */
@@ -62,8 +64,12 @@ public class HeaderChunk extends CriticalChunk {
 	 *
 	 * @param crc
 	 * The CRC for this chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public HeaderChunk(byte[] data, long crc) {
+	public HeaderChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}

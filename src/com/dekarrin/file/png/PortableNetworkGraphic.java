@@ -17,6 +17,23 @@ import com.dekarrin.error.*;
 public class PortableNetworkGraphic {
 	
 	/**
+	 * The amount of data that can be written uncompressed in
+	 * bytes. This is used when compression depends on data
+	 * size.
+	 */
+	public static final int UNCOMPRESSED_DATA_LIMIT = 1024;
+	
+	/**
+	 * The number of bytes in each image data chunk.
+	 */
+	public static final int IDAT_BUFFER_LENGTH = 50;
+	
+	/**
+	 * The values in the header of a valid png file.
+	 */
+	public static final int[] MAGIC_NUMBER = {137, 80, 78, 71, 13, 10, 26, 10};
+	
+	/**
 	 * Parses a PNG file into a PNG object.
 	 */
 	private class PngReader {
@@ -24,37 +41,37 @@ public class PortableNetworkGraphic {
 		/**
 		 * The mode used for verification of the png file.
 		 */
-		private static final int VERIFICATION_MODE = 0;
+		private final int VERIFICATION_MODE = 0;
 		
 		/**
 		 * The mode used for reading chunk lengths.
 		 */
-		private static final int LENGTH_READING_MODE = 1;
+		private final int LENGTH_READING_MODE = 1;
 		
 		/**
 		 * The mode used for reading chunk types.
 		 */
-		private static final int TYPE_READING_MODE = 2;
+		private final int TYPE_READING_MODE = 2;
 		
 		/**
 		 * The mode used for reading chunk data.
 		 */
-		private static final int DATA_READING_MODE = 3;
+		private final int DATA_READING_MODE = 3;
 		
 		/**
 		 * The mode used for reading chunk CRCs.
 		 */
-		private static final int CRC_READING_MODE = 4;
+		private final int CRC_READING_MODE = 4;
+		
+		/**
+		 * The array of values in the header of a valid png file.
+		 */
+		private final IntHolder MAGIC_NUMBER = new IntHolder(PortableNetworkGraphic.MAGIC_NUMBER);
 		
 		/**
 		 * The mode of this Parser.
 		 */
 		private int parseMode;
-		
-		/**
-		 * The array of values in the header of a valid png file.
-		 */
-		private static final IntHolder MAGIC_NUMBER = new IntHolder(new int[]{137, 80, 78, 71, 13, 10, 26, 10});
 			
 		/**
 		 * The array of length bytes in the chunk currently being
@@ -125,14 +142,19 @@ public class PortableNetworkGraphic {
 		 */
 		public Chunk[] read() throws InvalidFileFormatException, StreamFailureException {
 			parseChunksFromFile();
-			return completedChunks.toArray();
+			return completedChunks.toArray(new Chunk[0]);
 		}
 		
 		/**
 		 * Parses a chunk into its correct type based on its type.
+		 *
+		 * @throws InvalidChunkException
+		 * If the cyclic reduncdancy check read from the chunk
+		 * does not match the one calculated on the type and data.
 		 */
-		private Chunk createChunk() {
-			String type = new String(typeBytes.toArray(), 0, 4); 
+		private Chunk createChunk() throws InvalidChunkException {
+			byte[] typeByteArray = this.typeBytes.toArray();
+			String type = new String(typeByteArray, 0, 4); 
 			byte[] data = chunkData.toArray();
 			long crc = cyclicRedundancyCheck;
 			
@@ -174,7 +196,7 @@ public class PortableNetworkGraphic {
 			} else if(type.equals("tIME")) {
 				newChunk = new ModificationTimeChunk(data, crc);
 			} else {
-				newChunk = new Chunk(type, data, crc);
+				newChunk = new Chunk(typeByteArray, data, crc);
 			}
 			resetDataFields();
 			return newChunk;
@@ -206,7 +228,8 @@ public class PortableNetworkGraphic {
 		 * The byte to parse.
 		 *
 		 * @throws InvalidFileFormatException
-		 * When the header does not validate.
+		 * When the header does not validate, or if a chunk crc does
+		 * not match.
 		 */
 		private void parseByte(int readByte) throws InvalidFileFormatException {
 			switch(parseMode) {
@@ -241,8 +264,11 @@ public class PortableNetworkGraphic {
 		 * Checks the parse mode, and changes it as appropriate. If
 		 * it needs to be changed, the appropriate actions are taken
 		 * for changing the state of the parser to the new mode.
+		 *
+		 * @throws InvalidFileFormatException
+		 * If a chunk that is being read is invalid.
 		 */
-		private void checkParseModeCompletion() {
+		private void checkParseModeCompletion() throws InvalidFileFormatException {
 			switch(parseMode) {
 				case VERIFICATION_MODE:
 					if(isComplete(MAGIC_NUMBER)) {
@@ -277,7 +303,12 @@ public class PortableNetworkGraphic {
 				case CRC_READING_MODE:
 					if(isComplete(crcBytes)) {
 						interpretCrcBytes();
-						Chunk chunk = createChunk();
+						Chunk chunk = null;
+						try {
+							chunk = createChunk();
+						} catch(InvalidChunkException e) {
+							throw new InvalidFileFormatException("Error reading: "+e.getMessage(), "png");
+						}
 						completedChunks.add(chunk);
 						parseMode = LENGTH_READING_MODE;
 					}
@@ -415,11 +446,6 @@ public class PortableNetworkGraphic {
 	private class PngWriter {
 		
 		/**
-		 * The magic number for a png file.
-		 */
-		private static final byte[] MAGIC_NUMBER = new byte[] {(byte)137, 80, 78, 71, 13, 10, 26, 10};
-		
-		/**
 		 * The stream of the png file.
 		 */
 		private FileOutputStream pngStream;
@@ -463,8 +489,9 @@ public class PortableNetworkGraphic {
 		 * Writes the magic number for a Png file to the stream.
 		 */
 		private void writeMagicNumber() throws StreamFailureException {
+			byte[] magicNumber = getMagicNumber();
 			try {
-				pngStream.write(MAGIC_NUMBER);
+				pngStream.write(magicNumber);
 			} catch(IOException e) {
 				throw new StreamFailureException(e.getMessage());
 			}
@@ -489,6 +516,21 @@ public class PortableNetworkGraphic {
 		 */
 		private void createStream() throws FileNotFoundException {
 			pngStream = new FileOutputStream(pngFile);
+		}
+		
+		/**
+		 * Gets the magic number constant from PortableNetworkGraphic
+		 * and converts it into the proper form for writing.
+		 *
+		 * @return
+		 * The magic number as an array of bytes.
+		 */
+		private byte[] getMagicNumber() {
+			byte[] magic = new byte[PortableNetworkGraphic.MAGIC_NUMBER.length];
+			for(int i = 0; i < PortableNetworkGraphic.MAGIC_NUMBER.length; i++) {
+				magic[i] = (byte)PortableNetworkGraphic.MAGIC_NUMBER[i];
+			}
+			return magic;
 		}
 	}
 	
@@ -604,9 +646,19 @@ public class PortableNetworkGraphic {
 	private int colorMode;
 	
 	/**
-	 * Whether or not this png uses interlacing.
+	 * What method of interlacing this Png uses.
 	 */
-	private boolean adam7Interlacing;
+	private int interlaceMethod;
+	
+	/**
+	 * The compression method used in this Png's image data.
+	 */
+	private int compressionMethod;
+	
+	/**
+	 * The filter method used in this Png's image data.
+	 */
+	private int filterMethod;
 	
 	/**
 	 * The color palette, if there is one.
@@ -657,7 +709,7 @@ public class PortableNetworkGraphic {
 	/**
 	 * Whether the rendering intent is set.
 	 */
-	private int intentSet = false;
+	private boolean intentSet = false;
 	
 	/**
 	 * The color profile for this png.
@@ -745,12 +797,22 @@ public class PortableNetworkGraphic {
 	private Image image;
 
 	/**
-	 * Creates a new PNG from a series of chunks.
+	 * Creates a new PNG from a file.
 	 *
 	 * @param file
 	 * The file to load the png data from.
+	 *
+	 * @throws FileNotFoundException
+	 * If the specified file does not exist.
+	 *
+	 * @throws InvalidFileFormatException
+	 * If the file is corrupt or is not in the correct
+	 * format for a PNG.
+	 *
+	 * @throws StreamFailureException
+	 * If the file stream fails for some other reason.
 	 */
-	public PortableNetworkGraphic(String file) {
+	public PortableNetworkGraphic(String file) throws FileNotFoundException, InvalidFileFormatException, StreamFailureException {
 		loadPngFile(file);
 	}
 	
@@ -782,8 +844,11 @@ public class PortableNetworkGraphic {
 	 *
 	 * @param location
 	 * Where to save the Png file.
+	 *
+	 * @throws StreamFailureException
+	 * If the file stream failed.
 	 */
-	public void save(String location) {
+	public void save(String location) throws StreamFailureException {
 		writePngFile(location);
 	}
 	
@@ -794,8 +859,18 @@ public class PortableNetworkGraphic {
 	 *
 	 * @param location
 	 * Where to load the Png file from.
+	 *
+	 * @throws FileNotFoundException
+	 * If the specified file does not exist.
+	 *
+	 * @throws InvalidFileFormatException
+	 * If the file is corrupt or is not in the correct
+	 * format for a PNG.
+	 *
+	 * @throws StreamFailureException
+	 * If the file stream fails for some other reason.
 	 */
-	public void load(String location) {
+	public void load(String location) throws FileNotFoundException, InvalidFileFormatException, StreamFailureException {
 		loadPngFile(location);
 	}
 	
@@ -855,8 +930,8 @@ public class PortableNetworkGraphic {
 	 *
 	 * @param filtering method.
 	 */
-	public int getFilteringMethod() {
-		return filteringMethod;
+	public int getFilterMethod() {
+		return filterMethod;
 	}
 	
 	/**
@@ -866,7 +941,7 @@ public class PortableNetworkGraphic {
 	 * Whether it is.
 	 */
 	public boolean isInterlaced() {
-		return adam7Interlacing;
+		return (interlaceMethod != INTERLACE_METHOD_NONE);
 	}
 	
 	/**
@@ -885,7 +960,7 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The palette used for the image.
 	 */
-	public void getPalette() {
+	public Palette getPalette() {
 		return palette;
 	}
 	
@@ -1008,7 +1083,7 @@ public class PortableNetworkGraphic {
 		if(textData == null) {
 			textData = new HashMap<String,ArrayList<String>>(1);
 		}
-		checkKeyword(keyword);
+		keyword = makeKeywordValid(keyword);
 		ArrayList<String> list;
 		if(textData.containsKey(keyword)) {
 			list = textData.get(keyword);
@@ -1054,7 +1129,7 @@ public class PortableNetworkGraphic {
 	 * The used keywords.
 	 */
 	public String[] getKeywords() {
-		return textData.keySet().toArray();
+		return textData.keySet().toArray(new String[0]);
 	}
 	
 	/**
@@ -1112,8 +1187,8 @@ public class PortableNetworkGraphic {
 	 * The y dimension of pixels per inch.
 	 */
 	public void setPixelDimensions(int x, int y) {
-		int width = (x / 0.0254); // default and only unit is the meter; 1in = 0.0254m.
-		int height = (y / 0.0254);
+		int width = (int)(x / 0.0254); // default and only unit is the meter; 1in = 0.0254m.
+		int height = (int)(y / 0.0254);
 		resolution = new Resolution(width, height);
 	}
 	
@@ -1224,7 +1299,7 @@ public class PortableNetworkGraphic {
 	 * The last modification time.
 	 */
 	public Date getModificationDate() {
-		lastModified = new Date();
+		return lastModified;
 	}
 	
 	/**
@@ -1300,7 +1375,7 @@ public class PortableNetworkGraphic {
 	 * Whether it does.
 	 */
 	public boolean hasPalette() {
-		return (colorMode == COLOR_TYPE_COLOR_INDEXED);
+		return (colorMode == COLOR_TYPE_COLOR_PALETTE);
 	}
 	
 	/**
@@ -1336,7 +1411,7 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * Whether it does.
 	 */
-	public boolean hasTransparency() {
+	public boolean hasTransparencyData() {
 		boolean has;
 		switch(colorMode) {
 			case COLOR_TYPE_COLOR:
@@ -1344,7 +1419,7 @@ public class PortableNetworkGraphic {
 				has = (alphaColor != null);
 				break;
 				
-			case COLOR_TYPE_COLOR_INDEXED:
+			case COLOR_TYPE_COLOR_PALETTE:
 				has = (alphaPalette != null);
 				break;
 			
@@ -1371,7 +1446,7 @@ public class PortableNetworkGraphic {
 	 * Whether it does.
 	 */
 	public boolean hasSuggestedPalette() {
-		return (suggestedPalette != null);
+		return (reducedPalette != null);
 	}
 	
 	/**
@@ -1404,15 +1479,120 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Ensures that a keyword is valid. If the specified
+	 * keyword is not valid, it is reformatted so as to be
+	 * valid.
+	 *
+	 * @param keyword
+	 * The keyword to check for validity.
+	 *
+	 * @return
+	 * The keyword reformatted to be valid. If it is already
+	 * valid, the keyword returned as is.
+	 */
+	private String makeKeywordValid(String keyword) {
+		keyword = makeKeywordLengthValid(keyword);
+		keyword = makeKeywordCharsetValid(keyword);
+		keyword = makeKeywordSpacingValid(keyword);
+		return keyword;
+	}
+	
+	/**
+	 * Makes the length of a keyword valid. The validity of a keyword
+	 * is determined by the PNG specification at
+	 * {@url http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html#C.Anc-text}.
+	 * If the keyword is longer than 79 characters, it is truncated. If
+	 * the keyword is empty, it is set to the default keyword value of
+	 * "Comment".
+	 *
+	 * @param keyword
+	 * The keyword to make valid.
+	 *
+	 * @return
+	 * The keyword with its length corrected.
+	 */
+	private String makeKeywordLengthValid(String keyword) {
+		if(keyword.length() > 0) {
+			if(keyword.length() > 79) {
+				keyword = keyword.substring(0, 78);
+			}
+		} else {
+			keyword = "Comment";
+		}
+		return keyword;
+	}
+	
+	/**
+	 * Makes a keyword's spacing valid. The validity of a keyword
+	 * is determined by the PNG specification at
+	 * {@url http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html#C.Anc-text}.
+	 * The keyword is stripped of trailing and leading spaces, and
+	 * consecutive spaces are collapsed into one.
+	 *
+	 * @param keyword
+	 * The keyword to make valid.
+	 *
+	 * The keyword with its spacing corrected.
+	 */
+	private String makeKeywordSpacingValid(String keyword) {
+		keyword = keyword.trim();
+		keyword = keyword.replaceAll(" +", " ");
+		return keyword;
+	}
+	
+	/**
+	 * Makes a keyword's charset valid. The validity of a keyword
+	 * is determined by the PNG specification at
+	 * {@url http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html#C.Anc-text}.
+	 * All characters outside of the Latin-1 character set are
+	 * removed, and any non-printable characters are removed as well.
+	 * Non-breaking spaces are removed also, due to the fact that they
+	 * are indistinguishable from spaces.
+	 *
+	 * @param keyword
+	 * The keyword to make valid.
+	 *
+	 * @return
+	 * The keyword with its character set corrected.
+	 */
+	private String makeKeywordCharsetValid(String keyword) {
+		StringBuffer k = new StringBuffer();
+		char c;
+		for(int i = 0; i < keyword.length(); i++) {
+			c = keyword.charAt(i);
+			if(c < 256 && !Character.isISOControl(c) && c != 160/*<-- non-breaking space disallowed*/) {
+				k.append(c);
+			}
+			// completely disallow any non-permitted characters.
+		}
+		return k.toString();
+	}
+	
+	/**
 	 * Reads the png data from a file.
 	 *
 	 * @param file
 	 * The name of the file load the data from.
+	 *
+	 * @throws FileNotFoundException
+	 * If the specified file does not exist.
+	 *
+	 * @throws InvalidFileFormatException
+	 * If the file is corrupt or is not in the correct
+	 * format for a PNG. This is also thrown if an
+	 * unknown critical chunk is encountered.
+	 *
+	 * @throws StreamFailureException
+	 * If the file stream fails for some other reason.
 	 */
-	private void loadPngFile(String file) {
+	private void loadPngFile(String file) throws FileNotFoundException, InvalidFileFormatException, StreamFailureException {
 		PngReader reader = new PngReader(file);
 		Chunk[] chunks = reader.read();
-		parseChunks(chunks);
+		try {
+			parseChunks(chunks);
+		} catch(UnknownChunkException e) {
+			throw new InvalidFileFormatException("Unknown critical chunk '"+e.getType()+"' encountered.", "png");
+		}
 	}
 	
 	/**
@@ -1420,10 +1600,25 @@ public class PortableNetworkGraphic {
 	 *
 	 * @param file
 	 * The name of the file to write the data to.
+	 *
+	 * @throws StreamFailureException
+	 * If the file stream failed.
 	 */
-	private void writePngFile(String file) {
+	private void writePngFile(String file) throws StreamFailureException {
 		Chunk[] chunks = convertToChunks();
-		PngWriter writer = new PngWriter(file);
+		PngWriter writer = null;
+		while(writer == null) {
+			try {
+				writer = new PngWriter(file);
+			} catch(FileNotFoundException e) {
+				File f = new File(file);
+				try {
+					f.createNewFile();
+				} catch(IOException ioe) {
+					throw new StreamFailureException(ioe.getMessage());
+				}
+			}
+		}
 		writer.write(chunks);
 	}
 	
@@ -1534,7 +1729,7 @@ public class PortableNetworkGraphic {
 			ArrayList<String> texts = keywordSet.getValue();
 			for(String contents: texts) {
 				TextChunk tc = null;
-				if(t.length() > UNCOMPRESSED_TEXT_LIMIT) {
+				if(contents.length() > UNCOMPRESSED_DATA_LIMIT) {
 					tc = new CompressedTextDataChunk(keyword, contents, COMPRESSION_METHOD_ZLIB);
 				} else {
 					tc = new TextDataChunk(keyword, contents);
@@ -1542,7 +1737,7 @@ public class PortableNetworkGraphic {
 				chunks.add(tc);
 			}
 		}
-		return chunks.toArray(new TextData[0]);
+		return chunks.toArray(new TextChunk[0]);
 	}
 	 
 	/**
@@ -1552,20 +1747,20 @@ public class PortableNetworkGraphic {
 	 * The resulting SuggestedPaletteChunk.
 	 */
 	private SuggestedPaletteChunk suggestedPaletteToChunk() {
-		int[] red = new int[suggestedPalette.size()];
-		int[] green = new int[suggestedPalette.size()];
-		int[] blue = new int[suggestedPalette.size()];
-		int[] alpha = new int[suggestedPalette.size()];
-		int[] frequencies = new int[suggestedPalette.size()];
+		int[] red = new int[reducedPalette.size()];
+		int[] green = new int[reducedPalette.size()];
+		int[] blue = new int[reducedPalette.size()];
+		int[] alpha = new int[reducedPalette.size()];
+		int[] frequencies = new int[reducedPalette.size()];
 		Color color;
-		for(int i = 0; i < suggestedPalette.size(); i++) {
-			color = suggestedPalette.getColor(i);
+		for(int i = 0; i < reducedPalette.size(); i++) {
+			color = reducedPalette.getColor(i);
 			red[i] = color.getRed();
 			green[i] = color.getGreen();
 			blue[i] = color.getBlue();
 			alpha[i] = color.getAlpha();
 		}
-		SuggestedPaletteChunk spc = new SuggestedPaletteChunk(suggestedPalette.getName(), suggestedPalette.getSampleDepth(), red, green, blue, alpha, suggestedPalette.getAllFrequencies());
+		SuggestedPaletteChunk spc = new SuggestedPaletteChunk(reducedPalette.getName(), reducedPalette.getSampleDepth(), red, green, blue, alpha, reducedPalette.getAllFrequencies());
 		return spc;
 	}
 	
@@ -1576,7 +1771,7 @@ public class PortableNetworkGraphic {
 	 * The resulting PhysicalPixelDimensionsChunk.
 	 */
 	private PhysicalPixelDimensionsChunk resolutionToChunk() {
-		PhysicalPixelDimensionChunk ppdc = new PhysicalPixelDimensionChunk(resolution.x, resolution.y, METER_UNIT);
+		PhysicalPixelDimensionsChunk ppdc = new PhysicalPixelDimensionsChunk(resolution.x, resolution.y, METER_UNIT);
 		return ppdc;
 	}
 	
@@ -1588,7 +1783,7 @@ public class PortableNetworkGraphic {
 	 */
 	private TransparencyChunk transparencyDataToChunk() {
 		TransparencyChunk tc = null;
-		if(colorMode == COLOR_TYPE_COLOR_INDEXED) {
+		if(colorMode == COLOR_TYPE_COLOR_PALETTE) {
 			int[] transparencies = extractTransparencies();
 			tc = new TransparencyChunk(transparencies);
 		} else if(colorMode == COLOR_TYPE_GRAYSCALE) {
@@ -1619,8 +1814,8 @@ public class PortableNetworkGraphic {
 	 */
 	private BackgroundColorChunk backgroundColorToChunk() {
 		BackgroundColorChunk bcc;
-		if(colorMode == COLOR_TYPE_COLOR_INDEXED) {
-			bcc = new BackgroundColorChunk(getColorIndex(backgroundColor));
+		if(colorMode == COLOR_TYPE_COLOR_PALETTE) {
+			bcc = new BackgroundColorChunk(palette.indexOf(backgroundColor));
 		} else {
 			if(colorMode == COLOR_TYPE_COLOR && colorMode == COLOR_TYPE_COLOR_ALPHA) {
 				bcc = new BackgroundColorChunk(backgroundColor, TRUECOLOR_MODE);
@@ -1665,7 +1860,7 @@ public class PortableNetworkGraphic {
 	 */
 	private SignificantBitsChunk significantBitsToChunk() {
 		SignificantBitsChunk sbc = null;
-		switch(colorType) {
+		switch(colorMode) {
 			case COLOR_TYPE_GRAYSCALE:
 				sbc = new SignificantBitsChunk(getSignificantGrayscaleBits());
 				break;
@@ -1704,7 +1899,7 @@ public class PortableNetworkGraphic {
 	 * The resulting HeaderChunk.
 	 */
 	private HeaderChunk headerToChunk() {
-		HeaderChunk hc = new HeaderChunk(width, height, bitDepth, colorType, compressionMethod, filterMethod, interlaceMethod);
+		HeaderChunk hc = new HeaderChunk(width, height, bitDepth, colorMode, compressionMethod, filterMethod, interlaceMethod);
 		return hc;
 	}
 	
@@ -1715,8 +1910,8 @@ public class PortableNetworkGraphic {
 	 * The chunk containing the chromaticity.
 	 */
 	private ChromaticitiesChunk chromaticityToChunk() {
-		int wx = chromaticity.getWhiteX();
-		int wy = chromaticity.getWhiteY();
+		int wx = chromaticity.getWhitePointX();
+		int wy = chromaticity.getWhitePointY();
 		int rx = chromaticity.getRedX();
 		int ry = chromaticity.getRedY();
 		int gx = chromaticity.getGreenX();
@@ -1746,8 +1941,8 @@ public class PortableNetworkGraphic {
 	 * The transparency values.
 	 */
 	private int[] extractTransparencies() {
-		int[] trans = new int[palette.length()];
-		for(int i = 0; i < palette.length(); i++) {
+		int[] trans = new int[palette.size()];
+		for(int i = 0; i < palette.size(); i++) {
 			trans[i] = palette.getColor(i).getAlpha();
 		}
 		return trans;
@@ -1792,8 +1987,11 @@ public class PortableNetworkGraphic {
 	 *
 	 * @param chunks
 	 * The chunks to parse.
+	 *
+	 * @throws UnknownChunkException
+	 * If an unknown critical chunk is encountered.
 	 */
-	private void parseChunks(Chunk[] chunks) {
+	private void parseChunks(Chunk[] chunks) throws UnknownChunkException {
 		Vector<Chunk> unknown = unknownColorSpaceChunks;
 		Vector<ImageDataChunk> idatChunks = new Vector<ImageDataChunk>();
 		for(Chunk c: chunks) {
@@ -1909,6 +2107,7 @@ public class PortableNetworkGraphic {
 			}
 			chunks[chunksPointer++] = new ImageDataChunk(idatBuffer.toArray());
 		}
+		return chunks;
 	}
 	
 	/**
@@ -2031,12 +2230,12 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		GrayColor color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline();
+			lines[y] = new Scanline(samplesPerPixel(), bitDepth);
 			for(int x = 0; x < width; x++) {
 				color = (GrayColor)img.colorAt(x, y);
-				lines[y].addSample(x, 0, color.getValue());
+				lines[y].setSample(x, 0, color.getValue());
 				if(hasAlpha) {
-					lines[y].addSample(x, 1, color.getAlpha());
+					lines[y].setSample(x, 1, color.getAlpha());
 				}
 			}
 		}
@@ -2089,14 +2288,14 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline();
+			lines[y] = new Scanline(samplesPerPixel(), bitDepth);
 			for(int x = 0; x < width; x++) {
 				color = img.colorAt(x, y);
-				lines[y].addSample(x, 0, color.getRed());
-				lines[y].addSample(x, 1, color.getGreen());
-				lines[y].addSample(x, 2, color.getBlue());
+				lines[y].setSample(x, 0, color.getRed());
+				lines[y].setSample(x, 1, color.getGreen());
+				lines[y].setSample(x, 2, color.getBlue());
 				if(hasAlpha) {
-					lines[y].addSample(x, 3, color.getAlpha());
+					lines[y].setSample(x, 3, color.getAlpha());
 				}
 			}
 		}
@@ -2141,10 +2340,10 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline();
+			lines[y] = new Scanline(samplesPerPixel(), bitDepth);
 			for(int x = 0; x < width; x++) {
 				color = img.colorAt(x, y);
-				lines[y].addSample(x, 0, (byte)palette.indexOf(color));
+				lines[y].setSample(x, 0, (byte)palette.indexOf(color));
 			}
 		}
 		return lines;
@@ -2366,9 +2565,9 @@ public class PortableNetworkGraphic {
 	 */
 	private void readTextChunk(TextChunk chunk) {
 		if(textData == null) {
-			textData = new HashMap<String,String>();
+			textData = new HashMap<String,ArrayList<String>>();
 		}
-		textData.put(chunk.getKeyword(), chunk.getText());
+		addText(chunk.getKeyword(), chunk.getText());
 	}
 	
 	/**

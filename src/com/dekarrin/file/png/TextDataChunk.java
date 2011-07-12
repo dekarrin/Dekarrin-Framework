@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ByteComposer;
+
 /**
  * Chunk with uncompressed text content.
  */
@@ -18,8 +20,12 @@ public class TextDataChunk extends TextChunk {
 	 *
 	 * @param crc
 	 * The cyclic redundancy check.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public TextDataChunk(byte[] data, long crc) {
+	public TextDataChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}
@@ -52,7 +58,7 @@ public class TextDataChunk extends TextChunk {
 	 */
 	private void parseData() {
 		keyword	= parser.parseString();
-		text	= parser.parseFinalString();
+		text	= parser.parseRemainingString();
 	}
 	
 	/**

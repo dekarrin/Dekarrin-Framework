@@ -1,5 +1,7 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ByteComposer;
+
 /**
  * Chunk data for a standard RGB color space.
  */
@@ -23,8 +25,12 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The CRC for this chunk.
+	 *
+	 * @throws InvalidChunkException
+	 * If the cyclic reduncdancy check read from the chunk
+	 * does not match the one calculated on the type and data.
 	 */
-	public StandardRgbColorSpaceChunk(byte[] data, long crc) {
+	public StandardRgbColorSpaceChunk(byte[] data, long crc) throws InvalidChunkException {
 		super(TYPE_CODE, data, crc);
 		parseData();
 	}

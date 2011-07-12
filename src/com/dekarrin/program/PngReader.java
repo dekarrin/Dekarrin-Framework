@@ -1,6 +1,5 @@
 package com.dekarrin.program;
 
-import com.dekarrin.parse.PngParser;
 import com.dekarrin.file.png.*;
 import com.dekarrin.graphics.*;
 import com.dekarrin.io.*;
@@ -47,7 +46,11 @@ public class PngReader extends ConsoleProgram {
 		pl("-----------");
 		pl("reading test complete.");
 		pl("Writing...");
-		pic.save(output);
+		try {
+			pic.save(output);
+		} catch(StreamFailureException e) {
+			giveFatalError(e.getMessage());
+		}
 	}
 	
 	private void pl(String message) {

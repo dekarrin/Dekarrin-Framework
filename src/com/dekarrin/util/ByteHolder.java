@@ -1,5 +1,7 @@
 package com.dekarrin.util;
 
+import java.util.Arrays;
+
 /**
  * Holds bytes and remembers its current location.
  */

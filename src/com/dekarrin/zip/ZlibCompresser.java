@@ -169,6 +169,6 @@ public class ZlibCompresser {
 	 * True if it has been compressed; false otherwise.
 	 */
 	private boolean alreadyCompressed() {
-		return (compressedData != null):
+		return (compressedData != null);
 	}
 }
