@@ -36,7 +36,7 @@ public class ChemicalCompound {
 	 * Gets the mass of this entire compound. Significant figures are not
 	 * preserved.
 	 *
-	 * @returns
+	 * @return
 	 * The mass.
 	 */
 	public double getMass() {
@@ -53,7 +53,7 @@ public class ChemicalCompound {
 	 * Gets the mass of this entire compound. Significant figures are
 	 * preseved.
 	 *
-	 * @returns
+	 * @return
 	 * The mass.
 	 */
 	public String getMassString() {

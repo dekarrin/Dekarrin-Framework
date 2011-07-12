@@ -153,7 +153,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * @param command
 	 * The Command given to the program.
 	 *
-	 * @returns
+	 * @return
 	 * The output of the command.
 	 */
 	protected abstract String processCommand(Command command);
@@ -191,7 +191,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * @param command
 	 * The command to check.
 	 *
-	 * @returns
+	 * @return
 	 * Whether the command exists.
 	 */
 	private boolean commandExists(Command command) {
@@ -208,7 +208,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * @param command
 	 * The Command given to the program.
 	 *
-	 * @returns
+	 * @return
 	 * The output of the processed command.
 	 */
 	private String process(Command command) {
@@ -232,7 +232,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * @param commandName
 	 * The command that help is needed for.
 	 *
-	 * @returns
+	 * @return
 	 * The information on the specified command.
 	 */
 	private String getCommandHelp(String commandName) {
@@ -244,7 +244,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	/**
 	 * Lists all commands in the program.
 	 *
-	 * @returns
+	 * @return
 	 * The list of commands.
 	 */
 	private String getCommandList() {
@@ -261,7 +261,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * soon as output is given to the user, the program will
 	 * quit.
 	 *
-	 * @returns
+	 * @return
 	 * The system shutdown message.
 	 */
 	private String quit() {
@@ -275,7 +275,7 @@ public abstract class CliProgram extends ConsoleProgram {
 	 * @param command
 	 * The invalid entered command.
 	 *
-	 * @returns
+	 * @return
 	 * The message.
 	 */
 	private String getBadCommandMessage(Command command) {

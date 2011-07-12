@@ -1,4 +1,4 @@
-package com.dekarrin.util
+package com.dekarrin.util;
 
 /**
  * Holds int primitives and grows if the limit of the array

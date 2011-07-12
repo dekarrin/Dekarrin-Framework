@@ -121,7 +121,7 @@ public class ElementList {
 	/**
 	 * Checks if this ElementList has been locked.
 	 *
-	 * @returns
+	 * @return
 	 * True if this ElementList is locked, false otherwise.
 	 */
 	public boolean listIsLocked() {
@@ -169,10 +169,10 @@ public class ElementList {
 	/**
 	 * Gets an Element from the list.
 	 *
-	 * @param postition
+	 * @param position
 	 * The position of the Element in the list.
 	 *
-	 * @returns
+	 * @return
 	 * The Element at the specified index, or null if no Element
 	 * at that index exists.
 	 *
@@ -201,7 +201,7 @@ public class ElementList {
 	 * @param id
 	 * The symbol or name to check for. This is not case-sensitive.
 	 *
-	 * @returns
+	 * @return
 	 * True if an Element with the specified symbol or name exists; false
 	 * otherwise.
 	 *
@@ -228,7 +228,7 @@ public class ElementList {
 	 * @param id
 	 * The symbol or name of the Element to retrieve. This is not case-sensitive.
 	 *
-	 * @returns
+	 * @return
 	 * The Element with the specified symbol, or null if no Element
 	 * with that symbol or name exists.
 	 *
@@ -253,7 +253,7 @@ public class ElementList {
 	 * Checks if the internal pointer can be advanced by one to get
 	 * the next Element.
 	 *
-	 * @returns
+	 * @return
 	 * true if the pointer is not already on the last Element; false
 	 * otherwise.
 	 *
@@ -272,7 +272,7 @@ public class ElementList {
 	/**
 	 * Gets the next Element from the list.
 	 *
-	 * @returns
+	 * @return
 	 * The next Element in the list. If the internal pointer is at the
 	 * end of the list, then null is returned instead.
 	 *
@@ -316,7 +316,7 @@ public class ElementList {
 	/**
 	 * Checks if this ElementList has been created.
 	 *
-	 * @returns
+	 * @return
 	 * True if the ElementList has been instantiated; false otherwise.
 	 */
 	private static boolean hasBeenCreated() {
@@ -333,7 +333,7 @@ public class ElementList {
 	 * @param element
 	 * The input to check.
 	 *
-	 * @returns
+	 * @return
 	 * True if the element has a length of two or less. False otherwise.
 	 */
 	private static boolean isSymbol(String element) {

@@ -197,7 +197,7 @@ public class InternationalTextDataChunk extends TextChunk {
 		if(contents != null) {
 			text = contents;
 		}
-		if(compressedContents 1= null) {
+		if(compressedContents != null) {
 			compressedText = compressedContents;
 		}
 		if(contents == null) {

@@ -68,7 +68,7 @@ public abstract class ConsoleProgram {
 	 * @param index
 	 * The index of the argument to get.
 	 *
-	 * @returns
+	 * @return
 	 * The argument.
 	 */
 	protected String getArgument(int index) {

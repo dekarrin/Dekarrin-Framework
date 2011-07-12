@@ -24,10 +24,8 @@
 		<delete dir="${build}${dekarrin}" />
 	</target>
 	<target name="compile">
-		<mkdir dir="${build}${dekarrin}"/>
-		<javac includeantruntime="false" target="1.6" srcdir="${source}${dekarrin}" destdir="${build}${dekarrin}">
-			<compilerarg value="-Xlint:${warning_count}"/>
-		</javac>
+		<mkdir dir="${build}"/>
+		<javac includeantruntime="false" target="1.6" srcdir="${source}" destdir="${build}" debuglevel="lines,vars,source" debug="on"/>
 	</target>
 	<target name="libs">
 		<mkdir dir="${build}/acm" />
@@ -42,8 +40,8 @@
 	<target name="cleandocs">
 		<delete dir="${docs}"/>
 	</target>
-	<target name="gendocs" depends="cleandocs">
+	<target name="docs" depends="cleandocs">
 		<mkdir dir="${docs}"/>
-		<javadoc excludepackagenames="acm.program,acm.io,acm.gui,acm.util,acm.graphics" sourcepath="${source}" destdir="${docs}" access="private" />
+		<javadoc excludepackagenames="acm.program,acm.io,acm.gui,acm.util,acm.graphics,org.ostermiller.util" sourcepath="${source}" destdir="${docs}" access="protected" />
 	</target>
 </project>

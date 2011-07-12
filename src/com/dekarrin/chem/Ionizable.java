@@ -9,7 +9,7 @@ public interface Ionizable {
 	 * Checks if this Ionizable has more than one possible
 	 * charge.
 	 *
-	 * @returns
+	 * @return
 	 * True if this Ionizable has multiple charges; false otherwise.
 	 */
 	public boolean hasMultipleCharges();
@@ -17,7 +17,7 @@ public interface Ionizable {
 	/**
 	 * Gets the most common charge.
 	 *
-	 * @returns
+	 * @return
 	 * The most common charge.
 	 */
 	public int getPrimaryCharge();
@@ -25,7 +25,7 @@ public interface Ionizable {
 	/**
 	 * Gets all charges.
 	 *
-	 * @returns
+	 * @return
 	 * An array containing all the charges.
 	 */
 	public int[] getCharges();
@@ -45,7 +45,7 @@ public interface Ionizable {
 	/**
 	 * Checks which charge is currently being used.
 	 *
-	 * @returns
+	 * @return
 	 * The used charge.
 	 *
 	 * @throws ChargeNotSetException
@@ -56,7 +56,7 @@ public interface Ionizable {
 	/**
 	 * Checks if the charge has been set yet.
 	 *
-	 * @returns
+	 * @return
 	 * true if the used charge has been set, false otherwise.
 	 */
 	public boolean chargeIsSet();

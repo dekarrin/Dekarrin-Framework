@@ -115,7 +115,7 @@ public class CommandDescription {
 	 * Gets a syntax message for the command that this
 	 * CommandDescription is associated with.
 	 *
-	 * @returns
+	 * @return
 	 * A message showing proper syntax for this Command.
 	 */
 	public String getSyntaxMessage() {
@@ -129,7 +129,7 @@ public class CommandDescription {
 	 * Gets a full-on help message for the command that this
 	 * CommandDescription is associated with.
 	 *
-	 * @returns
+	 * @return
 	 * A long String containing the help message.
 	 */
 	public String getHelpMessage() {
@@ -154,7 +154,7 @@ public class CommandDescription {
 	 * The length that the name should be. The name section
 	 * of the list will be padded to this length.
 	 *
-	 * @returns
+	 * @return
 	 * The short list form of the command.
 	 */
 	public String getListing(int nameLength) {
@@ -168,7 +168,7 @@ public class CommandDescription {
 	 * Gets the syntax for the flags in thie command that
 	 * this CommandDescription is associated with.
 	 *
-	 * @returns
+	 * @return
 	 * The flag syntax.
 	 */
 	private String getFlagSyntax() {
@@ -198,7 +198,7 @@ public class CommandDescription {
 	 * Gets the syntax for the arguments in the command that
 	 * this CommandDescription is associated with.
 	 *
-	 * @returns
+	 * @return
 	 * The argument syntax.
 	 */
 	private String getArgumentSyntax() {
@@ -223,7 +223,7 @@ public class CommandDescription {
 	/**
 	 * Gets the help strings for the flags.
 	 *
-	 * @returns
+	 * @return
 	 * The flag help string.
 	 */
 	private String getFlagHelp() {
@@ -250,7 +250,7 @@ public class CommandDescription {
 	/**
 	 * Gets the help strings for the arguments.
 	 *
-	 * @returns
+	 * @return
 	 * The argument help string.
 	 */
 	private String getArgumentHelp() {

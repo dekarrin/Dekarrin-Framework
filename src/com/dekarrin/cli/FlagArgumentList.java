@@ -25,7 +25,7 @@ public class FlagArgumentList {
 	 * @param args
 	 * The argument list to strip flags from.
 	 *
-	 * @returns
+	 * @return
 	 * The given list without flags.
 	 */
 	public static String[] removeFlags(String[] args) {
@@ -86,7 +86,7 @@ public class FlagArgumentList {
 	 * @param name
 	 * The name of the flag to check for.
 	 *
-	 * @returns
+	 * @return
 	 * Whether or not the flag exists.
 	 */
 	public boolean contains(String name) {
@@ -99,7 +99,7 @@ public class FlagArgumentList {
 	 * @param name
 	 * The name of the flag.
 	 *
-	 * @returns
+	 * @return
 	 * The value of the flag.
 	 */
 	public String getValue(String name) {
@@ -109,7 +109,7 @@ public class FlagArgumentList {
 	/**
 	 * Checks how many flags are contained.
 	 *
-	 * @returns
+	 * @return
 	 * The number of flags contained.
 	 */
 	public int size() {
@@ -213,7 +213,7 @@ public class FlagArgumentList {
 	 * @param flagArgument
 	 * The argument being checked.
 	 *
-	 * @returns
+	 * @return
 	 * Whether or not the argument contains multiple flags.
 	 */
 	private boolean argumentContainsMultipleFlags(String flagArgument) {
@@ -230,7 +230,7 @@ public class FlagArgumentList {
 	 * @param arguments
 	 * The arguments from the command line.
 	 *
-	 * @returns
+	 * @return
 	 * The number of arguments which are flags.
 	 */
 	private static int countFlags(String[] arguments) {
@@ -249,7 +249,7 @@ public class FlagArgumentList {
 	 * @param flag
 	 * The flag to check.
 	 *
-	 * @returns
+	 * @return
 	 * Whether there is a value.
 	 */
 	private boolean flagContainsValue(String flag) {

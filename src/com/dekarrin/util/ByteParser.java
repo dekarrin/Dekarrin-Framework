@@ -537,7 +537,7 @@ public class ByteParser {
 		String nextCharacter;
 		while(remaining() > characterWidth) {
 			characterBytes = parseBytes(characterWidth);
-			if(isNullSeparator(nextCharacter) {
+			if(isNullSeparator(nextCharacter)) {
 				results.add(buffer.toString());
 				buffer = new StringBuffer();
 			} else {

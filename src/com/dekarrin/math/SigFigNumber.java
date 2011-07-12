@@ -92,7 +92,7 @@ public class SigFigNumber {
 	 * 10^1. For the thousands' place, 3 will be returned, because it is
 	 * 10^3.
 	 *
-	 * @returns
+	 * @return
 	 * The exponent required to raise 10 to to get the place of the lowest
 	 * sigfig.
 	 */
@@ -103,7 +103,7 @@ public class SigFigNumber {
 	/**
 	 * Gets the number of sigfigs in this SigFigNumber.
 	 *
-	 * @returns
+	 * @return
 	 * The number of sigfigs.
 	 */
 	public int getSigfigCount() {
@@ -113,7 +113,7 @@ public class SigFigNumber {
 	/**
 	 * Gets the numerical value of this SigFigNumber.
 	 *
-	 * @returns
+	 * @return
 	 * The value of this SigFigNumber.
 	 */
 	public double getNumericalValue() {
@@ -123,7 +123,7 @@ public class SigFigNumber {
 	/**
 	 * Gets the string value of this SigFigNumber.
 	 *
-	 * @returns
+	 * @return
 	 * The string value.
 	 */
 	public String toString() {

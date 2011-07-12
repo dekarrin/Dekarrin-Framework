@@ -212,7 +212,7 @@ public class CsvFile {
 	/**
 	 * Gets the headers in this CsvFile.
 	 *
-	 * @returns
+	 * @return
 	 * The headers.
 	 */
 	public String[] getHeaders() {
@@ -223,7 +223,7 @@ public class CsvFile {
 	 * Gets all the items in this CsvFile. This does not include
 	 * the headers.
 	 *
-	 * @returns
+	 * @return
 	 * An array containing all data in this CsvFile. This is a two
 	 * dimensional array. The first dimension is the item, and the
 	 * second is the value.
@@ -421,7 +421,7 @@ public class CsvFile {
 	 * @param dataValues
 	 * The values to use to create the String.
 	 *
-	 * @returns
+	 * @return
 	 * The items in the dataValues array in a single string, seperated
 	 * by the valueSeperator char.
 	 */
@@ -445,7 +445,7 @@ public class CsvFile {
 	 * @param in
 	 * The Reader to use as input.
 	 *
-	 * @returns
+	 * @return
 	 * A String containing the values of an entire item.
 	 */
 	private String readItem(Reader in) throws IOException {

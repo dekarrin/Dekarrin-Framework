@@ -3,11 +3,12 @@ package com.dekarrin.file.png;
 import java.awt.Point;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.io.*;
 import com.dekarrin.graphics.*;
 import com.dekarrin.zip.*;
 import com.dekarrin.util.*;
 import com.dekarrin.io.*;
-import com.dekarrin.error;
+import com.dekarrin.error.*;
 
 /**
  * Represents a PNG file. This class is attempting to be compliant
@@ -1398,7 +1399,7 @@ public class PortableNetworkGraphic {
 	 * Sets this png to not copy unsafe to copy chunks when
 	 * it saves.
 	 */
-	protected criticallyModify() {
+	protected void criticallyModify() {
 		modifiedCritical = true;
 	}
 	
@@ -1617,7 +1618,7 @@ public class PortableNetworkGraphic {
 	 * The resulting BackgroundColorChunk.
 	 */
 	private BackgroundColorChunk backgroundColorToChunk() {
-		BackgroundColorChunk bcc
+		BackgroundColorChunk bcc;
 		if(colorMode == COLOR_TYPE_COLOR_INDEXED) {
 			bcc = new BackgroundColorChunk(getColorIndex(backgroundColor));
 		} else {
@@ -1901,12 +1902,12 @@ public class PortableNetworkGraphic {
 			if(i + IDAT_BUFFER_LENGTH < data.length) {
 				idatBuffer = new ByteHolder(IDAT_BUFFER_LENGTH);
 			} else {
-				idatBuffer = new byte(data.length - i);
+				idatBuffer = new ByteHolder(data.length - i);
 			}
 			for(int j = 0; j < IDAT_BUFFER_LENGTH && i+j < data.length; j++) {
-				idatBuffer[j] = data[i+j];
+				idatBuffer.add(data[i+j]);
 			}
-			chunks[chunksPointer++] = new ImageDataChunk(idatBuffer);
+			chunks[chunksPointer++] = new ImageDataChunk(idatBuffer.toArray());
 		}
 	}
 	
@@ -1929,7 +1930,7 @@ public class PortableNetworkGraphic {
 		int k = 0;
 		for(int i = 0; i < lines.length; i++) {
 			nextBytes = lines[i].getFilteredBytes();
-			for(int j = 0; j < nextBytes.length) {
+			for(int j = 0; j < nextBytes.length; j++) {
 				deconstructed[k++] = nextBytes[j];
 			}
 		}

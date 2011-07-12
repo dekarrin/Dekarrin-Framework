@@ -34,7 +34,7 @@ public class UnrecognizedCommandException extends RuntimeException {
 	/**
 	 * Gets the command that caused the problem.
 	 *
-	 * @returns
+	 * @return
 	 * The command.
 	 */
 	public String getCommand() {
@@ -44,7 +44,7 @@ public class UnrecognizedCommandException extends RuntimeException {
 	/**
 	 * Gets the message for this UnrecognizedCommandException.
 	 *
-	 * @returns
+	 * @return
 	 * The message.
 	 */
 	public String getMessage() {

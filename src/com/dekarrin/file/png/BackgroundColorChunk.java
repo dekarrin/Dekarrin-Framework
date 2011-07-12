@@ -157,7 +157,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 				g = parser.parseInt(2);
 				b = parser.parseInt(2);
 				Color color = new Color();
-				Color color.setSamples(r, g, b);
+				color.setSamples(r, g, b);
 				setProperties(color);
 				break;
 		}

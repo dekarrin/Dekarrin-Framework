@@ -68,7 +68,7 @@ public class ChemistryProgram extends CliProgram {
 	 * @param command
 	 * The Command created by the user-entered command.
 	 *
-	 * @returns
+	 * @return
 	 * The output for whatever command was entered.
 	 */
 	protected String processCommand(Command command) {
@@ -91,7 +91,7 @@ public class ChemistryProgram extends CliProgram {
 	 * @param element
 	 * Either a symbol or name of an element.
 	 *
-	 * @returns
+	 * @return
 	 * The requested element's datasheet.
 	 */
 	private String getElementInfo(String element) {
@@ -151,7 +151,7 @@ public class ChemistryProgram extends CliProgram {
 	 * @param withList
 	 * Whether to list the elements that make up the spelled word.
 	 *
-	 * @returns
+	 * @return
 	 * The word spelled as a series of chemical symbols if it is possible,
 	 * otherwise a message indicating that it cannot be done.
 	 */

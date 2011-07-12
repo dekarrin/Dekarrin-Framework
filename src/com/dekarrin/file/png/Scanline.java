@@ -310,7 +310,7 @@ class Scanline {
 	 * @return
 	 * The filtered data.
 	 */
-	private static byte[] averageDefilter(byte[] raw, byte[] prior) {
+	private static byte[] averageFilter(byte[] raw, byte[] prior) {
 		byte[] average = new byte[raw.length];
 		int bpp = getPixelWidth();
 		if(prior == null) {
@@ -455,7 +455,7 @@ class Scanline {
 	 * @return
 	 * The result of subtracting byte2 from byte1.
 	 */
-	private static byte addBytes(byte byte1, byte byte2) {
+	private static byte subtractBytes(byte byte1, byte byte2) {
 		int a = byte1;
 		int b = byte2;
 		int c = (a - b) % 256;

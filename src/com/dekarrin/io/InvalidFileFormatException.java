@@ -38,7 +38,7 @@ public class InvalidFileFormatException extends Exception {
 	 * Shows the message for this InvalidFileFormatException. The message
 	 * contains information on both the file type and error.
 	 *
-	 * @returns
+	 * @return
 	 * The message.
 	 */
 	public String getMessage() {

@@ -31,9 +31,6 @@ public class ElementSpeller {
 	
 	/**
 	 * Creates a new ElementSpeller instance.
-	 *
-	 * @param elementList
-	 * A list of elements, indexed by their symbols.
 	 */
 	public ElementSpeller() {
 		initialize();
@@ -42,9 +39,6 @@ public class ElementSpeller {
 	/**
 	 * Creates a new ElementSpeller instance and sets the contents
 	 * to a word.
-	 *
-	 * @param elementList
-	 * A list of elements, indexed by their symbols.
 	 *
 	 * @param word
 	 * The word to set the contents to.
@@ -67,7 +61,7 @@ public class ElementSpeller {
 	/**
 	 * Gets the contained word of this ElementSpeller.
 	 *
-	 * @returns
+	 * @return
 	 * The contained word.
 	 */
 	public String getWord() {
@@ -78,7 +72,7 @@ public class ElementSpeller {
 	 * Gets the word contained in this ElementSpeller spelled as a
 	 * series of element symbols.
 	 *
-	 * @returns
+	 * @return
 	 * The word spelled with element symbols, if it is possible. If
 	 * it is impossible to spell the word with chemical symbols, null
 	 * is returned.
@@ -91,7 +85,7 @@ public class ElementSpeller {
 	 * Gets the Elements that make up the spelled word in this
 	 * ElementSpeller.
 	 *
-	 * @returns
+	 * @return
 	 * The Elements, if it is possible to spell the word; otherwise, null.
 	 */
 	public Element[] getElements() {
@@ -102,7 +96,7 @@ public class ElementSpeller {
 	 * Gets the list of symbols used to spell the word in this
 	 * ElementSpeller.
 	 *
-	 * @returns
+	 * @return
 	 * The symbols, if it is possible to spell the word; otherwise, null.	 
 	 */
 	public String[] getSymbols() {
@@ -113,7 +107,7 @@ public class ElementSpeller {
 	 * Checks whether the current contents of this ElementSpeller can be
 	 * spelled using chemical symbols.
 	 *
-	 * @returns
+	 * @return
 	 * True if it can be spelled, false otherwise.
 	 */
 	public boolean wordIsPossible() {
@@ -184,7 +178,7 @@ public class ElementSpeller {
 	 * @param letter
 	 * The letter to check for the symbol of.
 	 *
-	 * @returns
+	 * @return
 	 * True if the element could be added, false if it couldn't be.
 	 */
 	private boolean addThisLetter(Vector<String> list, char letter) {
@@ -206,13 +200,13 @@ public class ElementSpeller {
 	 * @param list
 	 * The list that the element symbol should be added to if it exists.
 	 *
-	 * @param letter
-	 * The letter to be checked.
+	 * @param letters
+	 * The letter(s) to be checked.
 	 *
 	 * @param i
 	 * The current iteration that the main spelling loop is on.
 	 *
-	 * @returns
+	 * @return
 	 * True if the element could be added, false otherwise.
 	 */
 	private boolean addPostCombo(Vector<String> list, char[] letters, int i) {
@@ -249,7 +243,7 @@ public class ElementSpeller {
 	 * @param i
 	 * The current iteration of the main spelling loop.
 	 *
-	 * @returns
+	 * @return
 	 * True if the symbol could be added, false otherwise.
 	 */
 	private boolean addPreCombo(Vector<String> list, char[] letters, int i) {
@@ -283,7 +277,7 @@ public class ElementSpeller {
 	 * @param letter
 	 * The letter to convert.
 	 *
-	 * @returns
+	 * @return
 	 * Returns the char as a chemical symbol String.
 	 */
 	private String makeChemicalSymbol(char letter) {
@@ -297,7 +291,7 @@ public class ElementSpeller {
 	 * @param letters
 	 * The letters to convert.
 	 *
-	 * @returns
+	 * @return
 	 * The chemical symbol.
 	 */
 	private String makeChemicalSymbol(char[] letters) {
@@ -318,7 +312,7 @@ public class ElementSpeller {
 	 * @param symbol
 	 * The symbol to check for.
 	 *
-	 * @returns
+	 * @return
 	 * True if an element with that symbol exists; false otherwise.
 	 */
 	private boolean elementWithSymbolExists(String symbol) {

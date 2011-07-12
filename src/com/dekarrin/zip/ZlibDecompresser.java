@@ -67,22 +67,21 @@ public class ZlibDecompresser {
 	 * the stored output is returned and the decompression is skipped.
 	 *
 	 * @return
-	 * The uncompressed data.
+	 * The decompressed data.
 	 */
 	public byte[] decompress() {
-		if(decompressedData == null) {
-			decompressedData = new byte[0];
+		if(!alreadyDecompressed()) {
 			decompressInputData();
 		}
 		return decompressedData;
 	}
 	
 	/**
-	 * Decompresses the data into a String. Th string uses the default
+	 * Decompresses the data into a String. The string uses the default
 	 * encoding for the system.
 	 *
 	 * @return
-	 * The string.
+	 * The decompressed String.
 	 */
 	public String decompressString() {
 		decompress();
@@ -98,7 +97,7 @@ public class ZlibDecompresser {
 	 * encoded using the default character set.
 	 *
 	 * @return
-	 * The string.
+	 * The decompressed String.
 	 */
 	public String decompressString(String encoding) {
 		decompress();
@@ -112,20 +111,20 @@ public class ZlibDecompresser {
 	}
 	
 	/**
-	 * Decompresses the data.
+	 * Decompresses the stored data.
 	 */
 	private void decompressInputData() {
 		Inflater decompresser = new Inflater();
 		decompresser.setInput(compressedData);
-		byte[] result = new byte[OUTPUT_BUFFER_SIZE];
+		byte[] outputBuffer = new byte[OUTPUT_BUFFER_SIZE];
 		int actualLength = 0;
-		while(decompresser.getRemaining() > 0) {
+		while(!decompresser.finished()) {
 			try {
-				actualLength = decompresser.inflate(result);
+				actualLength = decompresser.inflate(outputBuffer);
 			} catch(DataFormatException e) {
 				System.err.println("Bad DEFLATE format!");
 			}
-			addToOutput(result, actualLength);
+			addToOutput(outputBuffer, actualLength);
 		}
 		decompresser.end();
 	}
@@ -134,16 +133,16 @@ public class ZlibDecompresser {
 	 * Adds the result of an inflation to the output bytes.
 	 *
 	 * @param result
-	 * The result of an inflation.
+	 * The result of an inflation operation.
 	 *
 	 * @param length
 	 * The length to which the result array should be processed.
 	 */
 	private void addToOutput(byte[] result, int length) {
-		int oldDataLength = decompressedData.length;
+		int oldDataLength = (decompressedData != null) ? decompressedData.length : 0;
 		allocateDecompressedData(length);
 		for(int i = 0; i < length; i++) {
-			decompressedData [oldDataLength + i] = result[i];
+			decompressedData[oldDataLength + i] = result[i];
 		}
 	}
 	
@@ -165,5 +164,14 @@ public class ZlibDecompresser {
 		}
 		decompressedData = holder;
 	}
+	
+	/**
+	 * Checks if the data has already been decompressed.
+	 *
+	 * @return
+	 * True if it has been decompressed; false otherwise.
+	 */
+	private boolean alreadyDecompressed() {
+		return (decompressedData != null):
+	}
 }
- 

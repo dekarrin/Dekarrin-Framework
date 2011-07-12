@@ -55,7 +55,7 @@ public class Command {
 	/**
 	 * Gets the name of this command.
 	 *
-	 * @returns
+	 * @return
 	 * The name, lower-cased.
 	 */
 	public String getName() {
@@ -68,7 +68,7 @@ public class Command {
 	 * @param name
 	 * The name of the flag to check for.
 	 *
-	 * @returns
+	 * @return
 	 * Whether or not the flag exists.
 	 */
 	public boolean hasFlag(String name) {
@@ -81,7 +81,7 @@ public class Command {
 	 * @param name
 	 * The name of the flag.
 	 *
-	 * @returns
+	 * @return
 	 * The value of the flag.
 	 */
 	public String getFlag(String name) {
@@ -95,7 +95,7 @@ public class Command {
 	 * @param name
 	 * The name of the argument to check for.
 	 *
-	 * @returns
+	 * @return
 	 * True if the argument exists, false otherwise.
 	 */
 	public boolean hasArgument(String name) {
@@ -115,7 +115,7 @@ public class Command {
 	 * @param name
 	 * The name of the argument.
 	 *
-	 * @returns
+	 * @return
 	 * The value of the argument, or null if the argument
 	 * doesn't exist.
 	 */
@@ -132,7 +132,7 @@ public class Command {
 	 * Checks if there are there right number of arguments
 	 * in this Command.
 	 *
-	 * @returns
+	 * @return
 	 * True if this Command has at least as many arguments
 	 * as is necessary for it.
 	 */
@@ -148,7 +148,7 @@ public class Command {
 	/**
 	 * Gets a syntax message for this Command.
 	 *
-	 * @returns
+	 * @return
 	 * A message showing proper syntax for this Command.
 	 */
 	public String getSyntaxMessage() {
@@ -158,7 +158,7 @@ public class Command {
 	/**
 	 * Gets a full-on help message for this Command.
 	 *
-	 * @returns
+	 * @return
 	 * A long String containing the help message.
 	 */
 	public String getHelpMessage() {
@@ -172,7 +172,7 @@ public class Command {
 	 * @param argument
 	 * The argument to get the index for.
 	 *
-	 * @returns
+	 * @return
 	 * The index of the argument, if it is an argument. If
 	 * the given argument does not exist, -1 is returned.
 	 */
@@ -194,7 +194,7 @@ public class Command {
 	 * Gets the minimum number of arguments required for this
 	 * command.
 	 *
-	 * @returns
+	 * @return
 	 * The minimum number of arguments.
 	 */
 	private int getMinimumArguments() {
