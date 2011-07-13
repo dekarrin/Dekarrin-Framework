@@ -630,7 +630,7 @@ public class ByteParser {
 	 * The number of blocks of bytes of the specified width that
 	 * are left in the buffer.
 	 */
-	private int remainingBlocks(int size) {
+	public int remainingBlocks(int size) {
 		int bytes = dataBuffer.capacity() - dataBuffer.position();
 		int blocks = bytes / size;
 		return blocks;

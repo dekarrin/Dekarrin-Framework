@@ -10,7 +10,7 @@ public class ByteHolder implements PrimitiveHolder {
 	/**
 	 * The internal array for holding elements.
 	 */
-	private byte[] holder;
+	protected byte[] holder;
 	
 	/**
 	 * The pointer for remembering the current position.

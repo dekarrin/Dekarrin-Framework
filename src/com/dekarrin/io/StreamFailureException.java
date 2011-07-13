@@ -6,6 +6,10 @@ package com.dekarrin.io;
 public class StreamFailureException extends Exception {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3733188104606442560L;
+	/**
 	 * The message of this StreamFailureException, returned by
 	 * getMessage().
 	 */

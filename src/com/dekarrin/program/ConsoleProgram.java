@@ -87,7 +87,7 @@ public abstract class ConsoleProgram {
 	 * by subclasses.
 	 */
 	private void giveSyntaxError() {
-		String error = "syntax: "+programName+" ";
+		String error = "usage: java "+programName+" ";
 		for(int i = 0; i < argumentNames.size(); i++) {
 			error = error + String.format((optionalArgument.get(i)) ? "<%s> " : "[%s] ", argumentNames.get(i));
 		}
@@ -131,6 +131,7 @@ public abstract class ConsoleProgram {
 	 */
 	protected void giveFatalError(String message) {
 		ui.printError(message);
+		ui.println();
 		System.exit(1);
 	}
 }

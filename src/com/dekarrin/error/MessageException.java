@@ -6,6 +6,10 @@ package com.dekarrin.error;
 public class MessageException extends Exception {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1095430943887736092L;
+	/**
 	 * The message of this MessageException, returned by
 	 * getMessage().
 	 */

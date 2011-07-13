@@ -25,7 +25,6 @@ public class ArrayHelper {
 	public static int[][] split(int[] subject, int value) {
 		int occurances = count(subject, value);
 		int[][] subarrays = new int[occurances+1][];
-		int[] sub;
 		int start = -1;
 		for(int i = 0; i < subject.length; i++) {
 			if(i != value) {
@@ -288,5 +287,153 @@ public class ArrayHelper {
 			}
 		}
 		return c;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static long sum(byte[] subject) {
+		long sum = 0;
+		for(byte b: subject) {
+			sum += b;
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static long sum(short[] subject) {
+		long sum = 0;
+		for(short s: subject) {
+			sum += s;
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static long sum(char[] subject) {
+		long sum = 0;
+		for(char c: subject) {
+			sum += c;
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array. For the
+	 * purposes of adding booleans together, true is 1 and
+	 * false is 0.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static long sum(boolean[] subject) {
+		long sum = 0;
+		for(boolean b: subject) {
+			if(b) {
+				sum++;
+			}
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static long sum(int[] subject) {
+		long sum = 0;
+		for(int i: subject) {
+			sum += i;
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static long sum(long[] subject) {
+		long sum = 0;
+		for(long l: subject) {
+			sum += l;
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static double sum(float[] subject) {
+		double sum = 0.0;
+		for(float f: subject) {
+			sum += f;
+		}
+		return sum;
+	}
+	
+	/**
+	 * Gets the total of all values in an array.
+	 * 
+	 * @param subject
+	 * The array to total the elements in.
+	 * 
+	 * @return
+	 * The result of adding all the elements of the subject
+	 * together.
+	 */
+	public static double sum(double[] subject) {
+		double sum = 0.0;
+		for(double d: subject) {
+			sum += d;
+		}
+		return sum;
 	}
 }

@@ -11,49 +11,49 @@ import java.util.Arrays;
  * makes the resize() method seem obsolete, but it can (and
  * should) still be used for manual resizing operations.
  */
-public class GrowableIntHolder extends IntHolder implements Growable {
+public class GrowableByteHolder extends ByteHolder implements Growable {
 	
 	/**
-	 * The growth factor of this GrowableIntHolder. This is
+	 * The growth factor of this GrowableByteHolder. This is
 	 * how much it will increase the internal array's size
 	 * when it runs out of room.
 	 */
 	private double growthFactor = 0.5;
 	
 	/**
-	 * The number of elements in this GrowableIntHolder that
+	 * The number of elements in this GrowableByteHolder that
 	 * were set to a value.
 	 */
 	private int size = 0;
 	
 	/**
-	 * Creates a new GrowableIntHolder.
+	 * Creates a new GrowableByteHolder.
 	 *
 	 * @param size
 	 * The size of the internal storage array.
 	 *
 	 * @param growthFactor
-	 * How much to grow by whenever the GrowableIntHolder must
+	 * How much to grow by whenever the GrowableByteHolder must
 	 * be grown.
 	 */
-	public GrowableIntHolder(int size, double growthFactor) {
+	public GrowableByteHolder(int size, double growthFactor) {
 		super(size);
 		this.growthFactor = growthFactor;
 	}
 	
 	/**
-	 * Creates a new GrowableIntHolder with the default
+	 * Creates a new GrowableByteHolder with the default
 	 * growth behavior of 50% increase.
 	 *
 	 * @param size
 	 * The size of the internal storage array.
 	 */
-	public GrowableIntHolder(int size) {
+	public GrowableByteHolder(int size) {
 		super(size);
 	}
 	
 	/**
-	 * Inserts an int at an index. If the index is greater
+	 * Inserts a byte at an index. If the index is greater
 	 * than the current position, the position is changed to
 	 * the index + 1. If the index is greater than the
 	 * current largest index of the internal storage array,
@@ -62,21 +62,21 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	 * growth factor.
 	 *
 	 * @param data
-	 * The int to be inserted.
+	 * The byte to be inserted.
 	 *
 	 * @param index
 	 * The index to insert it at.
 	 */
 	@Override
-	public void set(int data, int index) {
+	public void set(byte data, int index) {
 		checkIndexValidity(index);
 		super.set(data, index);
 		fitSizeToIndex(index);
 	}
 	
 	/**
-	 * Inserts an int at the current position of the holder.
-	 * The int is inserted and the position pointer is
+	 * Inserts an byte at the current position of the holder.
+	 * The byte is inserted and the position pointer is
 	 * incremented by 1. If the current position is greater
 	 * than the current largest index of the internal
 	 * storage array, then the internal storage array is
@@ -86,15 +86,15 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	 * The int to be inserted.
 	 */
 	@Override
-	public void add(int data) {
+	public void add(byte data) {
 		checkIndexValidity(position() + 1);
 		super.add(data);
 		fitSizeToIndex(position());
 	}
 	
 	/**
-	 * Inserts ints at the current position of the holder.
-	 * The ints are inserted and the position pointer is
+	 * Inserts byte at the current position of the holder.
+	 * The bytes are inserted and the position pointer is
 	 * incremented by the length of the given array. If the
 	 * current position plus the length of the given data
 	 * array is greater than the current largest index of
@@ -102,10 +102,10 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	 * storage array is resized.
 	 *
 	 * @param data
-	 * The ints to be inserted.
+	 * The bytes to be inserted.
 	 */
 	@Override
-	public void add(int[] data) {
+	public void add(byte[] data) {
 		checkIndexValidity(position() + data.length);
 		super.add(data);
 		fitSizeToIndex(position());
@@ -121,7 +121,7 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	 * would result in a growth operation.
 	 *
 	 * @return
-	 * True if inserting another int to this array at any
+	 * True if inserting another byte to this array at any
 	 * point beyond the current index would result in the
 	 * internal storage array being grown; false otherwise.
 	 */
@@ -132,10 +132,10 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	
 	/**
 	 * Gets the number of elements stored in this
-	 * GrowableIntHolder. This will correspond to the
+	 * GrowableByteHolder. This will correspond to the
 	 * greatest index that had an integer assigned to it,
-	 * whether set explicitly using set(int, int), or
-	 * implicitly using add(int) or add(int[]). Note that
+	 * whether set explicitly using set(byte, int), or
+	 * implicitly using add(byte) or add(byte[]). Note that
 	 * this is not necessarily the number of elements that
 	 * were added to this GrowableIntHolder externally; if
 	 * indices are skipped when assigning a value, the
@@ -143,7 +143,7 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	 * default values.
 	 *
 	 * @return
-	 * The number of elements in this GrowableIntHolder.
+	 * The number of elements in this GrowableByteHolder.
 	 */
 	@Override
 	public int size() {
@@ -154,14 +154,14 @@ public class GrowableIntHolder extends IntHolder implements Growable {
 	 * Gets all the elements of the internal array that have
 	 * been set. An element is considered to be set if its
 	 * index is less than or equal to the size() of this
-	 * GrowableIntHolder.
+	 * GrowableByteHolder.
 	 *
 	 * @return
-	 * The set ints of this GrowableIntHolder.
+	 * The set byte of this GrowableByteHolder.
 	 */
 	@Override
-	public int[] toArray() {
-		int[] setValues = Arrays.copyOfRange(holder, 0, size);
+	public byte[] toArray() {
+		byte[] setValues = Arrays.copyOfRange(holder, 0, size);
 		return setValues;
 	}
 	

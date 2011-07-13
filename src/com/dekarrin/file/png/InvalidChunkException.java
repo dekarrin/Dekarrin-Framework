@@ -9,6 +9,11 @@ import com.dekarrin.error.MessageException;
 public class InvalidChunkException extends MessageException {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3392588602015984994L;
+
+	/**
 	 * Creates a new InvalidChunkException with the specified
 	 * message.
 	 *

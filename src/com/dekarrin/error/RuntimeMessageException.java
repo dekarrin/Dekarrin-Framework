@@ -6,6 +6,10 @@ package com.dekarrin.error;
 public class RuntimeMessageException extends RuntimeException {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1082386472498279970L;
+	/**
 	 * The message of this RuntimeMessageException, returned by
 	 * getMessage().
 	 */

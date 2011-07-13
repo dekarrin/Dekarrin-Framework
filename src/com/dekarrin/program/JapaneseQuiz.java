@@ -10,6 +10,11 @@ package com.dekarrin.program;
 public class JapaneseQuiz extends acm.program.ConsoleProgram {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1966725904114805303L;
+
+	/**
 	 * The lowest row of kana that can be selected for a question.
 	 */
 	private int lowLevel = 0;

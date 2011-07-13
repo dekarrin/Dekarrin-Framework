@@ -7,6 +7,11 @@ package com.dekarrin.io;
 public class InvalidFileFormatException extends Exception {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5479990326795564244L;
+
+	/**
 	 * The message of this InvalidFileFormatException, returned by
 	 * getMessage().
 	 */

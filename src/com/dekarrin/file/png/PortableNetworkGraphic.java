@@ -105,7 +105,7 @@ public class PortableNetworkGraphic {
 		/**
 		 * The calculated CRC of the chunk.
 		 */
-		private int cyclicRedundancyCheck;
+		private long cyclicRedundancyCheck;
 		
 		/**
 		 * The png file being parsed.
@@ -378,7 +378,7 @@ public class PortableNetworkGraphic {
 		 * int.
 		 */
 		private void interpretCrcBytes() {
-			cyclicRedundancyCheck = getIntFromBytes(crcBytes.toArray());
+			cyclicRedundancyCheck = getLongFromBytes(crcBytes.toArray());
 		}
 		
 		/**
@@ -393,7 +393,7 @@ public class PortableNetworkGraphic {
 		 */
 		private void resetDataFields() {
 			dataLength				= 0;
-			cyclicRedundancyCheck	= 0;
+			cyclicRedundancyCheck	= 0L;
 			lengthBytes				= new ByteHolder(4);
 			typeBytes				= new ByteHolder(4);
 			crcBytes				= new ByteHolder(4);
@@ -413,6 +413,31 @@ public class PortableNetworkGraphic {
 		private int getIntFromBytes(byte[] subject) {
 			ByteBuffer bb = ByteBuffer.wrap(subject);
 			int converted = bb.getInt();
+			return converted;
+		}
+		
+		/**
+		 * Converts a byte array into a long.
+		 *
+		 * @param subject
+		 * The bytes to convert. If this is not at leas eight bytes
+		 * long than it is padded according to big endian order
+		 * (bytes are added in front of the given bytes).
+		 *
+		 * @return
+		 * The long, made up of the first eight bytes in the array.
+		 */
+		private long getLongFromBytes(byte[] subject) {
+			if(subject.length < 8) {
+				ByteHolder holder = new ByteHolder(8);
+				for(int i = 0; i < 8 - subject.length; i++) {
+					holder.add((byte)0);
+				}
+				holder.add(subject);
+				subject = holder.toArray();
+			}
+			ByteBuffer bb = ByteBuffer.wrap(subject);
+			long converted = bb.getLong();
 			return converted;
 		}
 		
@@ -1751,7 +1776,6 @@ public class PortableNetworkGraphic {
 		int[] green = new int[reducedPalette.size()];
 		int[] blue = new int[reducedPalette.size()];
 		int[] alpha = new int[reducedPalette.size()];
-		int[] frequencies = new int[reducedPalette.size()];
 		Color color;
 		for(int i = 0; i < reducedPalette.size(); i++) {
 			color = reducedPalette.getColor(i);
@@ -2056,10 +2080,10 @@ public class PortableNetworkGraphic {
 		Scanline[] rawData = new Scanline[lines.length];
 		int samples = samplesPerPixel();
 		for(int i = 0; i < lines.length; i++) {
-			rawData[i] = Scanline.getInstanceFromFiltered(lines[i], bitDepth, samples);
+			rawData[i] = new Scanline(samples, bitDepth, lines[i]);
 		}
+		Scanline.resetLines();
 		constructImage(rawData);
-		Scanline.reset();
 	}
 	
 	/**
@@ -2073,7 +2097,6 @@ public class PortableNetworkGraphic {
 		byte[] uncompressedData = deconstructScanlines(rawData);
 		byte[] compressedData = compressData(uncompressedData);
 		ImageDataChunk[] chunks = createIdatChunks(compressedData);
-		Scanline.reset();
 		return chunks;
 	}
 	
@@ -2120,20 +2143,11 @@ public class PortableNetworkGraphic {
 	 * The data of the scanlines.
 	 */
 	private byte[] deconstructScanlines(Scanline[] lines) {
-		int count = 0;
-		for(int i = 0; i < lines.length; i++) {
-			count += lines[i].getBytes().length;
+		GrowableByteHolder holder = new GrowableByteHolder(lines.length * (width + 1));
+		for(Scanline sl: lines) {
+			holder.add(sl.getFiltered());
 		}
-		byte[] deconstructed = new byte[count];
-		byte[] nextBytes;
-		int k = 0;
-		for(int i = 0; i < lines.length; i++) {
-			nextBytes = lines[i].getFilteredBytes();
-			for(int j = 0; j < nextBytes.length; j++) {
-				deconstructed[k++] = nextBytes[j];
-			}
-		}
-		return deconstructed;
+		return holder.toArray();
 	}
 	
 	/**
@@ -2201,11 +2215,10 @@ public class PortableNetworkGraphic {
 		Image img = new Image(width, height, bitDepth, hasAlpha);
 		GrayColor color = new GrayColor(bitDepth);
 		for(int y = 0; y < scanlines.length; y++) {
-			int[][] samples = scanlines[y].getSamples();
-			for(int x = 0; x < samples.length; x++) {
-				color.setValue(samples[x][0]);
+			for(int x = 0; x < scanlines[y].pixels(); x++) {
+				color.setValue(scanlines[y].getSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE));
 				if(hasAlpha) {
-					color.setAlpha(samples[x][1]);
+					color.setAlpha(scanlines[y].getSample(x, Scanline.GRAYSCALE_ALPHA_SAMPLE));
 				} else if(alphaColor.equals(color)) {
 					color.setAlpha(0);
 				}
@@ -2230,12 +2243,12 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		GrayColor color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(samplesPerPixel(), bitDepth);
+			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
 				color = (GrayColor)img.colorAt(x, y);
-				lines[y].setSample(x, 0, color.getValue());
+				lines[y].setSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE, color.getValue());
 				if(hasAlpha) {
-					lines[y].setSample(x, 1, color.getAlpha());
+					lines[y].setSample(x, Scanline.GRAYSCALE_ALPHA_SAMPLE, color.getAlpha());
 				}
 			}
 		}
@@ -2257,13 +2270,12 @@ public class PortableNetworkGraphic {
 		Image img = new Image(width, height, bitDepth, hasAlpha);
 		Color color = new Color(bitDepth);
 		for(int y = 0; y < scanlines.length; y++) {
-			int[][] samples = scanlines[y].getSamples();
-			for(int x = 0; x < samples.length; x++) {
-				color.setRed(samples[x][0]);
-				color.setGreen(samples[x][1]);
-				color.setBlue(samples[x][2]);
+			for(int x = 0; x < scanlines[y].pixels(); x++) {
+				color.setRed(scanlines[y].getSample(x, Scanline.RED_SAMPLE));
+				color.setGreen(scanlines[y].getSample(x, Scanline.GREEN_SAMPLE));
+				color.setBlue(scanlines[y].getSample(x, Scanline.BLUE_SAMPLE));
 				if(hasAlpha) {
-					color.setAlpha(samples[x][3]);
+					color.setAlpha(scanlines[y].getSample(x, Scanline.ALPHA_SAMPLE));
 				} else if(alphaColor.equals(color)) {
 					color.setAlpha(0);
 				}
@@ -2288,14 +2300,14 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(samplesPerPixel(), bitDepth);
+			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
 				color = img.colorAt(x, y);
-				lines[y].setSample(x, 0, color.getRed());
-				lines[y].setSample(x, 1, color.getGreen());
-				lines[y].setSample(x, 2, color.getBlue());
+				lines[y].setSample(x, Scanline.RED_SAMPLE, color.getRed());
+				lines[y].setSample(x, Scanline.GREEN_SAMPLE, color.getGreen());
+				lines[y].setSample(x, Scanline.BLUE_SAMPLE, color.getBlue());
 				if(hasAlpha) {
-					lines[y].setSample(x, 3, color.getAlpha());
+					lines[y].setSample(x, Scanline.ALPHA_SAMPLE, color.getAlpha());
 				}
 			}
 		}
@@ -2316,9 +2328,9 @@ public class PortableNetworkGraphic {
 		Image img = new Image(width, height, bitDepth);
 		Color color;
 		for(int y = 0; y < scanlines.length; y++) {
-			int[][] samples = scanlines[y].getSamples();
-			for(int x = 0; x < samples.length; x++) {
-				color = palette.getColor(samples[x][0]);
+			for(int x = 0; x < scanlines[y].pixels(); x++) {
+				int paletteIndex = scanlines[y].getSample(x, Scanline.PALETTE_INDEX_SAMPLE);
+				color = palette.getColor(paletteIndex);
 				img.setColorAt(x, y, color);
 			}
 		}
@@ -2336,14 +2348,14 @@ public class PortableNetworkGraphic {
 	 * The scanlines that make up the image.
 	 */
 	private Scanline[] deconstructImageFromPalette(Image img) {
-		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(samplesPerPixel(), bitDepth);
+			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
 				color = img.colorAt(x, y);
-				lines[y].setSample(x, 0, (byte)palette.indexOf(color));
+				int paletteIndex = palette.indexOf(color);
+				lines[y].setSample(x, Scanline.PALETTE_INDEX_SAMPLE, paletteIndex);
 			}
 		}
 		return lines;
@@ -2363,7 +2375,6 @@ public class PortableNetworkGraphic {
 	private byte[][] extractScanlines(byte[] data) {
 		int scanlineWidth = getScanlineWidth();
 		byte[][] lines = new byte[height][scanlineWidth];
-		byte[] buffer = new byte[scanlineWidth];
 		int currentByte = 0;
 		int currentLine = 0;
 		for(int i = 0; i < data.length; i++) {
@@ -2684,6 +2695,7 @@ public class PortableNetworkGraphic {
 	 */
 	private void finishChunkDecoding() {
 		combinePaletteComponents();
+		combineSignificantBits();
 	}
 	
 	/**
@@ -2710,6 +2722,17 @@ public class PortableNetworkGraphic {
 				colorList = colorPalette;
 			}
 			palette = new Palette("untitled", bitDepth, colorList, frequencies);
+		}
+	}
+	
+	/**
+	 * Combines the alpha significant bits with the main color.
+	 */
+	private void combineSignificantBits() {
+		if(significantColorBits != null) {
+			if(significantAlphaBits != 0) {
+				significantColorBits.setAlpha(significantAlphaBits);
+			}
 		}
 	}
 }

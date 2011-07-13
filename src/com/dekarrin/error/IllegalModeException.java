@@ -6,6 +6,11 @@ package com.dekarrin.error;
 public class IllegalModeException extends RuntimeMessageException {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1363967626569560295L;
+
+	/**
 	 * Creates a new IllegalModeException with a specified message.
 	 *
 	 * @param message

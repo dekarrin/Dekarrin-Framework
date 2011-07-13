@@ -6,6 +6,10 @@ package com.dekarrin.graphics;
 public class InvalidBitDepthException extends RuntimeException {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1719131794384094346L;
+	/**
 	 * The message of this InvalidBitDepthException, returned by
 	 * getMessage().
 	 */

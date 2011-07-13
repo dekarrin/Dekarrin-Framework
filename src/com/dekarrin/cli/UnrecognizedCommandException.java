@@ -7,6 +7,11 @@ package com.dekarrin.cli;
 public class UnrecognizedCommandException extends RuntimeException {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7205495414317692195L;
+
+	/**
 	 * The command that caused the error.
 	 */
 	private String command;

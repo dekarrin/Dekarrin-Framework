@@ -1,7 +1,8 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.util.ArrayHelper;
+import com.dekarrin.util.ByteComposer;
 import com.dekarrin.util.ByteParser;
-import com.dekarrin.util.ByteHolder;
 import java.util.Arrays;
 
 /**
@@ -35,158 +36,481 @@ class Scanline {
 	public static final int PAETH_FILTER = 4;
 	
 	/**
-	 * The pixel class.
+	 * The sample type for a palette index.
 	 */
-	private static class Pixel {
-	
-		private int[] samples;
-		
-		public Pixel(byte[] data, int sampleCount, int bitDepth) {
-			ByteParser p = new ByteParser(data);
-			int sampleWidth = bitDepth / 8;
-			samples = new int[sampleCount];
-			int i = 0;
-			while(p.remaining() > 0) {
-				samples[i++] = p.parseInt(sampleWidth);
-			}
-		}
-		
-		public Pixel(int sampleCount) {
-			samples = new int[sampleCount];
-		}
-		
-		public void setSample(int sample, int value) {
-			if(samples == null) {
-				samples = new int[sample];
-			} else {
-				growArray(sample + 1);
-			}
-			samples[sample] = value;
-		}
-		
-		public int[] getSamples() {
-			return samples;
-		}
-		
-		private void growArray(int size) {
-			if(samples.length < size) {
-				samples = Arrays.copyOfRange(samples, 0, size);
-			}
-		}
-	}
-
-	/**
-	 * The pixels that make up this scanline.
-	 */
-	private Pixel[] pixels;
+	public static final int PALETTE_INDEX_SAMPLE = 0;
 	
 	/**
-	 * The filtering method used for this Scanline.
+	 * The sample type for a grayscale value.
 	 */
-	private int filteringMethod;
+	public static final int GRAYSCALE_VALUE_SAMPLE = 0;
 	
 	/**
-	 * The bit depth of the containing image.
+	 * The sample type for a grayscale alpha.
 	 */
-	private static int bitDepth;
+	public static final int GRAYSCALE_ALPHA_SAMPLE = 1;
 	
 	/**
-	 * The number of samples in every pixel of data.
+	 * The sample type for a truecolor red value.
 	 */
-	private static int samples;
+	public static final int RED_SAMPLE = 0;
 	
 	/**
-	 * The total length of a scanline in bytes.
+	 * The sample type for a truecolor green value.
 	 */
-	private static int width;
+	public static final int GREEN_SAMPLE = 1;
 	
 	/**
-	 * The last set of scanline data that was parsed.
+	 * The sample type for a truecolor blue value.
+	 */
+	public static final int BLUE_SAMPLE = 2;
+	
+	/**
+	 * The sample type for a truecolor alpha value.
+	 */
+	public static final int ALPHA_SAMPLE = 3;
+	
+	/**
+	 * The last decoded data, used in filtering algorithms.
 	 */
 	private static byte[] lastData;
 	
 	/**
-	 * Resets the lastData entered into a Scanline.
+	 * The number of samples that each pixel contains
 	 */
-	public static void reset() {
+	private int samplesPerPixel;
+	
+	/**
+	 * The bit depth of each sample.
+	 */
+	private int bitDepth;
+	
+	/**
+	 * The bytes from this scanline, filtered.
+	 */
+	private byte[] filteredData;
+	
+	/**
+	 * The actual samples of this Scanline. Dimension 1 is
+	 * the pixel, and dimension 2 holds the actual samples.
+	 */
+	private int[][] samples;
+	
+	/**
+	 * Creates a new Scanline from filtered bytes.
+	 *
+	 * @param samples
+	 * The number of samples in each pixel.
+	 *
+	 * @param bitDepth
+	 * The bit depth of each sample.
+	 *
+	 * @param data
+	 * The data to start this Scanline with. This is not
+	 * necessarily gaurenteed to have one byte per sample;
+	 * some bit depths have multiple samples packed into
+	 * one byte.
+	 */
+	public Scanline(int samples, int bitDepth, byte[] data) {
+		this.samplesPerPixel = samples;
+		this.bitDepth = bitDepth;
+		this.filteredData = data;
+		defilterData();
+	}
+	
+	/**
+	 * Creates a new empty Scanline.
+	 *
+	 * @param samples
+	 * The number of samples in each pixel.
+	 *
+	 * @param bitDepth
+	 * The bit depth of each sample.
+	 *
+	 * @param width
+	 * The width in pixels of this scanline.
+	 */
+	public Scanline(int samples, int bitDepth, int width) {
+		this.samplesPerPixel = samples;
+		this.bitDepth = bitDepth;
+		createSamples(width);
+	}
+	
+	/**
+	 * Gets the value of a sample.
+	 *
+	 * @param pixel
+	 * The pixel to get the sample from.
+	 *
+	 * @param sampleType
+	 * The sample type. This can be one of several values; see
+	 * the class constants for more information.
+	 *
+	 * @return
+	 * The sample value.
+	 */
+	public int getSample(int pixel, int sampleType) {
+		return samples[pixel][sampleType];
+	}
+	
+	/**
+	 * Sets the value of a sample.
+	 *
+	 * @param pixel
+	 * The pixel to set the sample at.
+	 *
+	 * @param sampleType
+	 * The sample type. This can be one of several values; see
+	 * the class constants for more information.
+	 *
+	 * @param value
+	 * What to set the sample to.
+	 */
+	public void setSample(int pixel, int sampleType, int value) {
+		filteredData = null;
+		samples[pixel][sampleType] = value;
+	}
+	
+	/**
+	 * Gets the filtered bytes from this Scanline.
+	 *
+	 * @return
+	 * The filtered bytes.
+	 */
+	public byte[] getFiltered() {
+		if(filteredData == null) {
+			filterData();
+		}
+		return filteredData;
+	}
+	
+	/**
+	 * Gets the number of pixels in this Scanline.
+	 * 
+	 * @return
+	 * The number of pixels.
+	 */
+	public int pixels() {
+		return samples.length;
+	}
+	
+	/**
+	 * Gets the number of samples in each pixel.
+	 * 
+	 * @return
+	 * The number of samples.
+	 */
+	public int samples() {
+		return samplesPerPixel;
+	}
+	
+	/**
+	 * Informs the Scanline class that the next instance will be
+	 * a top row. This resets the internal array used for storing
+	 * the last decoded data. When this is called, the next
+	 * Scanline instance will assume that it is the top row, and
+	 * any filtering that requires the use of the last decoded row
+	 * will consider the last row to be non-existant.
+	 */
+	public static void resetLines() {
 		lastData = null;
 	}
 	
 	/**
-	 * Creates a new scanline from an unfiltered
-	 * byte stream.
+	 * Creates the samples array for a certain amount of
+	 * pixels.
 	 *
-	 * @param byteStream
-	 * The stream to create the scanline from.
-	 *
-	 * @param bitDepth
-	 * The bit depth of the image this Scanline is a part of.
-	 *
-	 * @param sampleCount
-	 * The number of samples per pixel of image data.
-	 *
-	 * @return
-	 * The new Scanline.
+	 * @param pixels
+	 * The number of pixels that sample array should hold.
 	 */
-	public static Scanline getInstanceFromFiltered(byte[] byteStream, int bitDepth, int sampleCount) {
-		Scanline.width = byteStream.length;
-		Scanline.bitDepth = bitDepth;
-		Scanline.samples = sampleCount;
-		byte[] dataBytes = new byte[width-1];
-		ByteParser p = new ByteParser(byteStream);
-		int filteringMethod = p.parseInt(1);
-		switch(filteringMethod) {
-			case NO_FILTER:
-				dataBytes = p.parseRemainingBytes();
-				break;
-				
-			case SUB_FILTER:
-				dataBytes = Scanline.subDefilter(p.parseRemainingBytes());
-				break;
-				
-			case UP_FILTER:
-				dataBytes = Scanline.upDefilter(p.parseRemainingBytes(), lastData);
-				break;
-				
-			case AVERAGE_FILTER:
-				dataBytes = Scanline.averageDefilter(p.parseRemainingBytes(), lastData);
-				break;
-				
-			case PAETH_FILTER:
-				dataBytes = Scanline.paethDefilter(p.parseRemainingBytes(), lastData);
-				break;
-		}
-		Pixel[] pixels = new Pixel[getImageWidth()];
-		p = new ByteParser(dataBytes);
-		byte[] pixelData;
-		for(int i = 0; i < getImageWidth(); i++) {
-			pixelData = p.parseBytes(getPixelWidth());
-			pixels[i] = new Pixel(pixelData, Scanline.samples, Scanline.bitDepth);
-		}
-		lastData = dataBytes;
-		return new Scanline(pixels, filteringMethod);
+	private void createSamples(int pixels) {
+		samples = new int[pixels][samplesPerPixel];
+	}
+		
+	/**
+	 * Defilters the data into its samples and stores them in the
+	 * samples property.
+	 */
+	private void defilterData() {
+		byte[] unfiltered = unfilter(filteredData);
+		int[] samples = unpack(unfiltered);
+		buildSamples(samples);
 	}
 	
 	/**
-	 * Defilters the data according to the Sub filtering
-	 * algorithm.
-	 *
-	 * @param sub
-	 * The data to be defiltered.
+	 * Filters the data from the samples array and stores it in the
+	 * filteredData property.
+	 */
+	private void filterData() {
+		int[] samples = extractSamples();
+		byte[] unfiltered = pack(samples);
+		filteredData = filter(unfiltered);
+	}
+	
+	/**
+	 * Filters data bytes.
+	 * 
+	 * @param unfiltered
+	 * The data to filter.
 	 *
 	 * @return
-	 * The defiltered data.
+	 * The filtered data.
 	 */
-	private static byte[] subDefilter(byte[] sub) {
-		byte[] raw = new byte[sub.length];
-		int bpp = getPixelWidth();
-		for(int i = 0; i < bpp && i < sub.length; i++) {
-			raw[i] = sub[i];
+	private byte[] filter(byte[] unfiltered) {
+		byte[] filtered = null;
+		int filterMethod = chooseFilterMethod(unfiltered);
+		switch(filterMethod) {
+			case NO_FILTER:
+				filtered = unfiltered;
+				break;
+				
+			case SUB_FILTER:
+				filtered = subFilter(unfiltered);
+				break;
+				
+			case UP_FILTER:
+				filtered = upFilter(unfiltered);
+				break;
+				
+			case AVERAGE_FILTER:
+				filtered = averageFilter(unfiltered);
+				break;
+				
+			case PAETH_FILTER:
+				filtered = paethFilter(unfiltered);
+				break;
 		}
-		for(int i = bpp; i < sub.length; i++) {
-			raw[i] = addBytes(sub[i], raw[i-bpp]);
+		lastData = unfiltered;
+		return filtered;
+	}
+	
+	/**
+	 * Unfilters data bytes.
+	 *
+	 * @param filtered
+	 * The data to unfilter.
+	 *
+	 * @return
+	 * The unfiltered data.
+	 */
+	private byte[] unfilter(byte[] filtered) {
+		byte[] unfiltered = null;
+		int filterMethod = filtered[0];
+		filtered = Arrays.copyOfRange(filtered, 1, filtered.length);
+		switch(filterMethod) {
+			case NO_FILTER:
+				unfiltered = filtered;
+				break;
+				
+			case SUB_FILTER:
+				unfiltered = subUnfilter(filtered);
+				break;
+				
+			case UP_FILTER:
+				unfiltered = upUnfilter(filtered);
+				break;
+				
+			case AVERAGE_FILTER:
+				unfiltered = averageUnfilter(filtered);
+				break;
+				
+			case PAETH_FILTER:
+				unfiltered = paethUnfilter(filtered);
+				break;
 		}
-		return raw;
+		lastData = unfiltered;
+		return unfiltered;
+	}
+	
+	/**
+	 * Chooses a filter method based on which one produces the smallest
+	 * running total. This heuristic is taken from the PNG specification.
+	 *
+	 * @param unfiltered
+	 * The data that is to be filtered.
+	 *
+	 * @return
+	 * The number representing the filter algorithm to use.
+	 */
+	private int chooseFilterMethod(byte[] unfiltered) {
+		int noTotal = (int)ArrayHelper.sum(unfiltered);
+		int subTotal = (int)ArrayHelper.sum(subFilter(unfiltered));
+		int upTotal = (int)ArrayHelper.sum(upFilter(unfiltered));
+		int averageTotal = (int)ArrayHelper.sum(averageFilter(unfiltered));
+		int paethTotal = (int)ArrayHelper.sum(paethFilter(unfiltered));
+		int method = NO_FILTER;
+		if(subTotal < noTotal) {
+			method = SUB_FILTER;
+			if(upTotal < subTotal) {
+				method = UP_FILTER;
+				if(averageTotal < upTotal) {
+					method = AVERAGE_FILTER;
+					if(paethTotal < averageTotal) {
+						method = PAETH_FILTER;
+					}
+				}
+			}
+		}
+		return method;
+	}
+	
+	/**
+	 * Creates the samples from a single array of sample values.
+	 *
+	 * @param allSamples
+	 * The array of samples to build the internal samples array
+	 * from.
+	 */
+	private void buildSamples(int[] allSamples) {
+		createSamples(allSamples.length / samplesPerPixel);
+		int currentPixel = 0;
+		for(int i = 0; i < allSamples.length; i += samplesPerPixel) {
+			for(int j = 0; j < samplesPerPixel; j++) {
+				samples[currentPixel][j] = allSamples[i+j];
+			}
+			currentPixel++;
+		}
+	}
+	
+	/**
+	 * Extracts all of the sample data as a single int array.
+	 *
+	 * @return
+	 * The samples as one array.
+	 */
+	private int[] extractSamples() {
+		int[] extracted = new int[samplesPerPixel * samples.length];
+		for(int i = 0; i < samples.length; i += samplesPerPixel) {
+			for(int j = 0; j < samplesPerPixel; j++) {
+				extracted[i+j] = samples[i][j];
+			}
+		}
+		return extracted;
+	}
+	
+	/**
+	 * Packs the samples into unfiltered data.
+	 *
+	 * @param samples
+	 * The sample values to pack.
+	 *
+	 * @return unfiltered
+	 * The data, ready to be filtered.
+	 */
+	private byte[] pack(int[] samples) {
+		byte[] unfiltered = null;
+		if(bitDepth <= 8) {
+			unfiltered = packSingleByteSamples(samples);
+		} else {
+			unfiltered = packMultiByteSamples(samples);
+		}
+		return unfiltered;
+	}
+	
+	/**
+	 * Unpacks the samples from the unfiltered data.
+	 *
+	 * @param unfilteredData
+	 * The unfiltered data.
+	 *
+	 * @return
+	 * The samples.
+	 */
+	private int[] unpack(byte[] unfilteredData) {
+		int[] samples = null;
+		if(bitDepth <= 8) {
+			samples = unpackSingleByteSamples(unfilteredData);
+		} else {
+			samples = unpackMultiByteSamples(unfilteredData);
+		}
+		return samples;
+	}
+	
+	/**
+	 * Unpacks samples that are 8 bits or shorter.
+	 *
+	 * @param unfilteredData
+	 * The unfiltered data.
+	 *
+	 * @return
+	 * The samples.
+	 */
+	private int[] unpackSingleByteSamples(byte[] unfilteredData) {
+		int samplesPerByte = 8 / bitDepth;
+		int[] samples = new int[unfilteredData.length * samplesPerByte];
+		int bitMask = (int)Math.pow(2, bitDepth)-1;
+		int sampleOffset = 0;
+		for(int i = 0; i < unfilteredData.length; i++) {
+			int nextByte = ((int)unfilteredData[i] & 0xff);
+			for(int j = 8-bitDepth; j >= 0; j -= bitDepth) {
+				int shiftedSample = nextByte & (bitMask << j);
+				samples[sampleOffset++] = shiftedSample >>> j;
+			}
+		}
+		return samples;
+	}
+	
+	/**
+	 * Packs samples that are 8 bits or shorter.
+	 *
+	 * @param samples
+	 * The samples to pack.
+	 *
+	 * @return
+	 * The samples packed into unfiltered data bytes.
+	 */
+	private byte[] packSingleByteSamples(int[] samples) {
+		int samplesPerByte = 8 / bitDepth;
+		byte[] unfiltered = new byte[samples.length / samplesPerByte];
+		int nextByte;
+		int unfilteredOffset = 0;
+		int samplesOffset = 0;
+		while(samplesOffset < samples.length) {
+			nextByte = 0;
+			for(int i = 8-bitDepth; i >= 0; i -= bitDepth) {
+				nextByte |= (samples[samplesOffset++] << i);
+			}
+			unfiltered[unfilteredOffset++] = (byte)nextByte;
+		}
+		return unfiltered;
+	}
+	
+	/**
+	 * Unpacks samples that span multiple bytes.
+	 *
+	 * @param unfilteredData
+	 * The unfiltered data.
+	 *
+	 * @return
+	 * The samples.
+	 */
+	private int[] unpackMultiByteSamples(byte[] unfilteredData) {
+		int sampleWidth = bitDepth / 8;
+		int[] samples = new int[unfilteredData.length / sampleWidth];
+		ByteParser parser = new ByteParser(unfilteredData);
+		int i = 0;
+		while(parser.remainingBlocks(sampleWidth) > 0) {
+			samples[i++] = parser.parseInt(sampleWidth);
+		}
+		return samples;
+	}
+	
+	/**
+	 * Packs samples that span multiple bytes.
+	 *
+	 * @param samples
+	 * The samples to pack.
+	 *
+	 * @return
+	 * The samples packed into unfiltered data bytes.
+	 */
+	private byte[] packMultiByteSamples(int[] samples) {
+		int sampleWidth = bitDepth / 8;
+		ByteComposer unfiltered = new ByteComposer(samples.length * sampleWidth);
+		for(int s: samples) {
+			unfiltered.composeInt(s, sampleWidth);
+		}
+		return unfiltered.toArray();
 	}
 	
 	/**
@@ -199,43 +523,16 @@ class Scanline {
 	 * @return
 	 * The filtered data.
 	 */
-	private static byte[] subFilter(byte[] raw) {
+	private byte[] subFilter(byte[] raw) {
 		byte[] sub = new byte[raw.length];
-		int bpp = getPixelWidth();
-		for(int i = 0; i < bpp && i < sub.length; i++) {
+		int bpp = getBpp();
+		for(int i = 0; i < bpp && i < raw.length; i++) {
 			sub[i] = raw[i];
 		}
 		for(int i = bpp; i < sub.length; i++) {
-			sub[i] = subtractBytes(raw[i], raw[i-bpp]);
+			sub[i] = (byte)((raw[i] - raw[i-bpp]) % 256);
 		}
 		return sub;
-	}
-	
-	/**
-	 * Defilters the data according to the Up filtering
-	 * algorithm.
-	 *
-	 * @param up
-	 * The data to be defiltered.
-	 *
-	 * @param prior
-	 * The set of the last data. This must be the unfiltered
-	 * version. This can be null, to indicate that this is the
-	 * first scanline.
-	 *
-	 * @return
-	 * The defiltered data.
-	 */
-	private static byte[] upDefilter(byte[] up, byte[] prior) {
-		byte[] raw = new byte[up.length];
-		if(prior == null) {
-			prior = new byte[up.length];
-			Arrays.fill(prior, (byte)0);
-		}
-		for(int i = 0; i < up.length; i++) {
-			raw[i] = addBytes(up[i], prior[i]);
-		}
-		return raw;
 	}
 	
 	/**
@@ -245,55 +542,16 @@ class Scanline {
 	 * @param raw
 	 * The data to be filtered.
 	 *
-	 * @param prior
-	 * The set of the last data. This must be the unfiltered
-	 * version. This can be null, to indicate that this is the
-	 * first scanline.
-	 *
 	 * @return
 	 * The filtered data.
 	 */
-	private static byte[] upFilter(byte[] raw, byte[] prior) {
+	private byte[] upFilter(byte[] raw) {
+		byte[] prior = (lastData != null) ? lastData : new byte[raw.length];
 		byte[] up = new byte[raw.length];
-		if(prior == null) {
-			prior = new byte[raw.length];
-			Arrays.fill(prior, (byte)0);
-		}
-		for(int i = 0; i < up.length; i++) {
-			up[i] = subtractBytes(raw[i], prior[i]);
+		for(int i = 0; i < raw.length; i++) {
+			up[i] = (byte)((raw[i] - prior[i]) % 256);
 		}
 		return up;
-	}
-	
-	/**
-	 * Defilters the data according to the Average filtering
-	 * algorithm.
-	 *
-	 * @param average
-	 * The data to be defiltered.
-	 *
-	 * @param prior
-	 * The set of the last data. This must be the unfiltered
-	 * version. This can be null to indicate that this is
-	 * the first scanline.
-	 *
-	 * @return
-	 * The defiltered data.
-	 */
-	private static byte[] averageDefilter(byte[] average, byte[] prior) {
-		byte[] raw = new byte[average.length];
-		int bpp = getPixelWidth();
-		if(prior == null) {
-			prior = new byte[average.length];
-			Arrays.fill(prior, (byte)0);
-		}
-		for(int i = 0; i < bpp && i < average.length; i++) {
-			raw[i] = addBytes(average[i], (byte)Math.floor( (double)prior[i] / 2 ));
-		}
-		for(int i = bpp; i < average.length; i++) {
-			raw[i] = addBytes(average[i], (byte)Math.floor( (double)(raw[i-bpp]+prior[i]) / 2 ));
-		}
-		return raw;
 	}
 	
 	/**
@@ -303,59 +561,20 @@ class Scanline {
 	 * @param raw
 	 * The data to be filtered.
 	 *
-	 * @param prior
-	 * The set of the last data. This must be the unfiltered
-	 * version. This can be null to indicate that this is
-	 * the first scanline.
-	 *
 	 * @return
 	 * The filtered data.
 	 */
-	private static byte[] averageFilter(byte[] raw, byte[] prior) {
+	private byte[] averageFilter(byte[] raw) {
+		byte[] prior = (lastData != null) ? lastData : new byte[raw.length];
 		byte[] average = new byte[raw.length];
-		int bpp = getPixelWidth();
-		if(prior == null) {
-			prior = new byte[raw.length];
-			Arrays.fill(prior, (byte)0);
-		}
+		int bpp = getBpp();
 		for(int i = 0; i < bpp && i < raw.length; i++) {
-			average[i] = subtractBytes(raw[i], (byte)Math.floor( (double)prior[i] / 2 ));
+			average[i] = (byte)((raw[i] - (int)Math.floor(prior[i]/2)) % 256);
 		}
 		for(int i = bpp; i < raw.length; i++) {
-			average[i] = subtractBytes(raw[i], (byte)Math.floor( (double)(raw[i-bpp]+prior[i]) / 2 ));
+			average[i] = (byte)((raw[i] - (int)Math.floor((raw[i-bpp]+prior[i])/2)) % 256);
 		}
 		return average;
-	}
-	
-	/**
-	 * Defilters the data according to the Paeth filtering
-	 * algorithm.
-	 *
-	 * @param paeth
-	 * The data to be defiltered.
-	 *
-	 * @param prior
-	 * The data from the previous scanline, already decoded.
-	 * This can be null to indicate that paeth is the first
-	 * scanline.
-	 *
-	 * @return
-	 * The defiltered data.
-	 */
-	private static byte[] paethDefilter(byte[] paeth, byte[] prior) {
-		byte[] raw = new byte[paeth.length];
-		int bpp = getPixelWidth();
-		if(prior == null) {
-			prior = new byte[paeth.length];
-			Arrays.fill(prior, (byte)0);
-		}
-		for(int i = 0; i < bpp && i < paeth.length; i++) {
-			raw[i] = addBytes(paeth[i], paethPredictor((byte)0, prior[i], (byte)0));
-		}
-		for(int i = bpp; i < paeth.length; i++) {
-			raw[i] = addBytes(paeth[i], paethPredictor(raw[i-bpp], prior[i], prior[i-bpp]));
-		}
-		return raw;
 	}
 	
 	/**
@@ -365,28 +584,122 @@ class Scanline {
 	 * @param raw
 	 * The data to be defiltered.
 	 *
-	 * @param prior
-	 * The data from the previous scanline, already decoded.
-	 * This can be null to indicate that paeth is the first
-	 * scanline.
-	 *
 	 * @return
 	 * The filtered data.
 	 */
-	private static byte[] paethFilter(byte[] raw, byte[] prior) {
+	private byte[] paethFilter(byte[] raw) {
+		byte[] prior = (lastData != null) ? lastData : new byte[raw.length];
 		byte[] paeth = new byte[raw.length];
-		int bpp = getPixelWidth();
-		if(prior == null) {
-			prior = new byte[raw.length];
-			Arrays.fill(prior, (byte)0);
-		}
+		int bpp = getBpp();
 		for(int i = 0; i < bpp && i < raw.length; i++) {
-			paeth[i] = subtractBytes(raw[i], paethPredictor((byte)0, prior[i], (byte)0));
+			paeth[i] = (byte)((raw[i] - paethPredictor((byte)0, prior[i], (byte)0)) % 256);
 		}
 		for(int i = bpp; i < raw.length; i++) {
-			paeth[i] = subtractBytes(raw[i], paethPredictor(raw[i-bpp], prior[i], prior[i-bpp]));
+			paeth[i] = (byte)((raw[i] - paethPredictor(raw[i-bpp], prior[i], prior[i-bpp])) % 256);
 		}
 		return paeth;
+	}
+	
+	/**
+	 * Defilters the data according to the Sub filtering
+	 * algorithm.
+	 *
+	 * @param sub
+	 * The data to be defiltered.
+	 *
+	 * @return
+	 * The defiltered data.
+	 */
+	private byte[] subUnfilter(byte[] sub) {
+		byte[] raw = new byte[sub.length];
+		int bpp = getBpp();
+		for(int i = 0; i < bpp && i < sub.length; i++) {
+			raw[i] = sub[i];
+		}
+		for(int i = bpp; i < sub.length; i++) {
+			raw[i] = (byte)((sub[i] + raw[i-bpp]) % 256);
+		}
+		return raw;
+	}
+	
+	/**
+	 * Defilters the data according to the Up filtering
+	 * algorithm.
+	 *
+	 * @param up
+	 * The data to be defiltered.
+	 *
+	 * @return
+	 * The defiltered data.
+	 */
+	private byte[] upUnfilter(byte[] up) {
+		byte[] prior = (lastData != null) ? lastData : new byte[up.length];
+		byte[] raw = new byte[up.length];
+		for(int i = 0; i < up.length; i++) {
+			raw[i] = (byte)((up[i] + prior[i]) % 256);
+		}
+		return raw;
+	}
+	
+	/**
+	 * Defilters the data according to the Average filtering
+	 * algorithm.
+	 *
+	 * @param average
+	 * The data to be defiltered.
+	 *
+	 * @return
+	 * The defiltered data.
+	 */
+	private byte[] averageUnfilter(byte[] average) {
+		byte[] prior = (lastData != null) ? lastData : new byte[average.length];
+		byte[] raw = new byte[average.length];
+		int bpp = getBpp();
+		for(int i = 0; i < bpp && i < average.length; i++) {
+			raw[i] = (byte)((average[i] + (int)Math.floor( prior[i] / 2 )) % 256);
+		}
+		for(int i = bpp; i < average.length; i++) {
+			raw[i] = (byte)((average[i] + (int)Math.floor((raw[i-bpp]+prior[i]) / 2 )) % 256);
+		}
+		return raw;
+	}
+	
+	/**
+	 * Defilters the data according to the Paeth filtering
+	 * algorithm.
+	 *
+	 * @param paeth
+	 * The data to be defiltered.
+	 *
+	 * @return
+	 * The defiltered data.
+	 */
+	private byte[] paethUnfilter(byte[] paeth) {
+		byte[] prior = (lastData != null) ? lastData : new byte[paeth.length];
+		byte[] raw = new byte[paeth.length];
+		int bpp = getBpp();
+		for(int i = 0; i < bpp && i < paeth.length; i++) {
+			raw[i] = (byte)((paeth[i] + paethPredictor((byte)0, prior[i], (byte)0)) % 256);
+		}
+		for(int i = bpp; i < paeth.length; i++) {
+			raw[i] = (byte)((paeth[i] + paethPredictor(raw[i-bpp], prior[i], prior[i-bpp])) % 256);
+		}
+		return raw;
+	}
+	
+	/**
+	 * Gets the bytes per pixel for this Scanline. This always
+	 * rounds up to at least 1.
+	 *
+	 * @return
+	 * The bytes per pixel.
+	 */
+	private int getBpp() {
+		int bpp = (bitDepth * samplesPerPixel);
+		if(bpp == 0) {
+			bpp = 1;
+		}
+		return bpp;
 	}
 	
 	/**
@@ -408,8 +721,8 @@ class Scanline {
 	 * @return
 	 * The paeth predictor byte.
 	 */
-	private static byte paethPredictor(byte left, byte above, byte upperLeft) {
-		byte predictor;
+	private int paethPredictor(byte left, byte above, byte upperLeft) {
+		int predictor;
 		int paeth = left + above - upperLeft;
 		int leftPaeth = Math.abs(paeth - left);
 		int abovePaeth = Math.abs(paeth - above);
@@ -422,240 +735,5 @@ class Scanline {
 			predictor = upperLeft;
 		}
 		return predictor;
-	}
-	
-	/**
-	 * Adds two bytes together.
-	 *
-	 * @param byte1
-	 * One of the bytes to be added together.
-	 *
-	 * @param byte2
-	 * One of the bytes to be added together.
-	 *
-	 * @return
-	 * The two bytes added together.
-	 */
-	private static byte addBytes(byte byte1, byte byte2) {
-		int a = byte1;
-		int b = byte2;
-		int c = (a + b) % 256;
-		byte result = (byte)((byte)c & 0xff);
-		return result;
-	}
-	
-	/**
-	 * Subtracts two bytes.
-	 *
-	 * @param byte1
-	 * The byte to perform the subtraction on.
-	 *
-	 * @param byte2
-	 * The byte to subtract from the other.
-	 *
-	 * @return
-	 * The result of subtracting byte2 from byte1.
-	 */
-	private static byte subtractBytes(byte byte1, byte byte2) {
-		int a = byte1;
-		int b = byte2;
-		int c = (a - b) % 256;
-		byte result = (byte)((byte)c & 0xff);
-		return result;
-	}
-	
-	/**
-	 * Gets the sum of a byte array.
-	 *
-	 * @param bytes
-	 * The bytes to add together.
-	 *
-	 * @return
-	 * All bytes added together.
-	 */
-	private static int byteSum(byte[] bytes) {
-		int sum = 0;
-		for(byte i: bytes) {
-			sum += i;
-		}
-		return sum;
-	}
-	
-	/**
-	 * Gets the width of a single pixel.
-	 *
-	 * @return
-	 * The width of a pixel in bytes.
-	 */
-	private static int getPixelWidth() {
-		int width = Scanline.samples * (Scanline.bitDepth / 8);
-		return width;
-	}
-	
-	/**
-	 * Gets the width in pixels of the entire image.
-	 *
-	 * @return
-	 * The width of the image.
-	 */
-	private static int getImageWidth() {
-		int width = Scanline.width / getPixelWidth();
-		return width;
-	}
-	
-	/**
-	 * Creates a new scanline from a series of pixels.
-	 *
-	 * @param pixels
-	 * The pixels that make up the new Scanline.
-	 */
-	public Scanline(Pixel[] pixels, int filteringMethod) {
-		this.pixels = pixels;
-		this.filteringMethod = filteringMethod;
-	}
-	
-	/**
-	 * Creates a new, empty Scanline.
-	 */
-	public Scanline(int samplesPerPixel, int bitDepth) {
-		Scanline.bitDepth = bitDepth;
-		Scanline.samples = samplesPerPixel;
-	}
-	
-	/**
-	 * Adds a sample to this scanline at a specified pixel.
-	 *
-	 * @param pixelIndex
-	 * The pixel to add the sample at.
-	 *
-	 * @param sampleIndex
-	 * The index of the sample to add.
-	 *
-	 * @param value
-	 * The value to set the sample to.
-	 */
-	public void setSample(int pixelIndex, int sampleIndex, int value) {
-		if(pixels == null) {
-			pixels = new Pixel[pixelIndex];
-		} else {
-			growPixelArray(pixelIndex + 1);
-		}
-		if(pixels[pixelIndex] == null) {
-			pixels[pixelIndex] = new Pixel(pixelIndex);
-		}
-		pixels[pixelIndex].setSample(sampleIndex, value);
-	}
-	
-	/**
-	 * Gets the exact bytes of this scanline.
-	 *
-	 * @return
-	 * The bytes.
-	 */
-	public byte[] getBytes() {
-		byte[] data = new byte[width];
-		data[0] = (byte)filteringMethod;
-		int p = 1;
-		for(int i = 0; i < pixels.length; i++) {
-			int[] samples = pixels[i].getSamples();
-			for(int j: samples) {
-				data[p++] = (byte)j;
-			}
-		}
-		return data;
-	}
-	
-	/**
-	 * Gets all of the sample data.
-	 *
-	 * @return
-	 * The samples.
-	 */
-	public int[][] getSamples() {
-		int[][] sampleData = new int[pixels.length][samples];
-		int[] samples;
-		for(int i = 0; i < pixels.length; i++) {
-			samples = pixels[i].getSamples();
-			for(int j = 0; j < samples.length; j++) {
-				sampleData[i][j] = samples[j];
-			}
-		}
-		return sampleData;
-	}
-	
-	/**
-	 * Filters this scanline's bytes.
-	 *
-	 * @return
-	 * The filtered bytes.
-	 */
-	public byte[] getFilteredBytes() {
-		byte[] bytes = getBytes();
-		ByteHolder filteredBytes = new ByteHolder(bytes.length + 1);
-		int filterAlgorithm = selectFilterAlgorithm();
-		filteredBytes.add((byte)filterAlgorithm);
-		switch(filterAlgorithm) {
-			case NO_FILTER:
-				filteredBytes.add(bytes);
-				break;
-				
-			case SUB_FILTER:
-				filteredBytes.add(subFilter(bytes));
-				break;
-				
-			case UP_FILTER:
-				filteredBytes.add(upFilter(bytes, lastData));
-				break;
-				
-			case AVERAGE_FILTER:
-				filteredBytes.add(averageFilter(bytes, lastData));
-				break;
-				
-			case PAETH_FILTER:
-				filteredBytes.add(paethFilter(bytes, lastData));
-				break;
-		}
-		lastData = bytes;
-		return filteredBytes.toArray();
-	}
-	
-	/**
-	 * Selects a filtering algorithm for this row based on the
-	 * sum of absolute values.
-	 */
-	private int selectFilterAlgorithm() {
-		int method = NO_FILTER;
-		int sum = byteSum(getBytes());
-		int sum2;
-		if((sum2 = byteSum(subFilter(getBytes()))) < sum) {
-			sum = sum2;
-			method = SUB_FILTER;
-		}
-		if((sum2 = byteSum(upFilter(getBytes(), lastData))) < sum) {
-			sum = sum2;
-			method = UP_FILTER;
-		}
-		if((sum2 = byteSum(averageFilter(getBytes(), lastData))) < sum) {
-			sum = sum2;
-			method = AVERAGE_FILTER;
-		}
-		if((sum2 = byteSum(paethFilter(getBytes(), lastData))) < sum) {
-			sum = sum2;
-			method = PAETH_FILTER;
-		}
-		return method;
-	}
-	
-	/**
-	 * Ensures that the pixel array is the correct length,
-	 * and makes it longer if it isn't.
-	 *
-	 * @param size
-	 * The desired length.
-	 */
-	private void growPixelArray(int size) {
-		if(pixels.length < size) {
-			pixels = Arrays.copyOfRange(pixels, 0, size);
-		}
 	}
 }

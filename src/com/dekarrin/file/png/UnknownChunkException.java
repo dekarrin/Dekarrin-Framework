@@ -10,6 +10,10 @@ import com.dekarrin.error.MessageException;
 public class UnknownChunkException extends MessageException {
 	
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5423917208795073148L;
+	/**
 	 * The type of the chunk that was encountered.
 	 */
 	private String type;

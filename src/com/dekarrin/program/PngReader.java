@@ -3,6 +3,7 @@ package com.dekarrin.program;
 import com.dekarrin.file.png.*;
 import com.dekarrin.graphics.*;
 import com.dekarrin.io.*;
+import com.dekarrin.util.HelperString;
 import java.io.*;
 
 /**
@@ -34,14 +35,19 @@ public class PngReader extends ConsoleProgram {
 		Image image = pic.getImage();
 		Color color;
 		String colorString;
-		for(int y = 0; y < image.width; y++) {
+		String r,b,g,a;
+		/*for(int y = 0; y < image.width; y++) {
 			for(int x = 0; x < image.height; x++) {
 				color = image.colorAt(x, y);
-				colorString = String.format("[%d,%d,%d,%d]", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+				r = (new HelperString(Integer.toString(color.getRed(), 16))).padLeft(2, '0').toString();
+				g = (new HelperString(Integer.toString(color.getGreen(), 16))).padLeft(2, '0').toString();
+				b = (new HelperString(Integer.toString(color.getBlue(), 16))).padLeft(2, '0').toString();
+			//	a = (new HelperString(Integer.toString(color.getAlpha(), 16))).padLeft(2, '0').toString();
+				colorString = String.format("(#%s%s%s)", r, g, b);
 				p(colorString);
 			}
 			pl("");
-		}
+		}*/
 		
 		pl("-----------");
 		pl("reading test complete.");
