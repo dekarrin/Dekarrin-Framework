@@ -233,8 +233,24 @@ class Scanline {
 	 */
 	private void defilterData() {
 		byte[] unfiltered = unfilter(filteredData);
+		for(byte b: unfiltered) {
+			System.out.print(b+" ");
+		}
+		System.out.println();
 		int[] samples = unpack(unfiltered);
+		for(int i: samples) {
+			System.out.print(i+" ");
+		}
+		System.out.println();
 		buildSamples(samples);
+		System.out.println("Full Sample Picture:");
+		for(int i[]: this.samples) {
+			for(int j: i) {
+				System.out.print(j+":");
+			}
+			System.out.println();
+		}
+		System.out.println("ALL");
 	}
 	
 	/**
@@ -242,8 +258,24 @@ class Scanline {
 	 * filteredData property.
 	 */
 	private void filterData() {
+		System.out.println("Full Sample Picture:");
+		for(int i[]: this.samples) {
+			for(int j: i) {
+				System.out.print(j+":");
+			}
+			System.out.println();
+		}
+		System.out.println("ALL");
 		int[] samples = extractSamples();
+		for(int i: samples) {
+			System.out.print(i+" ");
+		}
+		System.out.println();
 		byte[] unfiltered = pack(samples);
+		for(byte b: unfiltered) {
+			System.out.print(b+" ");
+		}
+		System.out.println();
 		filteredData = filter(unfiltered);
 	}
 	
@@ -380,9 +412,10 @@ class Scanline {
 	 */
 	private int[] extractSamples() {
 		int[] extracted = new int[samplesPerPixel * samples.length];
-		for(int i = 0; i < samples.length; i += samplesPerPixel) {
+		int extractedPointer = 0;
+		for(int i = 0; i < samples.length; i++) {
 			for(int j = 0; j < samplesPerPixel; j++) {
-				extracted[i+j] = samples[i][j];
+				extracted[extractedPointer++] = samples[i][j];
 			}
 		}
 		return extracted;

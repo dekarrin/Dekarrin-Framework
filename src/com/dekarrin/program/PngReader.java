@@ -36,7 +36,7 @@ public class PngReader extends ConsoleProgram {
 		Color color;
 		String colorString;
 		String r,b,g,a;
-		/*for(int y = 0; y < image.width; y++) {
+		for(int y = 0; y < image.width; y++) {
 			for(int x = 0; x < image.height; x++) {
 				color = image.colorAt(x, y);
 				r = (new HelperString(Integer.toString(color.getRed(), 16))).padLeft(2, '0').toString();
@@ -47,7 +47,7 @@ public class PngReader extends ConsoleProgram {
 				p(colorString);
 			}
 			pl("");
-		}*/
+		}
 		
 		pl("-----------");
 		pl("reading test complete.");
