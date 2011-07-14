@@ -233,24 +233,8 @@ class Scanline {
 	 */
 	private void defilterData() {
 		byte[] unfiltered = unfilter(filteredData);
-		for(byte b: unfiltered) {
-			System.out.print(b+" ");
-		}
-		System.out.println();
 		int[] samples = unpack(unfiltered);
-		for(int i: samples) {
-			System.out.print(i+" ");
-		}
-		System.out.println();
 		buildSamples(samples);
-		System.out.println("Full Sample Picture:");
-		for(int i[]: this.samples) {
-			for(int j: i) {
-				System.out.print(j+":");
-			}
-			System.out.println();
-		}
-		System.out.println("ALL");
 	}
 	
 	/**
@@ -258,24 +242,8 @@ class Scanline {
 	 * filteredData property.
 	 */
 	private void filterData() {
-		System.out.println("Full Sample Picture:");
-		for(int i[]: this.samples) {
-			for(int j: i) {
-				System.out.print(j+":");
-			}
-			System.out.println();
-		}
-		System.out.println("ALL");
 		int[] samples = extractSamples();
-		for(int i: samples) {
-			System.out.print(i+" ");
-		}
-		System.out.println();
 		byte[] unfiltered = pack(samples);
-		for(byte b: unfiltered) {
-			System.out.print(b+" ");
-		}
-		System.out.println();
 		filteredData = filter(unfiltered);
 	}
 	
@@ -289,6 +257,11 @@ class Scanline {
 	 * The filtered data.
 	 */
 	private byte[] filter(byte[] unfiltered) {
+		System.out.println("prefiltered:");
+		for(byte b: unfiltered) {
+			System.out.print(b + ":");
+		}
+		System.out.println();
 		byte[] filtered = null;
 		int filterMethod = chooseFilterMethod(unfiltered);
 		switch(filterMethod) {
@@ -313,6 +286,18 @@ class Scanline {
 				break;
 		}
 		lastData = unfiltered;
+		// add the filter method to the beginning
+		ByteComposer composer = new ByteComposer(filtered.length + 1);
+		composer.composeInt(filterMethod, 1);
+		composer.composeBytes(filtered);
+		filtered = composer.toArray();
+		System.out.println("Postfiltered:");
+		for(byte b: filtered) {
+			System.out.print(b + ":");
+		}
+		System.out.println();
+		System.out.println();
+		System.out.println();
 		return filtered;
 	}
 	
@@ -327,6 +312,11 @@ class Scanline {
 	 */
 	private byte[] unfilter(byte[] filtered) {
 		byte[] unfiltered = null;
+		System.out.println("Pre-unfiltered:");
+		for(byte b: filtered) {
+			System.out.print(b + ":");
+		}
+		System.out.println();
 		int filterMethod = filtered[0];
 		filtered = Arrays.copyOfRange(filtered, 1, filtered.length);
 		switch(filterMethod) {
@@ -351,6 +341,13 @@ class Scanline {
 				break;
 		}
 		lastData = unfiltered;
+		System.out.println("Post-unfiltered:");
+		for(byte b: unfiltered) {
+			System.out.print(b + ":");
+		}
+		System.out.println();
+		System.out.println();
+		System.out.println();
 		return unfiltered;
 	}
 	
