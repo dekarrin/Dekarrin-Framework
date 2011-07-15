@@ -10,6 +10,20 @@ import com.dekarrin.error.ValueOutOfRangeException;
 public class GrayColor extends Color {
 	
 	/**
+	 * Creates a new GrayColor from a Color. The given Color's
+	 * red value is used to calculate this GrayColor's grayscale
+	 * value. The given Color's alpha value is taken as well.
+	 * 
+	 * @param color
+	 * The color to use as the basis for this GrayColor.
+	 */
+	public GrayColor(Color color) {
+		super(color.bitDepth());
+		setValue(color.getRed());
+		setAlpha(color.getAlpha());
+	}
+	
+	/**
 	 * Creates a new GrayColor at the specified bit depth. The
 	 * new GrayColor will have the default value of 0 in every
 	 * sample, but the alpha will be at the maximum.

@@ -2,9 +2,7 @@ package com.dekarrin.file.png;
 
 import com.dekarrin.util.ByteParser;
 import com.dekarrin.util.ByteComposer;
-import com.dekarrin.util.ByteHolder;
 import java.util.zip.CRC32;
-import java.util.HashMap;
 
 /**
  * Represents a chunk from a png file.

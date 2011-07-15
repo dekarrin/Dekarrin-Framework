@@ -166,7 +166,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @return
 	 * The color.
 	 */
-	public Color getAlpha() {
+	public Color getTransparentColor() {
 		return color;
 	}
 	
@@ -195,7 +195,6 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * Only one of the two properties is needed.
 	 */
 	private void parseTransparencyProperty() {
-		int r,g,b;
 		switch(colorMode) {
 			case INDEXED_COLOR_MODE:
 				setProperties(parser.parseRemainingInts(1));
@@ -270,7 +269,7 @@ public class TransparencyChunk extends AncillaryChunk {
 				
 			case GRAYSCALE_MODE:
 				composer = new ByteComposer(2);
-				composer.composeInt(color.getRed(), 2);
+				composer.composeInt(((GrayColor)color).getValue(), 2);
 				break;
 				
 			case TRUECOLOR_MODE:

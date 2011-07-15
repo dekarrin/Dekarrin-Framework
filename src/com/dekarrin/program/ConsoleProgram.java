@@ -73,8 +73,10 @@ public abstract class ConsoleProgram {
 	 */
 	protected String getArgument(int index) {
 		String arg = null;
-		if(args.length < index + 1) {
-			giveSyntaxError();
+		if(!hasArgument(index)) {
+			if(!argumentIsOptional(index)) {
+				giveSyntaxError();
+			}
 		} else {
 			arg = args[index];
 		}
@@ -89,7 +91,7 @@ public abstract class ConsoleProgram {
 	private void giveSyntaxError() {
 		String error = "usage: java "+programName+" ";
 		for(int i = 0; i < argumentNames.size(); i++) {
-			error = error + String.format((optionalArgument.get(i)) ? "<%s> " : "[%s] ", argumentNames.get(i));
+			error = error + String.format(argumentIsOptional(i) ? "<%s> " : "[%s] ", argumentNames.get(i));
 		}
 		giveFatalError(error);
 	}
@@ -133,5 +135,32 @@ public abstract class ConsoleProgram {
 		ui.printError(message);
 		ui.println();
 		System.exit(1);
+	}
+	
+	/**
+	 * Checks if an argument is optional.
+	 * 
+	 * @param index
+	 * The index of the argument to check.
+	 * 
+	 * @return
+	 * True if the argument is optional; false otherwise.
+	 */
+	protected boolean argumentIsOptional(int index) {
+		return optionalArgument.get(index);
+	}
+	
+	/**
+	 * Checks if this program was given a certain
+	 * argument.
+	 * 
+	 * @param index
+	 * The index of the argument to check for.
+	 * 
+	 * @return
+	 * True if the argument exists; false otherwise.
+	 */
+	protected boolean hasArgument(int index) {
+		return (index < args.length);
 	}
 }

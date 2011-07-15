@@ -1,21 +1,14 @@
 package com.dekarrin.io;
 
+import com.dekarrin.error.*;
+
 /**
  * Exception indicating that the file being read is corrupt,
  * or that it is the wrong format.
  */
-public class InvalidFileFormatException extends Exception {
+public class InvalidFormatException extends MessageException {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -5479990326795564244L;
-
-	/**
-	 * The message of this InvalidFileFormatException, returned by
-	 * getMessage().
-	 */
-	private String message;
 	
 	/**
 	 * The requested file type. This may not be the actual
@@ -34,8 +27,8 @@ public class InvalidFileFormatException extends Exception {
 	 * @param fileType
 	 * The type of file that caused this exception to be thrown.
 	 */
-	public InvalidFileFormatException(String message, String fileType) {
-		this.message = message;
+	public InvalidFormatException(String message, String fileType) {
+		super(message);
 		this.fileType = fileType;
 	}
 	
@@ -47,7 +40,7 @@ public class InvalidFileFormatException extends Exception {
 	 * The message.
 	 */
 	public String getMessage() {
-		String errorMessage = String.format("Bad %s file! %s", fileType, message);
+		String errorMessage = String.format("Bad %s file! %s", fileType, super.getMessage());
 		return errorMessage;
 	}
 }

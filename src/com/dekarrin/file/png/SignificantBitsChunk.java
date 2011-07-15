@@ -133,7 +133,6 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 */
 	private void parseData() {
 		int r,g,b,a;
-		GrayColor c;
 		switch(getLength()) {
 			// lengths are used here, so the cases cannot correspond to to the color
 			// type constants.

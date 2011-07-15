@@ -64,7 +64,7 @@ public class Image {
 		this.bitDepth = bitDepth;
 		this.width = width;
 		this.height = height;
-		createChannels(3, width, height);
+		createChannels(width, height, 3);
 	}
 	
 	/**
@@ -89,7 +89,7 @@ public class Image {
 		this.width = width;
 		this.height = height;
 		int channels = withAlpha ? 4 : 3;
-		createChannels(channels, width, height);
+		createChannels(width, height, channels);
 	}
 	
 	/**
@@ -253,7 +253,7 @@ public class Image {
 	 * @return
 	 * The color of the specified pixel.
 	 */
-	public Color colorAt(int x, int y) {
+	public Color getColorAt(int x, int y) {
 		Color c = new Color(bitDepth);
 		int r = hasChannel(RED) ? valueAt(RED, x, y) : c.maximumValue();
 		int g = hasChannel(GREEN) ? valueAt(GREEN, x, y) : c.maximumValue();

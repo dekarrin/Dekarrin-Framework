@@ -645,6 +645,7 @@ public class ByteParser {
 	 * @return
 	 * The string.
 	 */
+	@SuppressWarnings("unused")
 	private String byteToString(byte subject) {
 		return bytesToString(new byte[]{subject}, 1);
 	}

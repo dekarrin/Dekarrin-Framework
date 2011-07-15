@@ -87,9 +87,9 @@ public class GrowableByteHolder extends ByteHolder implements Growable {
 	 */
 	@Override
 	public void add(byte data) {
-		checkIndexValidity(position() + 1);
+		checkIndexValidity(position());
 		super.add(data);
-		fitSizeToIndex(position());
+		fitSizeToIndex(position()-1);
 	}
 	
 	/**
@@ -106,9 +106,10 @@ public class GrowableByteHolder extends ByteHolder implements Growable {
 	 */
 	@Override
 	public void add(byte[] data) {
-		checkIndexValidity(position() + data.length);
+		int finalIndex = position() + data.length - 1;
+		checkIndexValidity(finalIndex);
 		super.add(data);
-		fitSizeToIndex(position());
+		fitSizeToIndex(finalIndex);
 	}
 	
 	/**
@@ -171,8 +172,8 @@ public class GrowableByteHolder extends ByteHolder implements Growable {
 	@Override
 	public void resize(int size) {
 		super.resize(size);
-		if(size > holder.length) {
-			size = holder.length;
+		if(this.size > holder.length) {
+			this.size = holder.length;
 		}
 	}
 	

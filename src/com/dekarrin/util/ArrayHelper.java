@@ -113,7 +113,7 @@ public class ArrayHelper {
 	}
 	
 	/**
-	 * Counts the number of occurances of a value.
+	 * Counts the number of occurrences of a value.
 	 *
 	 * @param subject
 	 * The subject to search in.
@@ -435,5 +435,213 @@ public class ArrayHelper {
 			sum += d;
 		}
 		return sum;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static byte[] append(byte[] beginArray, byte[] endArray) {
+		byte[] appended = new byte[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static short[] append(short[] beginArray, short[] endArray) {
+		short[] appended = new short[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static int[] append(int[] beginArray, int[] endArray) {
+		int[] appended = new int[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static long[] append(long[] beginArray, long[] endArray) {
+		long[] appended = new long[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static char[] append(char[] beginArray, char[] endArray) {
+		char[] appended = new char[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static float[] append(float[] beginArray, float[] endArray) {
+		float[] appended = new float[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static double[] append(double[] beginArray, double[] endArray) {
+		double[] appended = new double[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	public static boolean[] append(boolean[] beginArray, boolean[] endArray) {
+		boolean[] appended = new boolean[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return appended;
+	}
+	
+	/**
+	 * Appends two arrays together.
+	 * 
+	 * @param beginArray
+	 * The array to come first.
+	 * 
+	 * @param endArray
+	 * The array to come last.
+	 * 
+	 * @return
+	 * The two arrays appended together.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] append(T[] beginArray, T[] endArray) {
+		Object[] appended = new Object[beginArray.length + endArray.length];
+		for(int i = 0; i < beginArray.length; i++) {
+			appended[i] = beginArray[i];
+		}
+		for(int i = 0; i < endArray.length; i++) {
+			appended[beginArray.length + i] = endArray[i];
+		}
+		return (T[])appended;
 	}
 }

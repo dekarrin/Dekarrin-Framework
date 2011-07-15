@@ -30,6 +30,7 @@ public class CsvFile {
 			values = newValues;
 		}
 
+		@SuppressWarnings("unused")
 		public void deleteValue(int index) {
 			String[] newValues = new String[values.length - 1];
 
@@ -379,8 +380,6 @@ public class CsvFile {
 			r = new BufferedReader(new FileReader(file.toString()));
 		} catch(FileNotFoundException e) {
 			System.err.println("Could not find file!");
-		} catch(IOException e) {
-			System.err.println("Error: " + e.getMessage());
 		}
 		
 		return r;

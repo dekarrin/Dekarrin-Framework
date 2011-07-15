@@ -10,6 +10,7 @@ public class ChemicalCompoundParser {
 	/**
 	 * The string being parsed.
 	 */
+	@SuppressWarnings("unused")
 	private String parsingString;
 
 	/**
@@ -29,6 +30,7 @@ public class ChemicalCompoundParser {
 	 * @param subject
 	 * The string to parse.
 	 */
+	@SuppressWarnings("unused")
 	private void parse(String subject) {
 		char[] subjectChars = subject.toCharArray();
 		StringBuffer ion = new StringBuffer();

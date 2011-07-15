@@ -2,6 +2,7 @@ package com.dekarrin.file.png;
 
 import com.dekarrin.util.ArrayHelper;
 import com.dekarrin.util.ByteComposer;
+import com.dekarrin.util.ByteHolder;
 import com.dekarrin.util.ByteParser;
 import java.util.Arrays;
 
@@ -257,48 +258,32 @@ class Scanline {
 	 * The filtered data.
 	 */
 	private byte[] filter(byte[] unfiltered) {
-		System.out.println("prefiltered:");
-		for(byte b: unfiltered) {
-			System.out.print(b + ":");
-		}
-		System.out.println();
-		byte[] filtered = null;
+		ByteHolder filtered = new ByteHolder(unfiltered.length + 1);
 		int filterMethod = chooseFilterMethod(unfiltered);
+		filtered.add((byte)filterMethod);
 		switch(filterMethod) {
 			case NO_FILTER:
-				filtered = unfiltered;
+				filtered.add(unfiltered);
 				break;
 				
 			case SUB_FILTER:
-				filtered = subFilter(unfiltered);
+				filtered.add(subFilter(unfiltered));
 				break;
 				
 			case UP_FILTER:
-				filtered = upFilter(unfiltered);
+				filtered.add(upFilter(unfiltered));
 				break;
 				
 			case AVERAGE_FILTER:
-				filtered = averageFilter(unfiltered);
+				filtered.add(averageFilter(unfiltered));
 				break;
 				
 			case PAETH_FILTER:
-				filtered = paethFilter(unfiltered);
+				filtered.add(paethFilter(unfiltered));
 				break;
 		}
 		lastData = unfiltered;
-		// add the filter method to the beginning
-		ByteComposer composer = new ByteComposer(filtered.length + 1);
-		composer.composeInt(filterMethod, 1);
-		composer.composeBytes(filtered);
-		filtered = composer.toArray();
-		System.out.println("Postfiltered:");
-		for(byte b: filtered) {
-			System.out.print(b + ":");
-		}
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		return filtered;
+		return filtered.toArray();
 	}
 	
 	/**
@@ -312,11 +297,6 @@ class Scanline {
 	 */
 	private byte[] unfilter(byte[] filtered) {
 		byte[] unfiltered = null;
-		System.out.println("Pre-unfiltered:");
-		for(byte b: filtered) {
-			System.out.print(b + ":");
-		}
-		System.out.println();
 		int filterMethod = filtered[0];
 		filtered = Arrays.copyOfRange(filtered, 1, filtered.length);
 		switch(filterMethod) {
@@ -341,13 +321,6 @@ class Scanline {
 				break;
 		}
 		lastData = unfiltered;
-		System.out.println("Post-unfiltered:");
-		for(byte b: unfiltered) {
-			System.out.print(b + ":");
-		}
-		System.out.println();
-		System.out.println();
-		System.out.println();
 		return unfiltered;
 	}
 	

@@ -1,12 +1,10 @@
 package com.dekarrin.chem;
 
 import com.dekarrin.file.csv.CsvFile;
-import com.dekarrin.io.*;
 import com.dekarrin.math.SigFigNumber;
 import com.dekarrin.util.*;
 import com.dekarrin.cli.*;
 import com.dekarrin.program.*;
-import java.util.*;
 
 /**
  * Provides various options for help with chemistry.

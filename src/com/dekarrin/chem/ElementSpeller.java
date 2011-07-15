@@ -1,7 +1,6 @@
 package com.dekarrin.chem;
 
 import com.dekarrin.util.HelperString;
-import java.util.HashMap;
 import java.util.Vector;
 
 /**

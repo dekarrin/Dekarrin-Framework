@@ -44,7 +44,8 @@ public class FlagArgumentList {
 	}
 	
 	/**
-	 * Whether flags are treated as case-sensitive or not.
+	 * Whether flags are treated as case-sensitive or not. Flag
+	 * values are always treated as case-sensitive.
 	 */
 	private boolean caseSensitive;
 	
@@ -90,6 +91,7 @@ public class FlagArgumentList {
 	 * Whether or not the flag exists.
 	 */
 	public boolean contains(String name) {
+		name = convertCase(name);
 		return flags.containsKey(name);
 	}
 	
@@ -103,6 +105,7 @@ public class FlagArgumentList {
 	 * The value of the flag.
 	 */
 	public String getValue(String name) {
+		name = convertCase(name);
 		return flags.get(name);
 	}
 	
@@ -194,6 +197,7 @@ public class FlagArgumentList {
 	 * The value of the flag.
 	 */
 	private void addFlag(String name, String value) {
+		name = convertCase(name);
 		flags.put(name, value);
 	}
 	
@@ -254,5 +258,25 @@ public class FlagArgumentList {
 	 */
 	private boolean flagContainsValue(String flag) {
 		return (flag.indexOf("=") != -1);
+	}
+	
+	/**
+	 * Checks if the case of the name needs to be converted.
+	 * If it does, converts the name to lower case. Otherwise,
+	 * does nothing.
+	 * 
+	 * @param name
+	 * The name to convert.
+	 * 
+	 * @return
+	 * The name converted to lower case, if this FlagArgumentList
+	 * does not treat flag names as case-sensitive; otherwise,
+	 * the unchanged name.
+	 */
+	private String convertCase(String name) {
+		if(caseSensitive) {
+			name = name.toLowerCase();
+		}
+		return name;
 	}
 }

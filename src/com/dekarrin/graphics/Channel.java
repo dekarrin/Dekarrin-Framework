@@ -175,10 +175,11 @@ public class Channel {
 	 * The row to initialize.
 	 */
 	private void initializeRow(int row) {
-		pixels[row] = new int[width];
+		int[] rowArray = new int[width];
 		for(int col = 0; col < width; col++) {
-			pixels[row][col] = 0;
+			rowArray[col] = 0;
 		}
+		pixels[row] = rowArray;
 	}
 	
 	/**

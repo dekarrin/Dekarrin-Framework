@@ -28,8 +28,6 @@ public class ByteReader {
 
 	private int bitPointer = 0;
 
-	private static ByteReader program;
-
 	private static final int BINARY_DIGITS_PER_LINE = 8;
 
 	private static final int BITS_PER_GROUP = 8;
@@ -46,7 +44,7 @@ public class ByteReader {
 		boolean bitMode = getBitMode(flags);
 		boolean hexOutput = getHexOutput(flags);
 		boolean noFormatting = getNoFormatting(flags);
-		program = new ByteReader(file, outputFile, bitMode, hexOutput, noFormatting);
+		new ByteReader(file, outputFile, bitMode, hexOutput, noFormatting);
 	}
 
 	private static String getOutputFileName(String[] args) {
