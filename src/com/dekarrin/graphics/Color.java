@@ -8,6 +8,37 @@ import com.dekarrin.error.ValueOutOfRangeException;
 public class Color {
 	
 	/**
+	 * Holds the HSB/HSV values for this color. Once they
+	 * have been calculated once, there's no reason to do
+	 * so again unless they have been changed.
+	 */
+	private /* struct */ class HsbColorValues {
+		public double hue = 0.0;
+		public double saturation = 0.0;
+		public double brightness = 0.0;
+		public boolean hueIsSet = false;
+		public boolean saturationIsSet = false;
+		public boolean brightnessIsSet = false;
+		public void setHue(double hue) {
+			this.hue = hue;
+			hueIsSet = true;
+		}
+		public void setSaturation(double saturation) {
+			this.saturation = saturation;
+			saturationIsSet = true;
+		}
+		public void setBrightness(double brightness) {
+			this.brightness = brightness;
+			brightnessIsSet = true;
+		}
+	}
+	
+	/**
+	 * The values of this Color in the HSB/HSV color space.
+	 */
+	private HsbColorValues asHsb = new HsbColorValues(); 
+	
+	/**
 	 * The bit depth of each sample.
 	 */
 	private int bitDepth;
@@ -53,30 +84,56 @@ public class Color {
 	}
 	
 	/**
-	 * Checks if a color has a bit depth and samples that are
-	 * equivilent to this Color's values.
+	 * Checks if a color has samples that are
+	 * equivalent to this Color's values.
 	 *
 	 * @param color
-	 * The color to compare this one with.
+	 * The Color to compare this one with.
 	 *
 	 * @return
-	 * Whether the given color has the same samples and bit depth
+	 * Whether the given color has the same samples
 	 * as this one.
 	 */
 	public boolean equals(Color color) {
-		boolean same = false;
-		if(color.bitDepth() == bitDepth) {
-			if(color.getRed() == red) {
-				if(color.getGreen() == green) {
-					if(color.getBlue() == blue) {
-						if(color.getAlpha() == alpha) {
-							same = true;
-						}
-					}
-				}
-			}
-		}
-		return same;
+		return equals(color, 0);
+	}
+	
+	/**
+	 * Checks if a Color represents the same color as this Color.
+	 * 
+	 * @param color
+	 * The Color to compare this one with.
+	 * 
+	 * @param tolerance
+	 * An index that specifies how much variation is allowed. This
+	 * ranges from 0 to 1. 0 specifies no variation, while 1 specifies
+	 * all variation; i.e, a tolerance of 1 specifies an allowed
+	 * variation so great such that every Color will be equal to this
+	 * one, while 0 specifies an allowed variation such that only
+	 * Colors that have the exact same values as this one will be
+	 * equal to this one.
+	 * 
+	 * @return
+	 * Whether the given Color has the same values as this one within
+	 * the specified amount of tolerance.
+	 */
+	public boolean equals(Color color, double tolerance) {
+		double maximumDifference = 4.0; // the greatest variance, black opaque to white transparent.
+		double r1,g1,b1,a1,r2,g2,b2,a2;
+		r1 = this.sampleAsFactor(red);
+		g1 = this.sampleAsFactor(green);
+		b1 = this.sampleAsFactor(blue);
+		a1 = this.sampleAsFactor(alpha);
+		r2 = getDepthFactor(color.getRed(), color.bitDepth());
+		g2 = getDepthFactor(color.getGreen(), color.bitDepth());
+		b2 = getDepthFactor(color.getBlue(), color.bitDepth());
+		a2 = getDepthFactor(color.getAlpha(), color.bitDepth());
+		double rDiff = Math.abs(r1 - r2);
+		double gDiff = Math.abs(g1 - g2);
+		double bDiff = Math.abs(b1 - b2);
+		double aDiff = Math.abs(a1 - a2);
+		double totalDiff = rDiff + gDiff + bDiff + aDiff;
+		return (totalDiff / maximumDifference <= tolerance);
 	}
 	
 	/**
@@ -273,7 +330,206 @@ public class Color {
 	}
 	
 	/**
-	 * Changes the sample values into their equivelents at the new
+	 * Gets the hue of this Color.
+	 * 
+	 * @return
+	 * The hue.
+	 */
+	public double hue() {
+		if(this.asHsb.hueIsSet) {
+			return this.asHsb.hue;
+		}
+		double r = sampleAsFactor(red);
+		double g = sampleAsFactor(green);
+		double b = sampleAsFactor(blue);
+		double minRgb = Math.min(r, Math.min(g, b));
+		double maxRgb = Math.max(r, Math.max(g, b));
+		double deltaRgb = maxRgb - minRgb;
+		double hue = 0;
+		if(maxRgb != 0) {
+			double deltaR = 60*(maxRgb - r)/deltaRgb + 180;
+			double deltaG = 60*(maxRgb - g)/deltaRgb + 180;
+			double deltaB = 60*(maxRgb - b)/deltaRgb + 180;
+			
+			if(r == maxRgb) {
+				hue = deltaB - deltaG;
+			} else if(g == maxRgb) {
+				hue = 120 + deltaR - deltaB;
+			} else {
+				hue = 240 + deltaG - deltaR;
+			}
+		}
+		if(hue < 0) {
+			hue += 360;
+		}
+		if(hue >= 360) {
+			hue -= 360;
+		}
+		this.asHsb.setHue(hue); 
+		return hue;
+	}
+	
+	/**
+	 * Gets the saturation of this color.
+	 * 
+	 * @return
+	 * The saturation.
+	 */
+	public double saturation() {
+		if(this.asHsb.saturationIsSet) {
+			return this.asHsb.saturation;
+		}
+		double r = sampleAsFactor(red);
+		double g = sampleAsFactor(green);
+		double b = sampleAsFactor(blue);
+		double minRgb = Math.min(r, Math.min(g, b));
+		double maxRgb = Math.max(r, Math.max(g, b));
+		double deltaRgb = maxRgb - minRgb;
+		double saturation = 0;
+		if(maxRgb != 0) {
+			saturation = deltaRgb / maxRgb;
+		}
+		this.asHsb.setSaturation(saturation);
+		return saturation;
+	}
+	
+	/**
+	 * Gets the brightness / value of this color.
+	 * 
+	 * @return
+	 * The brightness.
+	 */
+	public double brightness() {
+		if(this.asHsb.brightnessIsSet) {
+			return this.asHsb.brightness;
+		}
+		double r = sampleAsFactor(red);
+		double g = sampleAsFactor(green);
+		double b = sampleAsFactor(blue);
+		double brightness = Math.max(r, Math.max(g, b));
+		this.asHsb.setBrightness(brightness);
+		return brightness;
+	}
+	
+	/**
+	 * Sets the hue of this Color.
+	 * 
+	 * @param hue
+	 * The hue in degrees.
+	 */
+	public void setHue(double hue) {
+		setSamplesFromHsb(hue, saturation(), brightness());
+		this.asHsb.setHue(hue);
+	}
+	
+	/**
+	 * Sets the saturation of this Color.
+	 * 
+	 * @param saturation
+	 * The saturation as a factor in the range 0..1.
+	 */
+	public void setSaturation(double saturation) {
+		setSamplesFromHsb(hue(), saturation, brightness());
+		this.asHsb.setSaturation(saturation);
+	}
+	
+	/**
+	 * Sets the brightness/value of this Color.
+	 * 
+	 * @param brightness
+	 * The brightness as a factor in the range 0..1.
+	 */
+	public void setBrightness(double brightness) {
+		setSamplesFromHsb(hue(), saturation(), brightness);
+		this.asHsb.setBrightness(brightness);
+	}
+	
+	/**
+	 * Sets the RGB samples to values by converting HSB values.
+	 * 
+	 * @param hue
+	 * The color to change it to. This must be specified in degrees.
+	 * Values that fall outside of the range 0..360 will be
+	 * converted using mod 360.
+	 * 
+	 * @param saturation
+	 * How much color there is. This ranges from 0..1.
+	 * 
+	 * @param brightness
+	 * The intensity of the color. Also known as 'value'. This
+	 * ranges from 0..1.
+	 */
+	public void setSamplesFromHsb(double hue, double saturation, double brightness) {
+		hue = hue % 360;
+		if(saturation < 0.0 || saturation > 1.0) {
+			String unformatted = "Attempted to set saturation to %d; allowed range is 0-1";
+			throw new ValueOutOfRangeException(String.format(unformatted, saturation));
+		}
+		if(brightness < 0.0 || brightness > 1.0) {
+			String unformatted = "Attempted to set brightness to %d; allowed range is 0-1";
+			throw new ValueOutOfRangeException(String.format(unformatted, brightness));
+		}
+		double chroma = brightness * saturation;
+		double huePrime = hue / 60;
+		double secondComponent = chroma * (1.0 - Math.abs((huePrime % 2.0) - 1.0));
+		int hueSectionIndex = (int)Math.floor(huePrime);
+		double rInitial, gInitial, bInitial;
+		rInitial = gInitial = bInitial = 0;
+		switch(hueSectionIndex) {
+			case 0:
+				rInitial = chroma;
+				gInitial = secondComponent;
+				break;
+				
+			case 1:
+				rInitial = secondComponent;
+				gInitial = chroma;
+				break;
+				
+			case 2:
+				gInitial = chroma;
+				bInitial = secondComponent;
+				break;
+				
+			case 3:
+				gInitial = secondComponent;
+				bInitial = chroma;
+				break;
+				
+			case 4:
+				rInitial = secondComponent;
+				bInitial = chroma;
+				break;
+				
+			case 5:
+				rInitial = chroma;
+				bInitial = secondComponent;
+				break;
+		}
+		double brightnessDelta = brightness - chroma;
+		int rFinal,gFinal,bFinal;
+		rFinal = convertSample(rInitial + brightnessDelta, bitDepth);
+		gFinal = convertSample(gInitial + brightnessDelta, bitDepth);
+		bFinal = convertSample(bInitial + brightnessDelta, bitDepth);
+		setSamples(rFinal, gFinal, bFinal);
+	}
+	
+	/**
+	 * Converts a sample to a double value, where 1 is the maximum
+	 * value for this Color's bit depth, and 0 is equivalent to 0.
+	 * 
+	 * @param sample
+	 * The sample to convert
+	 * 
+	 * @return
+	 * The sample as a factor from 0..1.
+	 */
+	private double sampleAsFactor(int sample) {
+		return getDepthFactor(sample, bitDepth);
+	}
+	
+	/**
+	 * Changes the sample values into their equivalents at the new
 	 * bit depth.
 	 *
 	 * @param newBitDepth

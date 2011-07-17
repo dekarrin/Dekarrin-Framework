@@ -186,6 +186,23 @@ class Scanline {
 	}
 	
 	/**
+	 * Gets the filtered bytes from this Scanline using a
+	 * specified algorithm.
+	 * 
+	 * @param filterMethod
+	 * The filter method to use.
+	 * 
+	 * @return
+	 * The filtered bytes.
+	 */
+	public byte[] getFiltered(int filterMethod) {
+		if(filteredData == null) {
+			filterData(filterMethod);
+		}
+		return filteredData;
+	}
+	
+	/**
 	 * Gets the number of pixels in this Scanline.
 	 * 
 	 * @return
@@ -249,17 +266,33 @@ class Scanline {
 	}
 	
 	/**
+	 * Filters the data from the samples array and stores it in the
+	 * filteredData property. The data is filtered according to the
+	 * specified algorithm.
+	 * 
+	 * @param filterMethod
+	 * The filtering algorithm to use.
+	 */
+	private void filterData(int filterMethod) {
+		int[] samples = extractSamples();
+		byte[] unfiltered = pack(samples);
+		filteredData = filter(unfiltered, filterMethod);
+	}
+	
+	/**
 	 * Filters data bytes.
 	 * 
 	 * @param unfiltered
 	 * The data to filter.
-	 *
+	 * 
+	 * @param filterMethod
+	 * The filter algorithm to use.
+	 * 
 	 * @return
 	 * The filtered data.
 	 */
-	private byte[] filter(byte[] unfiltered) {
+	private byte[] filter(byte[] unfiltered, int filterMethod) {
 		ByteHolder filtered = new ByteHolder(unfiltered.length + 1);
-		int filterMethod = chooseFilterMethod(unfiltered);
 		filtered.add((byte)filterMethod);
 		switch(filterMethod) {
 			case NO_FILTER:
@@ -284,6 +317,19 @@ class Scanline {
 		}
 		lastData = unfiltered;
 		return filtered.toArray();
+	}
+	
+	/**
+	 * Filters data bytes.
+	 * 
+	 * @param unfiltered
+	 * The data to filter.
+	 *
+	 * @return
+	 * The filtered data.
+	 */
+	private byte[] filter(byte[] unfiltered) {
+		return filter(unfiltered, chooseFilterMethod(unfiltered));
 	}
 	
 	/**

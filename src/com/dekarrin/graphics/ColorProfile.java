@@ -3,7 +3,7 @@ package com.dekarrin.graphics;
 /**
  * Data for an ICC color profile.
  */
-public class IccProfile {
+public class ColorProfile {
 	
 	/**
 	 * The data of the profile.
@@ -24,7 +24,7 @@ public class IccProfile {
 	 * @param name
 	 * The name of the ICCP.
 	 */
-	public IccProfile(String name, byte[] data) {
+	public ColorProfile(String name, byte[] data) {
 		this.name = name;
 		this.data = data;
 	}

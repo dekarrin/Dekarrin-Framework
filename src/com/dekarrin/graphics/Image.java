@@ -47,6 +47,16 @@ public class Image {
 	public static final int ALPHA = 3;
 	
 	/**
+	 * Refers to the gray channel, if it exists.
+	 */
+	public static final int GRAY = 0;
+	
+	/**
+	 * Refers to the gray alpha channel, if it exists.
+	 */
+	public static final int GRAY_ALPHA = 1;
+	
+	/**
 	 * Creates a new RGB image.
 	 * The image will have 3 channels, one for each of red,
 	 * green, and blue.
@@ -89,6 +99,35 @@ public class Image {
 		this.width = width;
 		this.height = height;
 		int channels = withAlpha ? 4 : 3;
+		createChannels(width, height, channels);
+	}
+	
+	/**
+	 * Creates a new RGB image with an alpha channel.
+	 * The image will have 3 or 4 channels depending on
+	 * whether or not alpha is used.
+	 *
+	 * @param width
+	 * The width of the image in pixels.
+	 *
+	 * @param height
+	 * The height of the image in pixels.
+	 *
+	 * @param bitDepth
+	 * How many bits are used for each sample.
+	 *
+	 * @param withAlpha
+	 * Whether to give the image an alpha channel.
+	 * 
+	 * @param withColor
+	 * Whether or not to use color. If this is false, the
+	 * image will be grayscale.
+	 */
+	public Image(int width, int height, int bitDepth, boolean withAlpha, boolean withColor) {
+		this.bitDepth = bitDepth;
+		this.width = width;
+		this.height = height;
+		int channels = withAlpha ? withColor ? 4 : 2 : withColor ? 3 : 1;
 		createChannels(width, height, channels);
 	}
 	
@@ -240,7 +279,12 @@ public class Image {
 	}
 	
 	/**
-	 * Gets the color at the specified pixel.
+	 * Gets the color at the specified pixel. Note that this does
+	 * not return a reference to actual color objects; Image does
+	 * not store colors as Color objects, and the Color object
+	 * returned by this method is only used as a convenience class
+	 * for grouping the sample values together. To set the values
+	 * from a Color object, see setColorAt().
 	 *
 	 * @param x
 	 * The x value of the pixel. The origin is the left side and
@@ -251,7 +295,7 @@ public class Image {
 	 * up as it moves down.
 	 *
 	 * @return
-	 * The color of the specified pixel.
+	 * A color representing the values of the specified pixel.
 	 */
 	public Color getColorAt(int x, int y) {
 		Color c = new Color(bitDepth);
@@ -344,5 +388,23 @@ public class Image {
 		for(int i = 0; i < count; i++) {
 			channels[i] = new Channel(width, height);
 		}
+	}
+	
+	/**
+	 * Changes the bit depth of the samples.
+	 * 
+	 * @param newBitDepth
+	 * The bit depth to change it to.
+	 */
+	public void changeBitDepth(int bitDepth) {
+		Color c;
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				c = getColorAt(x, y);
+				c.changeBitDepth(bitDepth);
+				setColorAt(x, y, c);
+			}
+		}
+		this.bitDepth = bitDepth;
 	}
 }

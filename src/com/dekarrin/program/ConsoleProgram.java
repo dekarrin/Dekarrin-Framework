@@ -84,6 +84,44 @@ public abstract class ConsoleProgram {
 	}
 	
 	/**
+	 * Gets a command line argument as an integer.
+	 * 
+	 * @param index
+	 * The index of the argument to get.
+	 * 
+	 * @return
+	 * The argument as an int.
+	 */
+	int getArgumentAsInt(int index) {
+		int iArg = 0;
+		try {
+			iArg = Integer.parseInt(getArgument(index));
+		} catch(NumberFormatException e) {
+			giveFatalError(argumentNames.get(index) + " must be an integer.");
+		}
+		return iArg;
+	}
+	
+	/**
+	 * Gets a command line argument as a double.
+	 * 
+	 * @param index
+	 * The index of the argument to get.
+	 * 
+	 * @return
+	 * The argument as an double.
+	 */
+	double getArgumentAsDouble(int index) {
+		double dArg = 0;
+		try {
+			dArg = Double.parseDouble(getArgument(index));
+		} catch(NumberFormatException e) {
+			giveFatalError(argumentNames.get(index) + " must be a real number.");
+		}
+		return dArg;
+	}
+	
+	/**
 	 * Displays a message on proper syntax, then quits. The message is
 	 * automatically generated using the internal lists of arguments set
 	 * by subclasses.

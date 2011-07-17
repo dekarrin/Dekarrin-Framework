@@ -161,7 +161,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 		 * The chunk to pass.
 		 */
 		private void announceBackgroundColorChunk(BackgroundColorChunk chunk) {
-			for(ChunkListener listener: listeners) {
+				for(ChunkListener listener: listeners) {
 				listener.backgroundColorChunkProcessed(chunk);
 			}
 		}
@@ -929,7 +929,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * The image data chunks. These are preserved in case unknown unsafe
 	 * to copy chunks exist in the png.
 	 */
-	private ImageDataChunk[] dataChunks;
+	private Vector<ImageDataChunk> dataChunks = new Vector<ImageDataChunk>();
 	
 	/**
 	 * The filter method used in this Png's image data.
@@ -1004,7 +1004,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	/**
 	 * The color profile for this png.
 	 */
-	private IccProfile profile;
+	private ColorProfile profile;
 	
 	/**
 	 * The suggested reduced palette for this image if the actual
@@ -1097,6 +1097,26 @@ public class PortableNetworkGraphic implements ChunkListener {
 		compressionMethod = COMPRESSION_METHOD_ZLIB;
 		filterMethod = FILTER_METHOD_ADAPTIVE;
 		interlaceMethod = INTERLACE_METHOD_NONE;
+		switch(colorType) {
+			case COLOR_TYPE_GRAYSCALE:
+				if(bitDepth != 1 && bitDepth != 2 && bitDepth != 4 && bitDepth != 8 && bitDepth != 16) {
+					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in grayscale mode.");
+				}
+				break;
+			
+			case COLOR_TYPE_COLOR_PALETTE:
+				if(bitDepth != 8 && bitDepth != 4 && bitDepth != 2 && bitDepth != 1) {
+					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in indexed mode.");
+				}
+				break;
+				
+			case COLOR_TYPE_GRAYSCALE_ALPHA:
+			case COLOR_TYPE_COLOR:
+			case COLOR_TYPE_COLOR_ALPHA:
+				if(bitDepth != 8 && bitDepth != 16) {
+					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in current color mode.");
+				}
+		}
 	}
 	
 	/**
@@ -1211,7 +1231,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * The ICCP chunk.
 	 */
 	public void embeddedColorProfileChunkProcessed(EmbeddedColorProfileChunk chunk) {
-		profile = new IccProfile(chunk.getProfileName(), chunk.getProfile());
+		profile = new ColorProfile(chunk.getProfileName(), chunk.getProfile());
 	}
 	
 	/**
@@ -1369,7 +1389,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @return
 	 * The profile.
 	 */
-	public IccProfile GetProfile() {
+	public ColorProfile getProfile() {
 		return profile;
 	}
 	
@@ -1688,6 +1708,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 */
 	public void imageDataChunkProcessed(ImageDataChunk chunk) {
 		unknownChunks = unknownPostDataChunks;
+		dataChunks.add(chunk);
 		byte[] compressedData = chunk.getData();
 		byte[] decompressedData = decompressData(compressedData);
 		Scanline[] lines = getScanlinesFromData(decompressedData);
@@ -1794,7 +1815,21 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * If the file stream failed.
 	 */
 	public void save(String location) throws StreamFailureException {
-		writePngFile(location);
+		writePngFile(location, false);
+	}
+	
+	/**
+	 * Copies the image data of this Png to disk. Its image data is
+	 * copied from the original source data unmodified.
+	 * 
+	 * @param location
+	 * Where to save the Png file.
+	 *
+	 * @throws StreamFailureException
+	 * If the file stream failed.
+	 */
+	public void copy(String location) throws StreamFailureException {
+		writePngFile(location, true);
 	}
 	
 	/**
@@ -1870,7 +1905,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param profile
 	 * The profile.
 	 */
-	public void setProfile(IccProfile profile) {
+	public void setProfile(ColorProfile profile) {
 		this.profile = profile;
 	}
 	
@@ -2232,8 +2267,11 @@ public class PortableNetworkGraphic implements ChunkListener {
 	/**
 	 * Converts the data in this Png into chunks to be written
 	 * to disk.
+	 * 
+	 * @param forcePreservation
+	 * Whether or not the image data is preserved from the source.
 	 */
-	private Chunk[] convertToChunks() {
+	private Chunk[] convertToChunks(boolean forcePreservation) {
 		Vector<Chunk> chunks = new Vector<Chunk>();
 		chunks.add(headerToChunk());
 		if(unknownColorSpaceChunks.size() > 0) {
@@ -2283,7 +2321,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 		if(hasSuggestedPalette()) {
 			chunks.add(suggestedPaletteToChunk());
 		}
-		if(preserveImageData()) {
+		if(forcePreservation || preserveImageData()) {
 			for(ImageDataChunk idc: dataChunks) {
 				chunks.add(idc);
 			}
@@ -2427,7 +2465,9 @@ public class PortableNetworkGraphic implements ChunkListener {
 		for(int y = 0; y < height; y++) {
 			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
-				color = (GrayColor)img.getColorAt(x, y);
+				color = new GrayColor(bitDepth);
+				color.setValue(image.valueAt(Image.GRAY, x, y));
+				color.setAlpha(image.valueAt(Image.GRAY_ALPHA, x, y));
 				lines[y].setSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE, color.getValue());
 				if(hasAlpha) {
 					lines[y].setSample(x, Scanline.GRAYSCALE_ALPHA_SAMPLE, color.getAlpha());
@@ -2498,8 +2538,15 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 */
 	private byte[] deconstructScanlines(Scanline[] lines) {
 		ByteHolder holder = new ByteHolder(lines.length * getScanlineWidth());
+		byte[] buffer;
 		for(Scanline sl: lines) {
-			holder.add(sl.getFiltered());
+			buffer = sl.getFiltered(Scanline.NO_FILTER);
+			System.out.print("[OUT]: ");
+			for(byte b: buffer) {
+				System.out.print(b+":");
+			}
+			System.out.println();
+			holder.add(buffer);
 		}
 		return holder.toArray();
 	}
@@ -2550,8 +2597,9 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @return
 	 * The length of a pixel.
 	 */
-	private int getPixelWidth() {
-		int pw = samplesPerPixel() * (bitDepth / 8);
+	private double getPixelWidth() {
+		double pw;
+		pw = samplesPerPixel() * ((double)bitDepth / 8);
 		return pw;
 	}
 	
@@ -2580,6 +2628,11 @@ public class PortableNetworkGraphic implements ChunkListener {
 				start = i*getScanlineWidth();
 				end = (i+1)*getScanlineWidth();
 				scanlineData = Arrays.copyOfRange(composedData, start, end);
+				System.out.print("[IN]: ");
+				for(byte b: scanlineData) {
+					System.out.print(b+":");
+				}
+				System.out.println();
 				lines[i] = new Scanline(samplesPerPixel(), bitDepth, scanlineData);
 			}
 			start = numberOfScanlines * getScanlineWidth();
@@ -2598,7 +2651,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * The length of a scanline.
 	 */
 	private int getScanlineWidth() {
-		int sw = (getPixelWidth() * width) + 1;
+		int sw = (int)Math.ceil(getPixelWidth() * width) + 1;
 		return sw;
 	}
 	
@@ -2977,12 +3030,16 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 *
 	 * @param file
 	 * The name of the file to write the data to.
+	 * 
+	 * @param forcePreservation
+	 * Whether or not image data should be forced to
+	 * be preserved from the original chunks.
 	 *
 	 * @throws StreamFailureException
 	 * If the file stream failed.
 	 */
-	private void writePngFile(String file) throws StreamFailureException {
-		Chunk[] chunks = convertToChunks();
+	private void writePngFile(String file, boolean forcePreservation) throws StreamFailureException {
+		Chunk[] chunks = convertToChunks(forcePreservation);
 		PngWriter writer = null;
 		while(writer == null) {
 			try {

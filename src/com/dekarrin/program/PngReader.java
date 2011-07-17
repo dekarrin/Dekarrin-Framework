@@ -20,63 +20,35 @@ public class PngReader extends ConsoleProgram {
 		addArgs();
 		String file = getArgument(0);
 		String output = getArgument(1);
-		
 		PortableNetworkGraphic pic = null;
+		
 		try {
 			pic = new PortableNetworkGraphic(file);
-		} catch(InvalidFormatException e) {
+		} catch(Exception e) {
 			giveFatalError(e.getMessage());
-		} catch(FileNotFoundException e) {
-			giveFatalError(e.getMessage());
+		}
+		ColorProfile profile = pic.getProfile();
+		Image image = pic.getImage();
+		/*Color c;
+		for(int y = 0; y < image.height; y++) {
+			for(int x = 0; x < image.width; x++) {
+				c = image.getColorAt(x, y);
+				String r = (new HelperString(Integer.toString(c.getRed(), 16))).padLeft(2, '0').toString();
+				String g = (new HelperString(Integer.toString(c.getGreen(), 16))).padLeft(2, '0').toString();
+				String b = (new HelperString(Integer.toString(c.getBlue(), 16))).padLeft(2, '0').toString();
+		//		String a = (new HelperString(Integer.toString(c.getAlpha(), 16))).padLeft(2, '0').toString();
+				String pixel = String.format("#%s%s%s ", r, g, b);
+				p(pixel);
+			}
+			pl("");
+		}*/
+		PortableNetworkGraphic pic2 = new PortableNetworkGraphic(image, pic.getColorMode());
+		pic2.setProfile(profile);
+		try {
+			pic2.save(output);
 		} catch(StreamFailureException e) {
 			giveFatalError(e.getMessage());
 		}
-		
-		Image image = pic.getImage();
-		Color color;
-		String colorString;
-		@SuppressWarnings("unused")
-		String r,b,g,a;
-		for(int y = 0; y < image.width; y++) {
-			for(int x = 0; x < image.height; x++) {
-				color = image.getColorAt(x, y);
-				r = (new HelperString(Integer.toString(color.getRed(), 16))).padLeft(2, '0').toString();
-				g = (new HelperString(Integer.toString(color.getGreen(), 16))).padLeft(2, '0').toString();
-				b = (new HelperString(Integer.toString(color.getBlue(), 16))).padLeft(2, '0').toString();
-			//	a = (new HelperString(Integer.toString(color.getAlpha(), 16))).padLeft(2, '0').toString();
-				colorString = String.format("(#%s%s%s)", r, g, b);
-				p(colorString);
-			}
-			pl("");
-		}
-		
-		if(hasArgument(1)) {
-			pl("-----------");
-			pl("reading test complete.");
-			pl("Writing...");
-			try {
-				pic.save(output);
-			} catch(StreamFailureException e) {
-				giveFatalError(e.getMessage());
-			}
-		}
-		/*Image picture = new Image(100, 100, 8, false);
-		java.util.Random rgen = new java.util.Random();
-		rgen.setSeed(328924879814357L);
-		Color c;
-		for(int x = 0; x < picture.width; x++) {
-			for(int y = 0; y < picture.height; y++) {
-				c = new Color(8);
-				c.setSamples(rgen.nextInt(256), rgen.nextInt(256), rgen.nextInt(256));
-				picture.setColorAt(x, y, c);
-			}
-		}*/
-		//PortableNetworkGraphic png = new PortableNetworkGraphic(picture, PortableNetworkGraphic.COLOR_TYPE_COLOR);
-	//	try {
-		//	pic.save(file);
-		//} catch (StreamFailureException e) {
-			//giveFatalError(e.getMessage());
-	//	}
 	}
 	
 	private void pl(String message) {
@@ -89,6 +61,6 @@ public class PngReader extends ConsoleProgram {
 	
 	private void addArgs() {
 		addArgument("filename", false);
-		addArgument("output", true);
+		addArgument("output", false);
 	}
 }
