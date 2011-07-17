@@ -1,0 +1,23 @@
+word - smallest unit. Composed of letters.
+	|____ part_of_speech
+
+sentence - expression consisting of words.
+{
+	subject
+	predicate
+	tense (predicate.tense)
+	mood (predicate.mood)
+	aspect (predicate.aspect)
+	
+}
+
+part_of_speech - one of several subclassisification of a word.
+{
+	noun
+	verb
+	article
+	particle
+	adjective
+	advertb
+	pronoun
+	
