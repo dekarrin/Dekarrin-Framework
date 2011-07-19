@@ -6,11 +6,6 @@ import com.dekarrin.util.ByteComposer;
  * Represents a gamma chunk.
  */
 public class GammaChunk extends AncillaryChunk {
-	
-	/**
-	 * The type of this chunks.
-	 */
-	public static final byte[] TYPE_CODE = {103, 65, 77, 65}; // gAMA
 
 	/**
 	 * The gamma stored in this chunk.
@@ -22,16 +17,9 @@ public class GammaChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk crc.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public GammaChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public GammaChunk(byte[] data) {
+		super(Chunk.gAMA, data);
 		parseData();
 	}
 	
@@ -42,7 +30,7 @@ public class GammaChunk extends AncillaryChunk {
 	 * The gamma value.
 	 */
 	public GammaChunk(int gamma) {
-		super(TYPE_CODE);
+		super(Chunk.gAMA);
 		setProperties(gamma);
 		setChunkData(createDataBytes());
 	}

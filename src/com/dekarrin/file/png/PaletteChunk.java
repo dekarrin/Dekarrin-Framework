@@ -9,11 +9,6 @@ import com.dekarrin.util.ByteComposer;
 public class PaletteChunk extends CriticalChunk {
 	
 	/**
-	 * The type for this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {80, 76, 84, 69}; // PLTE
-	
-	/**
 	 * The palette entries.
 	 */
 	private Color[] paletteEntries;
@@ -23,16 +18,9 @@ public class PaletteChunk extends CriticalChunk {
 	 *
 	 * @param data
 	 * The raw data in this chunk.
-	 *
-	 * @param crc
-	 * The CRC for this chunk.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public PaletteChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public PaletteChunk(byte[] data) {
+		super(Chunk.PLTE, data);
 		parseData();
 	}
 	
@@ -43,7 +31,7 @@ public class PaletteChunk extends CriticalChunk {
 	 * The colors to be in this PaletteChunk.
 	 */
 	public PaletteChunk(Color[] colors) {
-		super(TYPE_CODE);
+		super(Chunk.PLTE);
 		setProperties(colors);
 		setChunkData(createDataBytes());
 	}

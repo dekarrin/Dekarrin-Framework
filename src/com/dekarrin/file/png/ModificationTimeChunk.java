@@ -8,11 +8,6 @@ import com.dekarrin.util.ByteComposer;
  * Holds last modification time information.
  */
 public class ModificationTimeChunk extends AncillaryChunk {
-
-	/**
-	 * The type code for this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {116, 73, 77, 69}; // tIME
 	
 	/**
 	 * The year of the last modification.
@@ -49,16 +44,9 @@ public class ModificationTimeChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk CRC.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public ModificationTimeChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public ModificationTimeChunk(byte[] data) {
+		super(Chunk.tIME, data);
 		parseData();
 	}
 	
@@ -69,7 +57,7 @@ public class ModificationTimeChunk extends AncillaryChunk {
 	 * The date to set this ModificationTimeChunk to.
 	 */
 	public ModificationTimeChunk(Date modificationDate) {
-		super(TYPE_CODE);
+		super(Chunk.tIME);
 		Calendar c = Calendar.getInstance();
 		c.setTime(modificationDate);
 		setProperties(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));

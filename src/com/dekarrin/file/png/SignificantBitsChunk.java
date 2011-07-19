@@ -10,11 +10,6 @@ import com.dekarrin.util.ByteComposer;
 public class SignificantBitsChunk extends AncillaryChunk {
 	
 	/**
-	 * The type of this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {115, 66, 73, 84}; // sBIT
-	
-	/**
 	 * Significant bits in the original colors.
 	 */
 	private Color significantColorBits;
@@ -29,16 +24,9 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk CRC.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public SignificantBitsChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public SignificantBitsChunk(byte[] data) {
+		super(Chunk.sBIT, data);
 		parseData();
 	}
 	
@@ -58,7 +46,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the alpha channel.
 	 */
 	public SignificantBitsChunk(int redBits, int greenBits, int blueBits, int alphaBits) {
-		super(TYPE_CODE);
+		super(Chunk.sBIT);
 		setProperties(redBits, greenBits, blueBits, alphaBits);
 		setChunkData(createColorDataBytes());
 	}
@@ -76,7 +64,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the blue channel.
 	 */
 	public SignificantBitsChunk(int redBits, int greenBits, int blueBits) {
-		super(TYPE_CODE);
+		super(Chunk.sBIT);
 		setProperties(redBits, greenBits, blueBits, 0);
 		setChunkData(createColorDataBytes());
 	}
@@ -91,7 +79,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the alpha channel.
 	 */
 	public SignificantBitsChunk(int grayBits, int alphaBits) {
-		super(TYPE_CODE);
+		super(Chunk.sBIT);
 		setProperties(grayBits, grayBits, grayBits, alphaBits);
 		setChunkData(createGrayscaleDataBytes());
 	}
@@ -103,7 +91,7 @@ public class SignificantBitsChunk extends AncillaryChunk {
 	 * The number of significant bits in the grayscale data.
 	 */
 	public SignificantBitsChunk(int grayBits) {
-		super(TYPE_CODE);
+		super(Chunk.sBIT);
 		setProperties(grayBits, grayBits, grayBits, 0);
 		setChunkData(createGrayscaleDataBytes());
 	}

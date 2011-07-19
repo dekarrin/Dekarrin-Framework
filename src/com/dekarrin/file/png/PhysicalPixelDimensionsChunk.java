@@ -10,11 +10,6 @@ import com.dekarrin.util.ByteComposer;
 public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	
 	/**
-	 * The type code of this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {112, 72, 89, 115}; // pHYs
-	
-	/**
 	 * The dimensions of the pixels.
 	 */
 	private Dimension dimensions;
@@ -29,16 +24,9 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk CRC.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public PhysicalPixelDimensionsChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public PhysicalPixelDimensionsChunk(byte[] data) {
+		super(Chunk.pHYs, data);
 		parseData();
 	}
 	
@@ -56,7 +44,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * The unit that the pixel dimensions are in.
 	 */
 	public PhysicalPixelDimensionsChunk(int x, int y, int unitSpecifier) {
-		super(TYPE_CODE);
+		super(Chunk.pHYs);
 		setProperties(x, y, unitSpecifier);
 		setChunkData(createDataBytes());
 	}

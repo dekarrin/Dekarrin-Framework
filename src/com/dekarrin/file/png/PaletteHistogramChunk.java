@@ -8,11 +8,6 @@ import com.dekarrin.util.ByteComposer;
 public class PaletteHistogramChunk extends AncillaryChunk {
 	
 	/**
-	 * The type of this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {104, 73, 83, 84}; // hIST
-	
-	/**
 	 * The frequencies of each palette item.
 	 */
 	private int[] frequencies;
@@ -22,16 +17,9 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk CRC.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public PaletteHistogramChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public PaletteHistogramChunk(byte[] data) {
+		super(Chunk.hIST, data);
 		parseData();
 	}
 	
@@ -43,7 +31,7 @@ public class PaletteHistogramChunk extends AncillaryChunk {
 	 * The frequencies of each color.
 	 */
 	public PaletteHistogramChunk(int[] frequencies) {
-		super(TYPE_CODE);
+		super(Chunk.hIST);
 		setProperties(frequencies);
 		setChunkData(createDataBytes());
 	}

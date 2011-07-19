@@ -29,7 +29,7 @@ public class InvalidFormatException extends MessageException {
 	 */
 	public InvalidFormatException(String message, String fileType) {
 		super(message);
-		this.fileType = fileType;
+		this.fileType = fileType.toLowerCase();
 	}
 	
 	/**

@@ -1,11 +1,9 @@
 package com.dekarrin.file.png;
 
 import java.awt.Point;
-import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
 import java.io.*;
+
 import com.dekarrin.graphics.*;
 import com.dekarrin.zip.*;
 import com.dekarrin.util.*;
@@ -16,759 +14,7 @@ import com.dekarrin.error.*;
  * Represents a PNG file. This class is attempting to be compliant
  * with version 1.2 of the PNG standard; it's not there yet.
  */
-public class PortableNetworkGraphic implements ChunkListener {
-	
-	/**
-	 * Parses a steam into a PortableNetworkGraphic object.
-	 */
-	private class PngReader {
-		
-		/**
-		 * The actual data from the chunk.
-		 */
-		private ByteHolder chunkData;
-		
-		/**
-		 * The mode used for reading chunk CRCs.
-		 */
-		private final int CRC_READING_MODE = 4;
-		
-		/**
-		 * The array of crc bytes in the chunk currently being
-		 * processed.
-		 */
-		private ByteHolder crcBytes;
-		
-		/**
-		 * The calculated CRC of the chunk.
-		 */
-		private long cyclicRedundancyCheck;
-		
-		/**
-		 * The mode used for reading chunk data.
-		 */
-		private final int DATA_READING_MODE = 3;
-		
-		/**
-		 * The length of the data field of the chunk currently being
-		 * processed.
-		 */
-		private int dataLength;
-		
-		/**
-		 * The mode used for reading chunk lengths.
-		 */
-		private final int LENGTH_READING_MODE = 1;
-			
-		/**
-		 * The array of length bytes in the chunk currently being
-		 * read.
-		 */
-		private ByteHolder lengthBytes;
-		
-		/**
-		 * The objects listening for read chunks.
-		 */
-		private ArrayList<ChunkListener> listeners = new ArrayList<ChunkListener>();
-		
-		/**
-		 * The array of values in the header of a valid png file.
-		 */
-		private final IntHolder MAGIC_NUMBER = new IntHolder(PortableNetworkGraphic.MAGIC_NUMBER);
-		
-		/**
-		 * The mode of this Parser.
-		 */
-		private int parseMode;
-		
-		/**
-		 * Whether or not the stream is currently being parsed.
-		 */
-		private boolean parsing;
-		
-		/**
-		 * The stream of the PNG file.
-		 */
-		private InputStream pngStream;
-		
-		/**
-		 * The mode used for reading chunk types.
-		 */
-		private final int TYPE_READING_MODE = 2;
-		
-		/**
-		 * The array of type bytes in the chunk currently being
-		 * read.
-		 */
-		private ByteHolder typeBytes;
-		
-		/**
-		 * The mode used for verification of the png file.
-		 */
-		private final int VERIFICATION_MODE = 0;
-		
-		/**
-		 * Creates a new stream reader to read PNG data from.
-		 * 
-		 * @param stream
-		 * The InputStream to read the PNG data from.
-		 */
-		public PngReader(InputStream stream) {
-			pngStream = stream;
-			resetDataFields();
-		}
-		
-		/**
-		 * Sets a listener for this PngReader's completion method.
-		 * 
-		 * @param listener
-		 * The listener to register.
-		 */
-		public void addChunkListener(ChunkListener listener) {
-			listeners.add(listener);
-		}
-		
-		/**
-		 * Parses the png file into a PNG object.
-		 *
-		 * @return
-		 * The png object.
-		 */
-		public void read() throws InvalidFormatException, StreamFailureException, UnknownChunkException {
-			parseChunksFromStream();
-		}
-		
-		/**
-		 * Adds a byte to a tempory holding array. The given int is
-		 * converted into a byte and then put into the specified
-		 * array.
-		 *
-		 * @param inputByte
-		 * The byte to add.
-		 *
-		 * @param holder
-		 * The array to put the byte in.
-		 */
-		private void addByteToHolder(int inputByte, ByteHolder holder) {
-			byte actualByte = (byte)inputByte;
-			holder.add(actualByte);
-		}
-		
-		/**
-		 * Passes a background color chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceBackgroundColorChunk(BackgroundColorChunk chunk) {
-				for(ChunkListener listener: listeners) {
-				listener.backgroundColorChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a chromaticities chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceChromaticitiesChunk(ChromaticitiesChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.chromaticitiesChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a compressed text data chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceCompressedTextDataChunk(CompressedTextDataChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.compressedTextDataChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a embedded color profile chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceEmbeddedColorProfileChunk(EmbeddedColorProfileChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.embeddedColorProfileChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a gamma chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceGammaChunk(GammaChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.gammaChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a header chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceHeaderChunk(HeaderChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.headerChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes an image data chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceImageDataChunk(ImageDataChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.imageDataChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes an international text data chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceInternationalTextDataChunk(InternationalTextDataChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.internationalTextDataChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a modification time chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceModificationTimeChunk(ModificationTimeChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.modificationTimeChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a palette chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announcePaletteChunk(PaletteChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.paletteChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a palette histogram chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announcePaletteHistogramChunk(PaletteHistogramChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.paletteHistogramChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a physical pixel dimensions chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announcePhysicalPixelDimensionsChunk(PhysicalPixelDimensionsChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.physicalPixelDimensionsChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a significant bits chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceSignificantBitsChunk(SignificantBitsChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.significantBitsChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a standard RGB color space chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceStandardRgbColorSpaceChunk(StandardRgbColorSpaceChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.standardRgbColorSpaceChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a suggested palette chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceSuggestedPaletteChunk(SuggestedPaletteChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.suggestedPaletteChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a text data chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceTextDataChunk(TextDataChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.textDataChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a trailer chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceTrailerChunk(TrailerChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.trailerChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes a transparency chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceTransparencyChunk(TransparencyChunk chunk) {
-			for(ChunkListener listener: listeners) {
-				listener.transparencyChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Passes an unknown chunk to the registered listeners.
-		 * 
-		 * @param chunk
-		 * The chunk to pass.
-		 */
-		private void announceUnknownChunk(Chunk chunk) throws UnknownChunkException {
-			for(ChunkListener listener: listeners) {
-				listener.unknownChunkProcessed(chunk);
-			}
-		}
-		
-		/**
-		 * Checks the parse mode, and changes it as appropriate. If
-		 * it needs to be changed, the appropriate actions are taken
-		 * for changing the state of the parser to the new mode.
-		 *
-		 * @throws InvalidFormatException
-		 * If a chunk that is being read is invalid.
-		 */
-		private void checkParseModeCompletion() throws InvalidFormatException, UnknownChunkException {
-			switch(parseMode) {
-				case VERIFICATION_MODE:
-					if(isComplete(MAGIC_NUMBER)) {
-						parseMode = LENGTH_READING_MODE;
-					}
-					break;
-					
-				case LENGTH_READING_MODE:
-					if(isComplete(lengthBytes)) {
-						interpretLengthBytes();
-						setChunkDataSize();
-						parseMode = TYPE_READING_MODE;
-					}
-					break;
-					
-				case TYPE_READING_MODE:
-					if(isComplete(typeBytes)) {
-						if(dataLength > 0) {
-							parseMode = DATA_READING_MODE;
-						} else {
-							parseMode = CRC_READING_MODE;	
-						}
-					}
-					break;
-					
-				case DATA_READING_MODE:
-					if(isComplete(chunkData)) {
-						parseMode = CRC_READING_MODE;
-					}
-					break;
-					
-				case CRC_READING_MODE:
-					if(isComplete(crcBytes)) {
-						interpretCrcBytes();
-						try {
-							createChunk();
-						} catch(InvalidChunkException e) {
-							throw new InvalidFormatException("Error reading: "+e.getMessage(), "png");
-						}
-						parseMode = LENGTH_READING_MODE;
-					}
-					break;
-			}
-		}
-		
-		/**
-		 * Creates a chunk based on the contained data and announces
-		 * it to its listeners.
-		 *
-		 * @throws InvalidChunkException
-		 * If the cyclic redundancy check read from the chunk
-		 * does not match the one calculated on the type and data.
-		 */
-		private void createChunk() throws InvalidChunkException, UnknownChunkException {
-			byte[] typeByteArray = this.typeBytes.toArray();
-			String type = new String(typeByteArray, 0, 4); 
-			byte[] data = chunkData.toArray();
-			long crc = cyclicRedundancyCheck;
-			
-			if(type.equals("IHDR")) {
-				announceHeaderChunk(new HeaderChunk(data, crc));
-			} else if(type.equals("PLTE")) {
-				announcePaletteChunk(new PaletteChunk(data, crc));
-			} else if(type.equals("IDAT")) {
-				announceImageDataChunk(new ImageDataChunk(data, crc));
-			} else if(type.equals("IEND")) {
-				parsing = false;
-				announceTrailerChunk(new TrailerChunk(data, crc));
-			} else if(type.equals("tRNS")) {
-				announceTransparencyChunk(new TransparencyChunk(data, crc));
-			} else if(type.equals("gAMA")) {
-				announceGammaChunk(new GammaChunk(data, crc));
-			} else if(type.equals("cHRM")) {
-				announceChromaticitiesChunk(new ChromaticitiesChunk(data, crc));
-			} else if(type.equals("sRGB")) {
-				announceStandardRgbColorSpaceChunk(new StandardRgbColorSpaceChunk(data, crc));
-			} else if(type.equals("iCCP")) {
-				announceEmbeddedColorProfileChunk(new EmbeddedColorProfileChunk(data, crc));
-			} else if(type.equals("tEXt")) {
-				announceTextDataChunk(new TextDataChunk(data, crc));
-			} else if(type.equals("zTXt")) {
-				announceCompressedTextDataChunk(new CompressedTextDataChunk(data, crc));
-			} else if(type.equals("iTXt")) {
-				announceInternationalTextDataChunk(new InternationalTextDataChunk(data, crc));
-			} else if(type.equals("bKGD")) {
-				announceBackgroundColorChunk(new BackgroundColorChunk(data, crc));
-			} else if(type.equals("pHYs")) {
-				announcePhysicalPixelDimensionsChunk(new PhysicalPixelDimensionsChunk(data, crc));
-			} else if(type.equals("sBIT")) {
-				announceSignificantBitsChunk(new SignificantBitsChunk(data, crc));
-			} else if(type.equals("sPLT")) {
-				announceSuggestedPaletteChunk(new SuggestedPaletteChunk(data, crc));
-			} else if(type.equals("hIST")) {
-				announcePaletteHistogramChunk(new PaletteHistogramChunk(data, crc));
-			} else if(type.equals("tIME")) {
-				announceModificationTimeChunk(new ModificationTimeChunk(data, crc));
-			} else {
-				announceUnknownChunk(new Chunk(typeByteArray, data, crc));
-			}
-			resetDataFields();
-		}
-		
-		/**
-		 * Converts a byte array into an int.
-		 *
-		 * @param subject
-		 * The bytes to convert.
-		 *
-		 * @return
-		 * The int, made up of the first four bytes in the array.
-		 */
-		private int getIntFromBytes(byte[] subject) {
-			ByteBuffer bb = ByteBuffer.wrap(subject);
-			int converted = bb.getInt();
-			return converted;
-		}
-			
-		/**
-		 * Converts a byte array into a long.
-		 *
-		 * @param subject
-		 * The bytes to convert. If this is not at leas eight bytes
-		 * long than it is padded according to big endian order
-		 * (bytes are added in front of the given bytes).
-		 *
-		 * @return
-		 * The long, made up of the first eight bytes in the array.
-		 */
-		private long getLongFromBytes(byte[] subject) {
-			if(subject.length < 8) {
-				ByteHolder holder = new ByteHolder(8);
-				for(int i = 0; i < 8 - subject.length; i++) {
-					holder.add((byte)0);
-				}
-				holder.add(subject);
-				subject = holder.toArray();
-			}
-			ByteBuffer bb = ByteBuffer.wrap(subject);
-			long converted = bb.getLong();
-			return converted;
-		}
-		
-		/**
-		 * Gets the next byte from the png stream.
-		 *
-		 * @return
-		 * The read byte.
-		 */
-		private int getNextByte() throws StreamFailureException {
-			int nextByte = -1;
-			try {
-				nextByte = pngStream.read();
-			} catch(IOException e) {
-				throw new StreamFailureException(e.getMessage());
-			}
-			return nextByte;
-		}
-		
-		/**
-		 * Interprets the bytes in the crcBytes array into a single
-		 * int.
-		 */
-		private void interpretCrcBytes() {
-			cyclicRedundancyCheck = getLongFromBytes(crcBytes.toArray());
-		}
-		
-		/**
-		 * Interprets the bytes in the lengthBytes array into a single
-		 * int.
-		 */
-		private void interpretLengthBytes() {
-			dataLength = getIntFromBytes(lengthBytes.toArray());
-		}
-		
-		/**
-		 * Checks if a holder position pointer has reached its capacity.
-		 *
-		 * @param holder
-		 * The holder to check.
-		 *
-		 * @return
-		 * True if the position has come to the end; false otherwise.
-		 */
-		private boolean isComplete(PrimitiveHolder holder) {
-			boolean complete = false;
-			if(holder.isAtEnd()) {
-				complete = true;
-			}
-			return complete;
-		}
-		
-		/**
-		 * Parses a single integer into a byte and then parses the
-		 * data itself.
-		 *
-		 * @param readByte
-		 * The byte to parse.
-		 *
-		 * @throws InvalidFormatException
-		 * When the header does not validate, or if a chunk crc does
-		 * not match.
-		 */
-		private void parseByte(int readByte) throws InvalidFormatException, UnknownChunkException {
-			switch(parseMode) {
-				case VERIFICATION_MODE:
-					verifyByte(readByte);
-					break;
-				
-				case LENGTH_READING_MODE:
-					addByteToHolder(readByte, lengthBytes);
-					break;
-					
-				case TYPE_READING_MODE:
-					addByteToHolder(readByte, typeBytes);
-					break;
-					
-				case DATA_READING_MODE:
-					addByteToHolder(readByte, chunkData);
-					break;
-				
-				case CRC_READING_MODE:
-					addByteToHolder(readByte, crcBytes);
-					break;
-					
-				default:
-					throw new IllegalModeException("Invalid mode");
-			}
-			checkParseModeCompletion();
-		}
-		
-		/**
-		 * Gets the data from the PNG file and stores it as generic
-		 * chunks in the completedChunks ArrayList.
-		 */
-		private void parseChunksFromStream() throws StreamFailureException, InvalidFormatException, UnknownChunkException {
-			int nextByteAsInt;
-			parsing = true;
-			parseMode = VERIFICATION_MODE;
-			while(parsing && (nextByteAsInt = getNextByte()) != -1) {
-				parseByte(nextByteAsInt);
-			}
-			try {
-				pngStream.close();
-			} catch(IOException e) {
-				throw new StreamFailureException(e.getMessage());
-			}
-		}
-		
-		/**
-		 * Initializes fields used for storing chunk data.
-		 */
-		private void resetDataFields() {
-			dataLength				= 0;
-			cyclicRedundancyCheck	= 0L;
-			lengthBytes				= new ByteHolder(4);
-			typeBytes				= new ByteHolder(4);
-			crcBytes				= new ByteHolder(4);
-			chunkData				= null;
-			MAGIC_NUMBER.reset();
-		}
-		
-		/**
-		 * Sets the size of the chunkData array to the read length.
-		 */
-		private void setChunkDataSize() {
-			chunkData = new ByteHolder(dataLength);
-		}
-		
-		/**
-		 * Checks a header byte for validity. After each check, the
-		 * verification pointer is incremented.
-		 *
-		 * @param headerByte
-		 * The byte from the header.
-		 *
-		 * @throws InvalidFormatException
-		 * If a byte is not valid.
-		 */
-		private void verifyByte(int headerByte) throws InvalidFormatException {
-			if(headerByte != MAGIC_NUMBER.next()) {
-				throw new InvalidFormatException("Bad header file!", "png");
-			}
-		}
-	}
-	
-	/**
-	 * Writes Png Chunk arrays to disk.
-	 */
-	private class PngWriter {
-		
-		/**
-		 * The file on disk.
-		 */
-		private File pngFile;
-		
-		/**
-		 * The stream of the png file.
-		 */
-		private FileOutputStream pngStream;
-		
-		/**
-		 * Creates a new PngWriter.
-		 *
-		 * @param filename
-		 * The location of the PNG.
-		 */
-		public PngWriter(String filename) throws FileNotFoundException {
-			pngFile = new File(filename);
-			createStream();
-		}
-		
-		/**
-		 * Writes chunks to disk.
-		 *
-		 * @param chunks
-		 * The chunks to write.
-		 */
-		public void write(Chunk[] chunks) throws StreamFailureException {
-			writeMagicNumber();
-			for(Chunk c: chunks) {
-				writeChunk(c);
-			}
-			try {
-				pngStream.flush();
-				pngStream.close();
-			} catch(IOException e) {
-				throw new StreamFailureException(e.getMessage());
-			}
-		}
-		
-		/**
-		 * Creates the stream for the png file.
-		 */
-		private void createStream() throws FileNotFoundException {
-			pngStream = new FileOutputStream(pngFile);
-		}
-		
-		/**
-		 * Gets the magic number constant from PortableNetworkGraphic
-		 * and converts it into the proper form for writing.
-		 *
-		 * @return
-		 * The magic number as an array of bytes.
-		 */
-		private byte[] getMagicNumber() {
-			byte[] magic = new byte[PortableNetworkGraphic.MAGIC_NUMBER.length];
-			for(int i = 0; i < PortableNetworkGraphic.MAGIC_NUMBER.length; i++) {
-				magic[i] = (byte)PortableNetworkGraphic.MAGIC_NUMBER[i];
-			}
-			return magic;
-		}
-		
-		/**
-		 * Writes a chunk to the stream.
-		 *
-		 * @param chunk
-		 * The chunk to write.
-		 */
-		private void writeChunk(Chunk c) throws StreamFailureException {
-			try {
-				pngStream.write(c.toBytes());
-			} catch(IOException e) {
-				throw new StreamFailureException(e.getMessage());
-			}
-		}
-		
-		/**
-		 * Writes the magic number for a Png file to the stream.
-		 */
-		private void writeMagicNumber() throws StreamFailureException {
-			byte[] magicNumber = getMagicNumber();
-			try {
-				pngStream.write(magicNumber);
-			} catch(IOException e) {
-				throw new StreamFailureException(e.getMessage());
-			}
-		}
-	}
+public class PortableNetworkGraphic {
 	
 	/**
 	 * Color type for color used.
@@ -830,11 +76,6 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * Interlace method for no interlacing.
 	 */
 	public static final int INTERLACE_METHOD_NONE = 0;
-	 
-	/**
-	 * The values in the header of a valid png file.
-	 */
-	public static final int[] MAGIC_NUMBER = {137, 80, 78, 71, 13, 10, 26, 10};
 	
 	/**
 	 * Unit specifier for the meter.
@@ -920,12 +161,6 @@ public class PortableNetworkGraphic implements ChunkListener {
 	private boolean criticallyModified = false;
 	
 	/**
-	 * The number of the Scanline that is currently being added
-	 * to the image.
-	 */
-	private int currentScanline = 0;
-	
-	/**
 	 * The image data chunks. These are preserved in case unknown unsafe
 	 * to copy chunks exist in the png.
 	 */
@@ -955,12 +190,6 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * The image contained by this Png.
 	 */
 	private Image image;
-	
-	/**
-	 * The image inflater.
-	 */
-	private Inflater imageDecompresser;
-	
 	/**
 	 * What method of interlacing this Png uses.
 	 */
@@ -994,12 +223,6 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * a palette.
 	 */
 	private int[] paletteFrequencies;
-	
-	/**
-	 * The excess data yielded from a Scanline extraction
-	 * operation.
-	 */
-	private byte[] previousImageData;
 	
 	/**
 	 * The color profile for this png.
@@ -1180,7 +403,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk.
 	 * The background color chunk.
 	 */
-	public void backgroundColorChunkProcessed(BackgroundColorChunk chunk) {
+	public void readBackgroundColorChunk(BackgroundColorChunk chunk) {
 		if(chunk.getColorMode() == colorMode) {
 			switch(chunk.getColorMode()) {
 				case COLOR_TYPE_GRAYSCALE:
@@ -1206,7 +429,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The chromaticites chunk.
 	 */
-	public void chromaticitiesChunkProcessed(ChromaticitiesChunk chunk) {
+	public void readChromaticitiesChunk(ChromaticitiesChunk chunk) {
 		Point r = chunk.getRed();
 		Point g = chunk.getGreen();
 		Point b = chunk.getBlue();
@@ -1220,7 +443,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The compressed text data chunk.
 	 */
-	public void compressedTextDataChunkProcessed(CompressedTextDataChunk chunk) {
+	public void readCompressedTextDataChunk(CompressedTextDataChunk chunk) {
 		addText(chunk.getKeyword(), chunk.getText());
 	}
 	
@@ -1230,7 +453,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The ICCP chunk.
 	 */
-	public void embeddedColorProfileChunkProcessed(EmbeddedColorProfileChunk chunk) {
+	public void readEmbeddedColorProfileChunk(EmbeddedColorProfileChunk chunk) {
 		profile = new ColorProfile(chunk.getProfileName(), chunk.getProfile());
 	}
 	
@@ -1240,7 +463,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The gamma chunk.
 	 */
-	public void gammaChunkProcessed(GammaChunk chunk) {
+	public void readGammaChunk(GammaChunk chunk) {
 		gamma = chunk.getGamma();
 		gammaSet = true;
 	}
@@ -1691,9 +914,8 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param header
 	 * The header chunk.
 	 */
-	public void headerChunkProcessed(HeaderChunk header) {
+	public void readHeaderChunk(HeaderChunk header) {
 		unknownChunks = unknownColorSpaceChunks;
-		imageDecompresser = new Inflater();
 		bitDepth = header.getBitDepth();
 		height = header.getHeight();
 		width = header.getWidth();
@@ -1706,15 +928,27 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunks
 	 * The image chunk to process make up the image data.
 	 */
-	public void imageDataChunkProcessed(ImageDataChunk chunk) {
-		unknownChunks = unknownPostDataChunks;
-		dataChunks.add(chunk);
-		byte[] compressedData = chunk.getData();
+	private void processImageData() throws InvalidFormatException {
+		byte[] compressedData = concatenateImageData();
 		byte[] decompressedData = decompressData(compressedData);
 		Scanline[] lines = getScanlinesFromData(decompressedData);
-		if(lines != null) {
-			constructImage(lines);
+		constructImage(lines);
+	}
+	
+	/**
+	 * Concatenates all the image data into one array.
+	 * 
+	 * @return
+	 * The data contents of the image data.
+	 */
+	private byte[] concatenateImageData() {
+		byte[] iData = new byte[0];
+		byte[] nextData;
+		for(ImageDataChunk c: dataChunks) {
+			nextData = c.getData();
+			ArrayHelper.append(iData, nextData);
 		}
+		return iData;
 	}
 	
 	/**
@@ -1723,7 +957,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The international text data chunk.
 	 */
-	public void internationalTextDataChunkProcessed(InternationalTextDataChunk chunk) {
+	public void readInternationalTextDataChunk(InternationalTextDataChunk chunk) {
 		addText(chunk.getKeyword(), chunk.getText());
 	}
 	
@@ -1765,7 +999,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The last modification time chunk.
 	 */
-	public void modificationTimeChunkProcessed(ModificationTimeChunk chunk) {
+	public void readModificationTimeChunk(ModificationTimeChunk chunk) {
 		Calendar c = Calendar.getInstance();
 		c.set(chunk.getYear(), chunk.getMonth(), chunk.getDay(), chunk.getHour(), chunk.getMinute(), chunk.getSecond());
 		lastModified = c.getTime();
@@ -1777,7 +1011,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The palette chunk.
 	 */
-	public void paletteChunkProcessed(PaletteChunk chunk) {
+	public void readPaletteChunk(PaletteChunk chunk) {
 		unknownChunks = unknownPreDataChunks;
 		paletteColors = chunk.getPalette();
 	}
@@ -1788,7 +1022,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The palette histogram chunk.
 	 */
-	public void paletteHistogramChunkProcessed(PaletteHistogramChunk chunk) {
+	public void readPaletteHistogramChunk(PaletteHistogramChunk chunk) {
 		paletteFrequencies = chunk.getFrequencies();
 	}
 	
@@ -1798,7 +1032,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The dimension chunk.
 	 */
-	public void physicalPixelDimensionsChunkProcessed(PhysicalPixelDimensionsChunk chunk) {
+	public void readPhysicalPixelDimensionsChunk(PhysicalPixelDimensionsChunk chunk) {
 		resolution = new Resolution(chunk.getWidth(), chunk.getHeight());
 	}
 	
@@ -1950,7 +1184,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The SignificantBitsChunk.
 	 */
-	public void significantBitsChunkProcessed(SignificantBitsChunk chunk) {
+	public void readSignificantBitsChunk(SignificantBitsChunk chunk) {
 		significantColorBits = chunk.getColorBits();
 		if(colorMode == COLOR_TYPE_GRAYSCALE_ALPHA || colorMode == COLOR_TYPE_COLOR_ALPHA) {
 			significantAlphaBits = chunk.getAlphaBits();
@@ -1965,7 +1199,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The standard RGB color space chunk.
 	 */
-	public void standardRgbColorSpaceChunkProcessed(StandardRgbColorSpaceChunk chunk) {
+	public void readStandardRgbColorSpaceChunk(StandardRgbColorSpaceChunk chunk) {
 		renderingIntent = chunk.getRenderingIntent();
 		renderingIntentSet = true;
 	}
@@ -1976,7 +1210,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The suggested palette chunk.
 	 */
-	public void suggestedPaletteChunkProcessed(SuggestedPaletteChunk chunk) {
+	public void readSuggestedPaletteChunk(SuggestedPaletteChunk chunk) {
 		Color[] c = chunk.getPaletteEntries();
 		int[] f = chunk.getFrequencies();
 		reducedPalette = new Palette(chunk.getPaletteName(), chunk.getSampleDepth(), c, f);
@@ -1988,18 +1222,8 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The text data chunk.
 	 */
-	public void textDataChunkProcessed(TextDataChunk chunk) {
+	public void readTextDataChunk(TextDataChunk chunk) {
 		addText(chunk.getKeyword(), chunk.getText());
-	}
-	
-	/**
-	 * Signals that the PNG data stream is at its end.
-	 * 
-	 * @param chunk
-	 * The trailer chunk that signaled the end.
-	 */
-	public void trailerChunkProcessed(TrailerChunk chunk) {
-		cleanUpDataStructures();
 	}
 	
 	/**
@@ -2009,7 +1233,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @param chunk
 	 * The transparency chunk.
 	 */
-	public void transparencyChunkProcessed(TransparencyChunk chunk) {
+	public void readTransparencyChunk(TransparencyChunk chunk) {
 		chunk.parseWithColorMode(colorMode);
 		if(chunk.getColorMode() == colorMode) {
 			switch(chunk.getColorMode()) {
@@ -2166,23 +1390,20 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 */
 	private void constructColorImage(Scanline[] scanlines) {
 		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
-		if(image == null) {
-			image = new Image(width, height, bitDepth, hasAlpha);
-		}
+		image = new Image(width, height, bitDepth, hasAlpha);
 		Color color = new Color(bitDepth);
-		for(int i = 0; i < scanlines.length; i++) {
-			for(int x = 0; x < scanlines[i].pixels(); x++) {
-				color.setRed(scanlines[i].getSample(x, Scanline.RED_SAMPLE));
-				color.setGreen(scanlines[i].getSample(x, Scanline.GREEN_SAMPLE));
-				color.setBlue(scanlines[i].getSample(x, Scanline.BLUE_SAMPLE));
+		for(int y = 0; y < scanlines.length; y++) {
+			for(int x = 0; x < scanlines[y].pixels(); x++) {
+				color.setRed(scanlines[y].getSample(x, Scanline.RED_SAMPLE));
+				color.setGreen(scanlines[y].getSample(x, Scanline.GREEN_SAMPLE));
+				color.setBlue(scanlines[y].getSample(x, Scanline.BLUE_SAMPLE));
 				if(hasAlpha) {
-					color.setAlpha(scanlines[i].getSample(x, Scanline.ALPHA_SAMPLE));
+					color.setAlpha(scanlines[y].getSample(x, Scanline.ALPHA_SAMPLE));
 				} else if(transparentColor != null && transparentColor.equals(color)) {
 					color.setAlpha(0);
 				}
-				image.setColorAt(x, currentScanline, color);
+				image.setColorAt(x, y, color);
 			}
-			currentScanline++;
 		}
 	}
 	
@@ -2198,19 +1419,17 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 */
 	private void constructGrayscaleImage(Scanline[] scanlines) {
 		boolean hasAlpha = (colorMode == COLOR_TYPE_GRAYSCALE_ALPHA);
-		if(image == null) {
-			image = new Image(width, height, bitDepth, hasAlpha);
-		}
+		image = new Image(width, height, bitDepth, hasAlpha);
 		GrayColor color = new GrayColor(bitDepth);
-		for(int i = 0; i < scanlines.length; i++) {
-			for(int x = 0; x < scanlines[i].pixels(); x++) {
-				color.setValue(scanlines[i].getSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE));
+		for(int y = 0; y < scanlines.length; y++) {
+			for(int x = 0; x < scanlines[y].pixels(); x++) {
+				color.setValue(scanlines[y].getSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE));
 				if(hasAlpha) {
-					color.setAlpha(scanlines[i].getSample(x, Scanline.GRAYSCALE_ALPHA_SAMPLE));
+					color.setAlpha(scanlines[y].getSample(x, Scanline.GRAYSCALE_ALPHA_SAMPLE));
 				} else if(transparentColor != null && transparentColor.equals(color)) {
 					color.setAlpha(0);
 				}
-				image.setColorAt(x, currentScanline, color);
+				image.setColorAt(x, y, color);
 			}
 		}
 	}
@@ -2250,17 +1469,14 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * The completed image.
 	 */
 	private void constructIndexedImage(Scanline[] scanlines) {
-		if(image == null) {
-			image = new Image(width, height, bitDepth);
-		}
+		image = new Image(width, height, bitDepth);
 		Color color;
-		for(int i = 0; i < scanlines.length; i++) {
-			for(int x = 0; x < scanlines[i].pixels(); x++) {
-				int paletteIndex = scanlines[i].getSample(x, Scanline.PALETTE_INDEX_SAMPLE);
+		for(int y = 0; y < scanlines.length; y++) {
+			for(int x = 0; x < scanlines[y].pixels(); x++) {
+				int paletteIndex = scanlines[y].getSample(x, Scanline.PALETTE_INDEX_SAMPLE);
 				color = palette.getColor(paletteIndex);
-				image.setColorAt(x, currentScanline, color);
+				image.setColorAt(x, y, color);
 			}
-			currentScanline++;
 		}
 	}
 	
@@ -2393,30 +1609,8 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * The decompressed data.
 	 */
 	private byte[] decompressData(byte[] data) {
-		imageDecompresser.setInput(data);
-		byte[] outputBuffer = new byte[50];
-		int actualLength = 0;
-		byte[] decompressedData = null;
-		while(!imageDecompresser.needsInput() && !imageDecompresser.finished()) {
-			try {
-				actualLength = imageDecompresser.inflate(outputBuffer);
-			} catch(DataFormatException e) {
-				System.err.println("Bad DEFLATE format!");
-			}
-			int oldDataLength = (decompressedData != null) ? decompressedData.length : 0;
-			if(decompressedData == null) {
-				decompressedData = new byte[0];
-			}
-			byte[] holder = new byte[decompressedData.length + actualLength];
-			for(int i = 0; i < decompressedData.length; i++) {
-				holder[i] = decompressedData[i];
-			}
-			decompressedData = holder;
-			for(int i = 0; i < actualLength; i++) {
-				decompressedData[oldDataLength + i] = outputBuffer[i];
-			}
-		}
-		return decompressedData;
+		ZlibDecompresser decompresser = new ZlibDecompresser(data);
+		return decompresser.decompress();
 	}
 	
 	/**
@@ -2610,36 +1804,18 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * Extra data to be added to the previous data in order to
 	 * create scan lines.
 	 */
-	private Scanline[] getScanlinesFromData(byte[] data) {
-		byte[] composedData;
-		if(previousImageData != null) {
-			composedData = ArrayHelper.append(previousImageData, data);
-		} else {
-			composedData = data;
+	private Scanline[] getScanlinesFromData(byte[] data) throws InvalidFormatException {
+		int numberOfScanlines = data.length / getScanlineWidth();
+		if(numberOfScanlines != height) {
+			throw new InvalidFormatException("Number of scanlines does not equal image height", "png");
 		}
-		int numberOfScanlines = composedData.length / getScanlineWidth();
-		Scanline[] lines = null;
-		if(numberOfScanlines > 0) {
-			lines = new Scanline[numberOfScanlines];
-			int start;
-			int end;
-			byte[] scanlineData;
-			for(int i = 0; i < numberOfScanlines; i++) {
-				start = i*getScanlineWidth();
-				end = (i+1)*getScanlineWidth();
-				scanlineData = Arrays.copyOfRange(composedData, start, end);
-				System.out.print("[IN]: ");
-				for(byte b: scanlineData) {
-					System.out.print(b+":");
-				}
-				System.out.println();
-				lines[i] = new Scanline(samplesPerPixel(), bitDepth, scanlineData);
-			}
-			start = numberOfScanlines * getScanlineWidth();
-			end = composedData.length;
-			previousImageData = Arrays.copyOfRange(composedData, start, end);
-		} else {
-			previousImageData = composedData;
+		Scanline[] lines = new Scanline[height];
+		byte[] scanlineData;
+		for(int i=0,start=0,end=0; i < height; i++) {
+			start = i*getScanlineWidth();
+			end = (i+1)*getScanlineWidth();
+			scanlineData = Arrays.copyOfRange(data, start, end);
+			lines[i] = new Scanline(samplesPerPixel(), bitDepth, scanlineData);
 		}
 		return lines;
 	}
@@ -2696,16 +1872,105 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * If the file stream fails for some other reason.
 	 */
 	private void loadPngFile(String file) throws FileNotFoundException, InvalidFormatException, StreamFailureException {
+		Chunk nextChunk = null;
 		FileInputStream f = new FileInputStream(file);
-		PngReader reader = new PngReader(f);
-		reader.addChunkListener(this);
-		try {
-			reader.read();
-		} catch(UnknownChunkException e) {
-			throw new InvalidFormatException("Unknown critical chunk '"+e.getType()+"' encountered.", "png");
+		ChunkInputStream reader = new ChunkInputStream(f);
+		reader.verifyPng();
+		boolean reading = true;
+		while(reading) {
+			nextChunk = reader.readChunk();
+			if(nextChunk.getType() == Chunk.IEND) {
+				reading = false;
+			}
+			processChunk(nextChunk);
 		}
+		processImageData();
+		cleanUpDataStructures();
 	}
 	
+	/**
+	 * Parses a chunk for data and adds it to the data of this
+	 * PNG.
+	 * 
+	 * @param chunk
+	 * The chunk to process.
+	 */
+	private void processChunk(Chunk chunk) {
+		int type = chunk.getType();
+		switch(type) {
+			case Chunk.IHDR:
+				readHeaderChunk((HeaderChunk) chunk);
+				break;
+
+			case Chunk.PLTE:
+				readPaletteChunk((PaletteChunk) chunk);
+				break;
+				
+			case Chunk.IDAT:
+				unknownChunks = unknownPostDataChunks;
+				dataChunks.add((ImageDataChunk) chunk);
+				break;
+
+			case Chunk.IEND:
+				break;
+
+			case Chunk.tRNS:
+				readTransparencyChunk((TransparencyChunk) chunk);
+				break;
+
+			case Chunk.gAMA:
+				readGammaChunk((GammaChunk) chunk);
+				break;
+
+			case Chunk.cHRM:
+				readChromaticitiesChunk((ChromaticitiesChunk) chunk);
+				break;
+
+			case Chunk.sRGB:
+				readStandardRgbColorSpaceChunk((StandardRgbColorSpaceChunk) chunk);
+				break;
+
+			case Chunk.iCCP:
+				readEmbeddedColorProfileChunk((EmbeddedColorProfileChunk) chunk);
+				break;
+
+			case Chunk.iTXt:
+				readInternationalTextDataChunk((InternationalTextDataChunk) chunk);
+				break;
+
+			case Chunk.tEXt:
+				readTextDataChunk((TextDataChunk) chunk);
+				break;
+
+			case Chunk.zTXt:
+				readCompressedTextDataChunk((CompressedTextDataChunk) chunk);
+				break;
+
+			case Chunk.bKGD:
+				readBackgroundColorChunk((BackgroundColorChunk) chunk);
+				break;
+
+			case Chunk.pHYs:
+				readPhysicalPixelDimensionsChunk((PhysicalPixelDimensionsChunk) chunk);
+				break;
+
+			case Chunk.sBIT:
+				readSignificantBitsChunk((SignificantBitsChunk) chunk);
+				break;
+
+			case Chunk.sPLT:
+				readSuggestedPaletteChunk((SuggestedPaletteChunk) chunk);
+				break;
+
+			case Chunk.hIST:
+				readPaletteHistogramChunk((PaletteHistogramChunk) chunk);
+				break;
+
+			case Chunk.tIME:
+				readModificationTimeChunk((ModificationTimeChunk) chunk);
+				break;
+		}
+	}
 	/**
 	 * Makes a keyword's charset valid. The validity of a keyword
 	 * is determined by the PNG specification at
@@ -3028,7 +2293,7 @@ public class PortableNetworkGraphic implements ChunkListener {
 	/**
 	 * Writes the png data to a file.
 	 *
-	 * @param file
+	 * @param location
 	 * The name of the file to write the data to.
 	 * 
 	 * @param forcePreservation
@@ -3038,14 +2303,14 @@ public class PortableNetworkGraphic implements ChunkListener {
 	 * @throws StreamFailureException
 	 * If the file stream failed.
 	 */
-	private void writePngFile(String file, boolean forcePreservation) throws StreamFailureException {
+	private void writePngFile(String location, boolean forcePreservation) throws StreamFailureException {
 		Chunk[] chunks = convertToChunks(forcePreservation);
-		PngWriter writer = null;
-		while(writer == null) {
+		FileOutputStream file = null;
+		while(file == null) {
 			try {
-				writer = new PngWriter(file);
+				file = new FileOutputStream(location);
 			} catch(FileNotFoundException e) {
-				File f = new File(file);
+				File f = new File(location);
 				try {
 					f.createNewFile();
 				} catch(IOException ioe) {
@@ -3053,6 +2318,10 @@ public class PortableNetworkGraphic implements ChunkListener {
 				}
 			}
 		}
-		writer.write(chunks);
+		ChunkOutputStream writer = new ChunkOutputStream(file);
+		writer.writeMagicNumber();
+		for(Chunk c: chunks) {
+			writer.writeChunk(c);
+		}
 	}
 }

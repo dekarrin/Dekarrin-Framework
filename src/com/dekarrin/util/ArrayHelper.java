@@ -644,4 +644,228 @@ public class ArrayHelper {
 		}
 		return (T[])appended;
 	}
+	
+	/**
+	 * Converts an array of bytes into a short. The bytes
+	 * are read in big-endian order, with the first index
+	 * representing the first used byte. If the length of the
+	 * array of bytes is not equal to the number of bytes in
+	 * a short, it is either padded or truncated to make
+	 * the result fit within a short.
+	 * 
+	 * For in-depth examples of the mechanics of this and
+	 * other to-primitive methods, see {@link
+	 * ArrayHelper#toInt(byte[]) toInt()}.
+	 *
+	 * @param primitives
+	 * The bytes that make up the short. The length of this
+	 * array need not be the same size as a short. If it
+	 * is more than two bytes, only the last two bytes will
+	 * be used. If it is less than two bytes, the short is
+	 * padded to the left with zero-filled bytes to make it
+	 * two bytes long.
+	 *
+	 * @return
+	 * The short created by concatenating the given byte
+	 * primitives.
+	 */
+	public static short toShort(byte[] primitives) {
+		short result = 0;
+		for(int i = 0; i < primitives.length; i++) {
+			result = (short)((result << 8) | (primitives[i] & 0xff));
+		}
+		return result;
+	}
+	
+	/**
+	 * Converts an array of bytes into an integer. The bytes
+	 * are read in big-endian order, with the first index
+	 * representing the first used byte. If the length of the
+	 * array of bytes is not equal to the number of bytes in
+	 * an integer, it is either padded or truncated to make
+	 * the result fit within an integer.
+	 * 
+	 * Examples:
+	 * toInt(new byte[]{36, 123, -28, 8}) takes the bitfields
+	 * for 36, 123, -28, and 8. These are 00100100, 01111011,
+	 * 11100100, and 00001000, respectively. The bitfields are
+	 * concatenated together get a new 32-bit bit field,
+	 * 00100100 01111011 11100100 00001000. This bitfield
+	 * represents the integer value 612099080, which is
+	 * returned.
+	 * 
+	 * toInt(new byte[]{36, 123}) takes the bitfields for 36
+	 * and 123. These are 00100100 and 01111011, respectively.
+	 * The bitfields are concatenated, but because there are
+	 * fewer than four bytes, the resulting bitfield is padded
+	 * to the left with zero-filled bytes in order to result
+	 * in a 32-bit field, 00000000 00000000 00100100 01111011.
+	 * This bitfield represents the integer value 9339, which
+	 * is returned.
+	 * 
+	 * toInt(new byte[]{36, 123, -28, 8, 17, -1}) takes the
+	 * bitfields for 36, 123, -28, 8, 17, and -1. These are
+	 * 00100100, 01111011, 11100100, 00001000, 00010001, and
+	 * 11111111, respectively. Because there are more than
+	 * four bytes, only the last four bytes from the array
+	 * are concatenated into a new 32-bit field,
+	 * 11100100 00001000 00010001 11111111. This bitfield
+	 * represents the integer value 3825734143, which is
+	 * returned.
+	 *
+	 * @param primitives
+	 * The bytes that make up the integer. The length of this
+	 * array need not be the same size as an integer. If it
+	 * is more than four bytes, only the last four bytes will
+	 * be used. If it is less than four bytes, the integer is
+	 * padded to the left with zero-filled bytes to make it
+	 * four bytes long.
+	 *
+	 * @return
+	 * The integer created by concatenating the given byte
+	 * primitives.
+	 */
+	public static int toInt(byte[] primitives) {
+		int result = 0;
+		for(int i = 0; i < primitives.length; i++) {
+			result = (result << 8) | (primitives[i] & 0xff);
+		}
+		return result;
+	}
+	
+	/**
+	 * Converts an array of bytes into a long. The bytes
+	 * are read in big-endian order, with the first index
+	 * representing the first used byte. If the length of the
+	 * array of bytes is not equal to the number of bytes in
+	 * a long, it is either padded or truncated to make
+	 * the result fit within a long.
+	 * 
+	 * For in-depth examples of the mechanics of this and
+	 * other to-primitive methods, see {@link
+	 * ArrayHelper#toInt(byte[]) toInt()}.
+	 *
+	 * @param primitives
+	 * The bytes that make up the long. The length of this
+	 * array need not be the same size as a long. If it
+	 * is more than eight bytes, only the last eight bytes will
+	 * be used. If it is less than eight bytes, the long is
+	 * padded to the left with zero-filled bytes to make it
+	 * eight bytes long.
+	 *
+	 * @return
+	 * The long created by concatenating the given byte
+	 * primitives.
+	 */
+	public static long toLong(byte[] primitives) {
+		long result = 0;
+		for(int i = 0; i < primitives.length; i++) {
+			result = (long)((result << 8) | (primitives[i] & 0xff));
+		}
+		return result;
+	}
+	
+	/**
+	 * Converts an array of bytes into a char. The bytes
+	 * are read in big-endian order, with the first index
+	 * representing the first used byte. If the length of the
+	 * array of bytes is not equal to the number of bytes in
+	 * a char, it is either padded or truncated to make
+	 * the result fit within a char.
+	 * 
+	 * For in-depth examples of the mechanics of this and
+	 * other to-primitive methods, see {@link
+	 * ArrayHelper#toInt(byte[]) toInt()}.
+	 *
+	 * @param primitives
+	 * The bytes that make up the char. The length of this
+	 * array need not be the same size as a char. If it
+	 * is more than two bytes, only the last two bytes will
+	 * be used. If it is less than two bytes, the char is
+	 * padded to the left with zero-filled bytes to make it
+	 * two bytes long.
+	 *
+	 * @return
+	 * The char created by concatenating the given byte
+	 * primitives.
+	 */
+	public static char toChar(byte[] primitives) {
+		char result = 0;
+		for(int i = 0; i < primitives.length; i++) {
+			result = (char)((result << 8) | (primitives[i] & 0xff));
+		}
+		return result;
+	}
+	
+	/**
+	 * Gets the bytes that make up a short.
+	 * 
+	 * @param primitive
+	 * The primitive value to convert to bytes.
+	 * 
+	 * @return
+	 * An array of bytes that make up the given primitive.
+	 */
+	public static byte[] toArray(short primitive) {
+		int width = 2;
+		byte[] bytes = new byte[width];
+		for(int i = 0; i < width; i++) {
+			bytes[i] = (byte)(primitive >>> 8*(width-1-i));
+		}
+		return bytes;
+	}
+	
+	/**
+	 * Gets the bytes that make up an integer.
+	 * 
+	 * @param primitive
+	 * The primitive value to convert to bytes.
+	 * 
+	 * @return
+	 * An array of bytes that make up the given primitive.
+	 */
+	public static byte[] toArray(int primitive) {
+		int width = 4;
+		byte[] bytes = new byte[width];
+		for(int i = 0; i < width; i++) {
+			bytes[i] = (byte)(primitive >>> 8*(width-1-i));
+		}
+		return bytes;
+	}
+	
+	/**
+	 * Gets the bytes that make up a long.
+	 * 
+	 * @param primitive
+	 * The primitive value to convert to bytes.
+	 * 
+	 * @return
+	 * An array of bytes that make up the given primitive.
+	 */
+	public static byte[] toArray(long primitive) {
+		int width = 8;
+		byte[] bytes = new byte[width];
+		for(int i = 0; i < width; i++) {
+			bytes[i] = (byte)(primitive >>> 8*(width-1-i));
+		}
+		return bytes;
+	}
+	
+	/**
+	 * Gets the bytes that make up a char.
+	 * 
+	 * @param primitive
+	 * The primitive value to convert to bytes.
+	 * 
+	 * @return
+	 * An array of bytes that make up the given primitive.
+	 */
+	public static byte[] toArray(char primitive) {
+		int width = 2;
+		byte[] bytes = new byte[width];
+		for(int i = 0; i < width; i++) {
+			bytes[i] = (byte)(primitive >>> 8*(width-1-i));
+		}
+		return bytes;
+	}
 }

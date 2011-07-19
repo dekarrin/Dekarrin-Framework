@@ -3,8 +3,6 @@ package com.dekarrin.program;
 import com.dekarrin.file.png.*;
 import com.dekarrin.graphics.*;
 import com.dekarrin.io.*;
-import com.dekarrin.util.HelperString;
-import java.io.*;
 
 /**
  * Reads information on Png files.

@@ -6,11 +6,6 @@ import com.dekarrin.util.ByteComposer;
  * Chunk data for a standard RGB color space.
  */
 public class StandardRgbColorSpaceChunk extends AncillaryChunk {
-	
-	/**
-	 * The type of this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {115, 82, 71, 66}; // sRGB
 
 	/**
 	 * The rendering intent of this png.
@@ -22,16 +17,9 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The raw data in this chunk.
-	 *
-	 * @param crc
-	 * The CRC for this chunk.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public StandardRgbColorSpaceChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public StandardRgbColorSpaceChunk(byte[] data) {
+		super(Chunk.sRGB, data);
 		parseData();
 	}
 	
@@ -42,7 +30,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * What the rendering intent is to be.
 	 */
 	public StandardRgbColorSpaceChunk(int renderingIntent) {
-		super(TYPE_CODE);
+		super(Chunk.sRGB);
 		setProperties(renderingIntent);
 		setChunkData(createDataBytes());
 	}

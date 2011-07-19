@@ -8,11 +8,6 @@ import com.dekarrin.util.ByteComposer;
 public class HeaderChunk extends CriticalChunk {
 	
 	/**
-	 * The type code for this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {73, 72, 68, 82}; // IHDR
-	
-	/**
 	 * The width of the image.
 	 */
 	private int width;
@@ -61,16 +56,9 @@ public class HeaderChunk extends CriticalChunk {
 	 *
 	 * @param data
 	 * The raw data in this chunk.
-	 *
-	 * @param crc
-	 * The CRC for this chunk.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public HeaderChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public HeaderChunk(byte[] data) {
+		super(Chunk.IHDR, data);
 		parseData();
 	}
 	
@@ -100,7 +88,7 @@ public class HeaderChunk extends CriticalChunk {
 	 * The interlace method to use for this png.
 	 */
 	public HeaderChunk(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
-		super(TYPE_CODE);
+		super(Chunk.IHDR);
 		setProperties(width, height, bitDepth, colorType, compressionMethod, filterMethod, interlaceMethod);
 		setChunkData(createDataBytes());
 	}

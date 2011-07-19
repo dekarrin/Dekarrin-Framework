@@ -9,11 +9,6 @@ import com.dekarrin.util.ByteComposer;
 public class InternationalTextDataChunk extends TextChunk {
 
 	/**
-	 * The type code for this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {105, 84, 88, 116}; // iTXt
-
-	/**
 	 * Whether the text data contained is compressed.
 	 */
 	private boolean compressed;
@@ -43,16 +38,9 @@ public class InternationalTextDataChunk extends TextChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk CRC.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public InternationalTextDataChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public InternationalTextDataChunk(byte[] data) {
+		super(Chunk.iTXt, data);
 		parseData();
 	}
 	
@@ -77,7 +65,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * field.
 	 */
 	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, int compressionMethod) {
-		super(TYPE_CODE);
+		super(Chunk.iTXt);
 		boolean compressed = (contents.length() > PortableNetworkGraphic.UNCOMPRESSED_DATA_LIMIT) ? true : false;
 		setProperties(keyword, translatedKeyword, contents, null, language, compressionMethod, compressed);
 		setChunkData(createDataBytes());

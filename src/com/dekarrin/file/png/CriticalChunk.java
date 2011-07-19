@@ -8,23 +8,16 @@ public abstract class CriticalChunk extends Chunk {
 	
 	/**
 	 * Constructor for a CriticalChunk. Passes
-	 * parameters up to superconstructor.
+	 * parameters up to super constructor.
 	 *
 	 * @param type
-	 * The type bytes of the chunk.
+	 * The type of the chunk.
 	 *
 	 * @param data
 	 * The data bytes of the chunk.
-	 *
-	 * @param crc
-	 * The cyclic redundancy check read from the chunk.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public CriticalChunk(byte[] type, byte[] data, long crc) throws InvalidChunkException {
-		super(type, data, crc);
+	public CriticalChunk(int type, byte[] data) {
+		super(type, data);
 	}
 	
 	/**
@@ -33,7 +26,7 @@ public abstract class CriticalChunk extends Chunk {
 	 * @param type
 	 * The type name.
 	 */
-	public CriticalChunk(byte[] type) {
+	public CriticalChunk(int type) {
 		super(type);
 	}
 }

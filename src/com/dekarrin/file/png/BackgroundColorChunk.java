@@ -13,11 +13,6 @@ import com.dekarrin.util.ByteComposer;
 public class BackgroundColorChunk extends AncillaryChunk {
 	
 	/**
-	 * The chunk type.
-	 */
-	public static final byte[] TYPE_CODE = {98, 75, 71, 68}; // bKGD
-	
-	/**
 	 * The mode of this background chunk. This is dependent on
 	 * the color type of the png, but the amount of data in this
 	 * chunk varies with each type, so it can use this
@@ -41,16 +36,9 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk crc.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public BackgroundColorChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public BackgroundColorChunk(byte[] data) {
+		super(Chunk.bKGD, data);
 		parseData();
 	}
 	
@@ -65,7 +53,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * THe color mode to process the color as.
 	 */
 	public BackgroundColorChunk(Color color, int colorMode) {
-		super(TYPE_CODE);
+		super(Chunk.bKGD);
 		this.colorMode = colorMode;
 		setProperties(color);
 		setChunkData(createDataBytes());
@@ -80,7 +68,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * as the background color.
 	 */
 	public BackgroundColorChunk(int index) {
-		super(TYPE_CODE);
+		super(Chunk.bKGD);
 		this.colorMode = INDEXED_COLOR_MODE;
 		setProperties(index);
 		setChunkData(createDataBytes());

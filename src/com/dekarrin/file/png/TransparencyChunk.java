@@ -11,11 +11,6 @@ import com.dekarrin.util.ByteComposer;
 public class TransparencyChunk extends AncillaryChunk {
 	
 	/**
-	 * The type code of this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {116, 82, 78, 83}; // tRNS
-	
-	/**
 	 * The mode of this background chunk. This is dependent on
 	 * the color type of the png, but the amount of data in this
 	 * chunk varies with each type, so it can use this
@@ -44,16 +39,9 @@ public class TransparencyChunk extends AncillaryChunk {
 	 *
 	 * @param crc
 	 * The CRC for this chunk.
-	 *
-	 * @param colorMode
-	 * The mode of color in the png this chunk is a part of.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public TransparencyChunk(byte[] data, long crc, int colorMode) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public TransparencyChunk(byte[] data, int colorMode) {
+		super(Chunk.tRNS, data);
 		this.colorMode = colorMode;
 		parseData();
 	}
@@ -65,16 +53,9 @@ public class TransparencyChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The data in the chunk.
-	 *
-	 * @param crc
-	 * The CRC for this chunk.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public TransparencyChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public TransparencyChunk(byte[] data) {
+		super(Chunk.tRNS, data);
 	}
 	
 	/**
@@ -85,7 +66,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The tranparency value for each palette color.
 	 */
 	public TransparencyChunk(int[] transparencies) {
-		super(TYPE_CODE);
+		super(Chunk.tRNS);
 		colorMode = INDEXED_COLOR_MODE;
 		setProperties(transparencies);
 		setChunkData(createDataBytes());
@@ -99,7 +80,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The value of the gray color used as the transparent color.
 	 */
 	public TransparencyChunk(int grayValue) {
-		super(TYPE_CODE);
+		super(Chunk.tRNS);
 		colorMode = GRAYSCALE_MODE;
 		setProperties(grayValue);
 		setChunkData(createDataBytes());
@@ -119,7 +100,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The value of the blue color used as the transparent color.
 	 */
 	public TransparencyChunk(int redValue, int greenValue, int blueValue) {
-		super(TYPE_CODE);
+		super(Chunk.tRNS);
 		colorMode = TRUECOLOR_MODE;
 		setProperties(redValue, greenValue, blueValue);
 		setChunkData(createDataBytes());

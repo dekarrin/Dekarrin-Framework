@@ -7,11 +7,6 @@ import com.dekarrin.util.ByteComposer;
  * Chunk holding compressed text data.
  */
 public class CompressedTextDataChunk extends TextChunk {
-
-	/**
-	 * The type code for this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {122, 84, 88, 116}; // zTXt
 	
 	/**
 	 * The raw, compressed text.
@@ -29,16 +24,9 @@ public class CompressedTextDataChunk extends TextChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The cyclic redundancy code for the chunk.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public CompressedTextDataChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public CompressedTextDataChunk(byte[] data) {
+		super(Chunk.zTXt, data);
 		parseData();
 	}
 	
@@ -56,7 +44,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * data.
 	 */
 	public CompressedTextDataChunk(String keyword, String contents, int compressionMethod) {
-		super(TYPE_CODE);
+		super(Chunk.zTXt);
 		setProperties(keyword, contents, null, compressionMethod);
 		setChunkData(createDataBytes());
 	}

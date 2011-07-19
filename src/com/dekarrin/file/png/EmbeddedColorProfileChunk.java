@@ -9,11 +9,6 @@ import com.dekarrin.util.ByteComposer;
 public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	
 	/**
-	 * The type of this chunk.
-	 */
-	public static final byte[] TYPE_CODE = {105, 67, 67, 80}; // iCCP
-	
-	/**
 	 * The name of the ICC Profile.
 	 */
 	private String profileName;
@@ -38,16 +33,9 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
-	 *
-	 * @param crc
-	 * The chunk CRC.
-	 *
-	 * @throws InvalidChunkException
-	 * If the cyclic reduncdancy check read from the chunk
-	 * does not match the one calculated on the type and data.
 	 */
-	public EmbeddedColorProfileChunk(byte[] data, long crc) throws InvalidChunkException {
-		super(TYPE_CODE, data, crc);
+	public EmbeddedColorProfileChunk(byte[] data) {
+		super(Chunk.iCCP, data);
 		parseData();
 	}
 	
@@ -61,7 +49,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * The profile data.
 	 */
 	public EmbeddedColorProfileChunk(String name, byte[] data) {
-		super(TYPE_CODE);
+		super(Chunk.iCCP);
 		setProperties(name, data, null, 0);
 		setChunkData(createDataBytes());
 	}
