@@ -1,6 +1,7 @@
 package com.dekarrin.graphics;
 
 import com.dekarrin.error.ValueOutOfRangeException;
+import com.dekarrin.util.HelperString;
 
 /**
  * Represents a color at a specific bit depth.
@@ -62,6 +63,62 @@ public class Color {
 	 * The alpha sample for this color.
 	 */
 	private int alpha;
+	
+	/**
+	 * Gets color values as an HTML-notation hex string.
+	 * 
+	 * @param r
+	 * The red value.
+	 * 
+	 * @param g
+	 * The green value.
+	 * 
+	 * @param b
+	 * The blue value.
+	 * 
+	 * @param a
+	 * The alpha value.
+	 * 
+	 * @param depth
+	 * The depth in bits of each sample.
+	 * 
+	 * @return
+	 * The hex color string that represents the given values.
+	 */
+	public static String hexValue(int r, int g, int b, int a, int depth) {
+		String red = valueToHex(r, depth);
+		String green = valueToHex(g, depth);
+		String blue = valueToHex(b, depth);
+		String alpha = valueToHex(a, depth);
+		String hex = String.format("#%s%s%s%s", red, green, blue, alpha);
+		return hex;
+	}
+	
+	/**
+	 * Gets color values as an HTML-notation hex string.
+	 * 
+	 * @param r
+	 * The red value.
+	 * 
+	 * @param g
+	 * The green value.
+	 * 
+	 * @param b
+	 * The blue value.
+	 * 
+	 * @param depth
+	 * The depth in bits of each sample.
+	 * 
+	 * @return
+	 * The hex color string that represents the given values.
+	 */
+	public static String hexValue(int r, int g, int b, int depth) {
+		String red = valueToHex(r, depth);
+		String green = valueToHex(g, depth);
+		String blue = valueToHex(b, depth);
+		String hex = String.format("#%s%s%s", red, green, blue);
+		return hex;
+	}
 	
 	/**
 	 * Creates a new Color at the specified bit depth. The
@@ -515,6 +572,29 @@ public class Color {
 	}
 	
 	/**
+	 * Gets the color values as an HTML-notation hex
+	 * string.
+	 * 
+	 * @param withAlpha
+	 * Whether or not to include the alpha as a fourth
+	 * value.
+	 * 
+	 * @return
+	 * The hex color string that represents this Color.
+	 */
+	public String hexValue(boolean withAlpha) {
+		String r = valueToHex(red, bitDepth);
+		String g = valueToHex(green, bitDepth);
+		String b = valueToHex(blue, bitDepth);
+		String a = "";
+		if(withAlpha) {
+			a = valueToHex(alpha, bitDepth);
+		}
+		String hex = String.format("#%s%s%s%s", r, g, b, a);
+		return hex;
+	}
+	
+	/**
 	 * Converts a sample to a double value, where 1 is the maximum
 	 * value for this Color's bit depth, and 0 is equivalent to 0.
 	 * 
@@ -593,5 +673,25 @@ public class Color {
 	private int convertSample(double factor, int bitDepth) {
 		int sampleValue = (int)(factor * maximumValue(bitDepth));
 		return sampleValue;
+	}
+	
+	/**
+	 * Converts a single color value into its hex equivalent.
+	 * 
+	 * @param value
+	 * The color to get the hex value for.
+	 * 
+	 * @param sampleDepth
+	 * The sample depth of the color, specified in bits.
+	 * 
+	 * @return
+	 * The hex String for the given color.
+	 */
+	private static String valueToHex(int value, int sampleDepth) {
+		int paddingLevel = (int)Math.ceil((double)sampleDepth / 4);
+		String unpadded = Integer.toString(value, 16);
+		HelperString padded = new HelperString(unpadded);
+		padded.padLeft(paddingLevel, '0');
+		return padded.toString();
 	}
 }

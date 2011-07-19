@@ -3,6 +3,8 @@ package com.dekarrin.zip;
 import java.util.zip.*;
 import java.io.UnsupportedEncodingException;
 
+import com.dekarrin.file.png.Chunk;
+
 /**
  * Decompresses binary data using ZLIB.
  */
@@ -123,6 +125,7 @@ public class ZlibDecompresser {
 				actualLength = decompresser.inflate(outputBuffer);
 			} catch(DataFormatException e) {
 				System.err.println("Bad DEFLATE format!");
+				System.exit(1);
 			}
 			addToOutput(outputBuffer, actualLength);
 		}

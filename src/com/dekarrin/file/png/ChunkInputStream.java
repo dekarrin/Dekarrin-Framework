@@ -36,6 +36,7 @@ public class ChunkInputStream extends DataInputStream {
 	 */
 	public void verifyPng() throws InvalidFormatException, StreamFailureException {
 		if(!verified) {
+			verified = true;
 			for(int i = 0; i < MAGIC_NUMBER.length; i++) {
 				try {
 					if(readUnsignedByte() != MAGIC_NUMBER[i]) {

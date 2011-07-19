@@ -618,10 +618,10 @@ class Scanline {
 		byte[] average = new byte[raw.length];
 		int bpp = getBpp();
 		for(int i = 0; i < bpp && i < raw.length; i++) {
-			average[i] = (byte)((raw[i] - (int)Math.floor(prior[i]/2)) % 256);
+			average[i] = (byte)((raw[i] - calculateAverage((byte)0, prior[i])) % 256);
 		}
 		for(int i = bpp; i < raw.length; i++) {
-			average[i] = (byte)((raw[i] - (int)Math.floor((raw[i-bpp]+prior[i])/2)) % 256);
+			average[i] = (byte)((raw[i] - calculateAverage(raw[i-bpp], prior[i])) % 256);
 		}
 		return average;
 	}
@@ -705,10 +705,10 @@ class Scanline {
 		byte[] raw = new byte[average.length];
 		int bpp = getBpp();
 		for(int i = 0; i < bpp && i < average.length; i++) {
-			raw[i] = (byte)((average[i] + (int)Math.floor( prior[i] / 2 )) % 256);
+			raw[i] = (byte)((average[i] + calculateAverage((byte)0, prior[i])) % 256);
 		}
 		for(int i = bpp; i < average.length; i++) {
-			raw[i] = (byte)((average[i] + (int)Math.floor((raw[i-bpp]+prior[i]) / 2 )) % 256);
+			raw[i] = (byte)((average[i] + calculateAverage(raw[i-bpp], prior[i])) % 256);
 		}
 		return raw;
 	}
@@ -744,11 +744,33 @@ class Scanline {
 	 * The bytes per pixel.
 	 */
 	private int getBpp() {
-		int bpp = (bitDepth * samplesPerPixel);
-		if(bpp == 0) {
-			bpp = 1;
+		int bytesPerSample = (bitDepth / 8);
+		if(bytesPerSample < 1) {
+			bytesPerSample = 1;
 		}
+		int bpp = (samplesPerPixel * bytesPerSample);
 		return bpp;
+	}
+	
+	/**
+	 * Calculates the average of two byte values. Uses unsigned
+	 * math by explicit integer casting.
+	 * 
+	 * @param left
+	 * The value of the pixel to the left of the one being
+	 * calculated.
+	 * 
+	 * @param above
+	 * The value of the pixel above the one being calculated.
+	 * 
+	 * @return
+	 * The average of the two given values.
+	 */
+	private int calculateAverage(byte left, byte above) {
+		int l = (int)left & 0xff;
+		int a = (int)above & 0xff;
+		int avg = (int)Math.floor((l+a)/2);
+		return avg;
 	}
 	
 	/**
@@ -772,16 +794,20 @@ class Scanline {
 	 */
 	private int paethPredictor(byte left, byte above, byte upperLeft) {
 		int predictor;
-		int paeth = left + above - upperLeft;
-		int leftPaeth = Math.abs(paeth - left);
-		int abovePaeth = Math.abs(paeth - above);
-		int upperLeftPaeth = Math.abs(paeth - upperLeft);
-		if(leftPaeth <= abovePaeth && leftPaeth <= upperLeftPaeth) {
-			predictor = left;
-		} else if(abovePaeth <= upperLeftPaeth) {
-			predictor = above;
+		int a,b,c; // results are off if not properly cast to ints
+		a = (int)left & 0xff;
+		b = (int)above & 0xff;
+		c = (int)upperLeft & 0xff;
+		int paeth = a + b - c;
+		int pa = Math.abs(paeth - a);
+		int pb = Math.abs(paeth - b);
+		int pc = Math.abs(paeth - c);
+		if(pa <= pb && pa <= pc) {
+			predictor = a;
+		} else if(pb <= pc) {
+			predictor = b;
 		} else {
-			predictor = upperLeft;
+			predictor = c;
 		}
 		return predictor;
 	}

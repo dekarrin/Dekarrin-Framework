@@ -1,14 +1,33 @@
 package com.dekarrin.file.png;
 
 import java.awt.Point;
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
-import com.dekarrin.graphics.*;
-import com.dekarrin.zip.*;
-import com.dekarrin.util.*;
-import com.dekarrin.io.*;
-import com.dekarrin.error.*;
+import com.dekarrin.error.ValueOutOfRangeException;
+import com.dekarrin.graphics.Chromaticity;
+import com.dekarrin.graphics.Color;
+import com.dekarrin.graphics.ColorProfile;
+import com.dekarrin.graphics.GrayColor;
+import com.dekarrin.graphics.Image;
+import com.dekarrin.graphics.Palette;
+import com.dekarrin.graphics.Resolution;
+import com.dekarrin.io.InvalidFormatException;
+import com.dekarrin.io.StreamFailureException;
+import com.dekarrin.util.ArrayHelper;
+import com.dekarrin.util.ByteHolder;
+import com.dekarrin.zip.ZlibCompresser;
+import com.dekarrin.zip.ZlibDecompresser;
 
 /**
  * Represents a PNG file. This class is attempting to be compliant
@@ -398,74 +417,17 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Reads the background color from a chunk.
-	 *
-	 * @param chunk.
-	 * The background color chunk.
-	 */
-	public void readBackgroundColorChunk(BackgroundColorChunk chunk) {
-		if(chunk.getColorMode() == colorMode) {
-			switch(chunk.getColorMode()) {
-				case COLOR_TYPE_GRAYSCALE:
-				case COLOR_TYPE_GRAYSCALE_ALPHA:
-				case COLOR_TYPE_COLOR:
-				case COLOR_TYPE_COLOR_ALPHA:
-					backgroundColor = chunk.getColor();
-					break;
-					
-				case COLOR_TYPE_COLOR_PALETTE:
-					backgroundColorIndex = chunk.getPaletteIndex();
-					break;
-			}
-		} else {
-			throw new RuntimeException("Color mode mismatch!");
-		}
-	}
-	
-	/**
-	 * Reads a chromaticites chunk and assigns properties based
-	 * on it.
-	 *
-	 * @param chunk
-	 * The chromaticites chunk.
-	 */
-	public void readChromaticitiesChunk(ChromaticitiesChunk chunk) {
-		Point r = chunk.getRed();
-		Point g = chunk.getGreen();
-		Point b = chunk.getBlue();
-		Point w = chunk.getWhitePoint();
-		chromaticity = new Chromaticity(r, g, b, w);
-	}
-	
-	/**
-	 * Reads compressed text data into this PNG.
+	 * Copies the image data of this Png to disk. Its image data is
+	 * copied from the original source data unmodified.
 	 * 
-	 * @param chunk
-	 * The compressed text data chunk.
-	 */
-	public void readCompressedTextDataChunk(CompressedTextDataChunk chunk) {
-		addText(chunk.getKeyword(), chunk.getText());
-	}
-	
-	/**
-	 * Reads an embedded color profile.
+	 * @param location
+	 * Where to save the Png file.
 	 *
-	 * @param chunk
-	 * The ICCP chunk.
+	 * @throws StreamFailureException
+	 * If the file stream failed.
 	 */
-	public void readEmbeddedColorProfileChunk(EmbeddedColorProfileChunk chunk) {
-		profile = new ColorProfile(chunk.getProfileName(), chunk.getProfile());
-	}
-	
-	/**
-	 * Reads a gamma chunk and assigns properties based on it.
-	 *
-	 * @param chunk
-	 * The gamma chunk.
-	 */
-	public void readGammaChunk(GammaChunk chunk) {
-		gamma = chunk.getGamma();
-		gammaSet = true;
+	public void copy(String location) throws StreamFailureException {
+		writePngFile(location, true);
 	}
 	
 	/**
@@ -500,7 +462,7 @@ public class PortableNetworkGraphic {
 	public int getBitDepth() {
 		return bitDepth;
 	}
-
+	
 	/**
 	 * Gets the chromaticity for this png image.
 	 *
@@ -540,7 +502,7 @@ public class PortableNetworkGraphic {
 	public int getFilterMethod() {
 		return filterMethod;
 	}
-	
+
 	/**
 	 * Gets the gamma of this png image.
 	 *
@@ -909,59 +871,6 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Reads a header chunk and assigns properties based on it.
-	 *
-	 * @param header
-	 * The header chunk.
-	 */
-	public void readHeaderChunk(HeaderChunk header) {
-		unknownChunks = unknownColorSpaceChunks;
-		bitDepth = header.getBitDepth();
-		height = header.getHeight();
-		width = header.getWidth();
-		colorMode = header.getColorType();
-	}
-	
-	/**
-	 * Builds an image from image data chunks.
-	 *
-	 * @param chunks
-	 * The image chunk to process make up the image data.
-	 */
-	private void processImageData() throws InvalidFormatException {
-		byte[] compressedData = concatenateImageData();
-		byte[] decompressedData = decompressData(compressedData);
-		Scanline[] lines = getScanlinesFromData(decompressedData);
-		constructImage(lines);
-	}
-	
-	/**
-	 * Concatenates all the image data into one array.
-	 * 
-	 * @return
-	 * The data contents of the image data.
-	 */
-	private byte[] concatenateImageData() {
-		byte[] iData = new byte[0];
-		byte[] nextData;
-		for(ImageDataChunk c: dataChunks) {
-			nextData = c.getData();
-			ArrayHelper.append(iData, nextData);
-		}
-		return iData;
-	}
-	
-	/**
-	 * Reads international text data into this PNG.
-	 * 
-	 * @param chunk
-	 * The international text data chunk.
-	 */
-	public void readInternationalTextDataChunk(InternationalTextDataChunk chunk) {
-		addText(chunk.getKeyword(), chunk.getText());
-	}
-	
-	/**
 	 * Checks whether the image is interlaced.
 	 *
 	 * @return
@@ -994,49 +903,6 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the last modified information from that chunk.
-	 *
-	 * @param chunk
-	 * The last modification time chunk.
-	 */
-	public void readModificationTimeChunk(ModificationTimeChunk chunk) {
-		Calendar c = Calendar.getInstance();
-		c.set(chunk.getYear(), chunk.getMonth(), chunk.getDay(), chunk.getHour(), chunk.getMinute(), chunk.getSecond());
-		lastModified = c.getTime();
-	}
-	
-	/**
-	 * Reads a palette chunk and assigns properties based on it.
-	 *
-	 * @param chunk
-	 * The palette chunk.
-	 */
-	public void readPaletteChunk(PaletteChunk chunk) {
-		unknownChunks = unknownPreDataChunks;
-		paletteColors = chunk.getPalette();
-	}
-	
-	/**
-	 * Gets the histogram information from the chunk data.
-	 *
-	 * @param chunk
-	 * The palette histogram chunk.
-	 */
-	public void readPaletteHistogramChunk(PaletteHistogramChunk chunk) {
-		paletteFrequencies = chunk.getFrequencies();
-	}
-	
-	/**
-	 * Reads dimensions.
-	 *
-	 * @param chunk
-	 * The dimension chunk.
-	 */
-	public void readPhysicalPixelDimensionsChunk(PhysicalPixelDimensionsChunk chunk) {
-		resolution = new Resolution(chunk.getWidth(), chunk.getHeight());
-	}
-	
-	/**
 	 * Saves this Png to disk. Its data is converted into Chunks,
 	 * compressable chunks are compressed, and the image data is
 	 * filtered. The resulting Chunk array is then written to a
@@ -1050,20 +916,6 @@ public class PortableNetworkGraphic {
 	 */
 	public void save(String location) throws StreamFailureException {
 		writePngFile(location, false);
-	}
-	
-	/**
-	 * Copies the image data of this Png to disk. Its image data is
-	 * copied from the original source data unmodified.
-	 * 
-	 * @param location
-	 * Where to save the Png file.
-	 *
-	 * @throws StreamFailureException
-	 * If the file stream failed.
-	 */
-	public void copy(String location) throws StreamFailureException {
-		writePngFile(location, true);
 	}
 	
 	/**
@@ -1153,7 +1005,7 @@ public class PortableNetworkGraphic {
 	public void setReducedPalette(Palette reducedPalette) {
 		this.reducedPalette = reducedPalette;
 	}
-	 
+	
 	/**
 	 * Sets the rendering intent for this png image.
 	 *
@@ -1176,83 +1028,6 @@ public class PortableNetworkGraphic {
 	public void setTransparentColor(Color color) {
 		transparentColor = color;
 	}
-	
-	/**
-	 * Reads the number of significant bits present in the original
-	 * file.
-	 *
-	 * @param chunk
-	 * The SignificantBitsChunk.
-	 */
-	public void readSignificantBitsChunk(SignificantBitsChunk chunk) {
-		significantColorBits = chunk.getColorBits();
-		if(colorMode == COLOR_TYPE_GRAYSCALE_ALPHA || colorMode == COLOR_TYPE_COLOR_ALPHA) {
-			significantAlphaBits = chunk.getAlphaBits();
-		}
-		significantBitsSet = true;
-	}
-	
-	/**
-	 * Reads a standard RGB color space chunk and assigns
-	 * properties based on it.
-	 *
-	 * @param chunk
-	 * The standard RGB color space chunk.
-	 */
-	public void readStandardRgbColorSpaceChunk(StandardRgbColorSpaceChunk chunk) {
-		renderingIntent = chunk.getRenderingIntent();
-		renderingIntentSet = true;
-	}
-	
-	/**
-	 * Reads the suggested palette from the chunk data.
-	 *
-	 * @param chunk
-	 * The suggested palette chunk.
-	 */
-	public void readSuggestedPaletteChunk(SuggestedPaletteChunk chunk) {
-		Color[] c = chunk.getPaletteEntries();
-		int[] f = chunk.getFrequencies();
-		reducedPalette = new Palette(chunk.getPaletteName(), chunk.getSampleDepth(), c, f);
-	}
-	
-	/**
-	 * Reads text data into this PNG.
-	 * 
-	 * @param chunk
-	 * The text data chunk.
-	 */
-	public void readTextDataChunk(TextDataChunk chunk) {
-		addText(chunk.getKeyword(), chunk.getText());
-	}
-	
-	/**
-	 * Reads a transparency chunk and assigns properties based
-	 * on it.
-	 *
-	 * @param chunk
-	 * The transparency chunk.
-	 */
-	public void readTransparencyChunk(TransparencyChunk chunk) {
-		chunk.parseWithColorMode(colorMode);
-		if(chunk.getColorMode() == colorMode) {
-			switch(chunk.getColorMode()) {
-				case COLOR_TYPE_GRAYSCALE:
-					transparentColor = new GrayColor(chunk.getTransparentColor());
-					
-				case COLOR_TYPE_COLOR:
-					transparentColor = chunk.getTransparentColor();
-					break;
-					
-				case COLOR_TYPE_COLOR_PALETTE:
-					paletteAlphas = chunk.getPaletteAlphas();
-					break;
-			}
-		} else {
-			throw new RuntimeException("Color mode mismatch!");
-		}
-	}
-	
 	
 	/**
 	 * Loads an unknown chunk.
@@ -1379,6 +1154,22 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Concatenates all the image data into one array.
+	 * 
+	 * @return
+	 * The data contents of the image data.
+	 */
+	private byte[] concatenateImageData() {
+		byte[] iData = new byte[0];
+		byte[] nextData;
+		for(ImageDataChunk c: dataChunks) {
+			nextData = c.getData();
+			iData = ArrayHelper.append(iData, nextData);
+		}
+		return iData;
+	}
+	
+	/**
 	 * Creates an image from a series of scanlines using truecolor
 	 * mode.
 	 *
@@ -1433,7 +1224,7 @@ public class PortableNetworkGraphic {
 			}
 		}
 	}
-	
+	 
 	/**
 	 * Builds the image from a series of scanlines.
 	 *
@@ -1671,6 +1462,7 @@ public class PortableNetworkGraphic {
 		return lines;
 	}
 	
+	
 	/**
 	 * Creates a series of scanlines from the image.
 	 *
@@ -1734,12 +1526,7 @@ public class PortableNetworkGraphic {
 		ByteHolder holder = new ByteHolder(lines.length * getScanlineWidth());
 		byte[] buffer;
 		for(Scanline sl: lines) {
-			buffer = sl.getFiltered(Scanline.NO_FILTER);
-			System.out.print("[OUT]: ");
-			for(byte b: buffer) {
-				System.out.print(b+":");
-			}
-			System.out.println();
+			buffer = sl.getFiltered();
 			holder.add(buffer);
 		}
 		return holder.toArray();
@@ -1888,89 +1675,6 @@ public class PortableNetworkGraphic {
 		cleanUpDataStructures();
 	}
 	
-	/**
-	 * Parses a chunk for data and adds it to the data of this
-	 * PNG.
-	 * 
-	 * @param chunk
-	 * The chunk to process.
-	 */
-	private void processChunk(Chunk chunk) {
-		int type = chunk.getType();
-		switch(type) {
-			case Chunk.IHDR:
-				readHeaderChunk((HeaderChunk) chunk);
-				break;
-
-			case Chunk.PLTE:
-				readPaletteChunk((PaletteChunk) chunk);
-				break;
-				
-			case Chunk.IDAT:
-				unknownChunks = unknownPostDataChunks;
-				dataChunks.add((ImageDataChunk) chunk);
-				break;
-
-			case Chunk.IEND:
-				break;
-
-			case Chunk.tRNS:
-				readTransparencyChunk((TransparencyChunk) chunk);
-				break;
-
-			case Chunk.gAMA:
-				readGammaChunk((GammaChunk) chunk);
-				break;
-
-			case Chunk.cHRM:
-				readChromaticitiesChunk((ChromaticitiesChunk) chunk);
-				break;
-
-			case Chunk.sRGB:
-				readStandardRgbColorSpaceChunk((StandardRgbColorSpaceChunk) chunk);
-				break;
-
-			case Chunk.iCCP:
-				readEmbeddedColorProfileChunk((EmbeddedColorProfileChunk) chunk);
-				break;
-
-			case Chunk.iTXt:
-				readInternationalTextDataChunk((InternationalTextDataChunk) chunk);
-				break;
-
-			case Chunk.tEXt:
-				readTextDataChunk((TextDataChunk) chunk);
-				break;
-
-			case Chunk.zTXt:
-				readCompressedTextDataChunk((CompressedTextDataChunk) chunk);
-				break;
-
-			case Chunk.bKGD:
-				readBackgroundColorChunk((BackgroundColorChunk) chunk);
-				break;
-
-			case Chunk.pHYs:
-				readPhysicalPixelDimensionsChunk((PhysicalPixelDimensionsChunk) chunk);
-				break;
-
-			case Chunk.sBIT:
-				readSignificantBitsChunk((SignificantBitsChunk) chunk);
-				break;
-
-			case Chunk.sPLT:
-				readSuggestedPaletteChunk((SuggestedPaletteChunk) chunk);
-				break;
-
-			case Chunk.hIST:
-				readPaletteHistogramChunk((PaletteHistogramChunk) chunk);
-				break;
-
-			case Chunk.tIME:
-				readModificationTimeChunk((ModificationTimeChunk) chunk);
-				break;
-		}
-	}
 	/**
 	 * Makes a keyword's charset valid. The validity of a keyword
 	 * is determined by the PNG specification at
@@ -2121,6 +1825,103 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
+	 * Parses a chunk for data and adds it to the data of this
+	 * PNG.
+	 * 
+	 * @param chunk
+	 * The chunk to process.
+	 */
+	private void processChunk(Chunk chunk) {
+		int type = chunk.getType();
+		switch(type) {
+			case Chunk.IHDR:
+				readHeaderChunk((HeaderChunk) chunk);
+				break;
+
+			case Chunk.PLTE:
+				readPaletteChunk((PaletteChunk) chunk);
+				break;
+				
+			case Chunk.IDAT:
+				unknownChunks = unknownPostDataChunks;
+				dataChunks.add((ImageDataChunk) chunk);
+				break;
+
+			case Chunk.IEND:
+				break;
+
+			case Chunk.tRNS:
+				readTransparencyChunk((TransparencyChunk) chunk);
+				break;
+
+			case Chunk.gAMA:
+				readGammaChunk((GammaChunk) chunk);
+				break;
+
+			case Chunk.cHRM:
+				readChromaticitiesChunk((ChromaticitiesChunk) chunk);
+				break;
+
+			case Chunk.sRGB:
+				readStandardRgbColorSpaceChunk((StandardRgbColorSpaceChunk) chunk);
+				break;
+
+			case Chunk.iCCP:
+				readEmbeddedColorProfileChunk((EmbeddedColorProfileChunk) chunk);
+				break;
+
+			case Chunk.iTXt:
+				readInternationalTextDataChunk((InternationalTextDataChunk) chunk);
+				break;
+
+			case Chunk.tEXt:
+				readTextDataChunk((TextDataChunk) chunk);
+				break;
+
+			case Chunk.zTXt:
+				readCompressedTextDataChunk((CompressedTextDataChunk) chunk);
+				break;
+
+			case Chunk.bKGD:
+				readBackgroundColorChunk((BackgroundColorChunk) chunk);
+				break;
+
+			case Chunk.pHYs:
+				readPhysicalPixelDimensionsChunk((PhysicalPixelDimensionsChunk) chunk);
+				break;
+
+			case Chunk.sBIT:
+				readSignificantBitsChunk((SignificantBitsChunk) chunk);
+				break;
+
+			case Chunk.sPLT:
+				readSuggestedPaletteChunk((SuggestedPaletteChunk) chunk);
+				break;
+
+			case Chunk.hIST:
+				readPaletteHistogramChunk((PaletteHistogramChunk) chunk);
+				break;
+
+			case Chunk.tIME:
+				readModificationTimeChunk((ModificationTimeChunk) chunk);
+				break;
+		}
+	}
+	
+	/**
+	 * Builds an image from image data chunks.
+	 *
+	 * @param chunks
+	 * The image chunk to process make up the image data.
+	 */
+	private void processImageData() throws InvalidFormatException {
+		byte[] compressedData = concatenateImageData();
+		byte[] decompressedData = decompressData(compressedData);
+		Scanline[] lines = getScanlinesFromData(decompressedData);
+		constructImage(lines);
+	}
+	
+	/**
 	 * Converts the profile data to a new EmbeddedColorProfileChunk.
 	 *
 	 * @return
@@ -2129,6 +1930,219 @@ public class PortableNetworkGraphic {
 	private EmbeddedColorProfileChunk profileToChunk() {
 		EmbeddedColorProfileChunk ecpc = new EmbeddedColorProfileChunk(profile.name, profile.data);
 		return ecpc;
+	}
+	
+	/**
+	 * Reads the background color from a chunk.
+	 *
+	 * @param chunk.
+	 * The background color chunk.
+	 */
+	private void readBackgroundColorChunk(BackgroundColorChunk chunk) {
+		if(chunk.getColorMode() == colorMode) {
+			switch(chunk.getColorMode()) {
+				case COLOR_TYPE_GRAYSCALE:
+				case COLOR_TYPE_GRAYSCALE_ALPHA:
+				case COLOR_TYPE_COLOR:
+				case COLOR_TYPE_COLOR_ALPHA:
+					backgroundColor = chunk.getColor();
+					break;
+					
+				case COLOR_TYPE_COLOR_PALETTE:
+					backgroundColorIndex = chunk.getPaletteIndex();
+					break;
+			}
+		} else {
+			throw new RuntimeException("Color mode mismatch!");
+		}
+	}
+	
+	/**
+	 * Reads a chromaticites chunk and assigns properties based
+	 * on it.
+	 *
+	 * @param chunk
+	 * The chromaticites chunk.
+	 */
+	private void readChromaticitiesChunk(ChromaticitiesChunk chunk) {
+		Point r = chunk.getRed();
+		Point g = chunk.getGreen();
+		Point b = chunk.getBlue();
+		Point w = chunk.getWhitePoint();
+		chromaticity = new Chromaticity(r, g, b, w);
+	}
+	
+	/**
+	 * Reads compressed text data into this PNG.
+	 * 
+	 * @param chunk
+	 * The compressed text data chunk.
+	 */
+	private void readCompressedTextDataChunk(CompressedTextDataChunk chunk) {
+		addText(chunk.getKeyword(), chunk.getText());
+	}
+	
+	/**
+	 * Reads an embedded color profile.
+	 *
+	 * @param chunk
+	 * The ICCP chunk.
+	 */
+	private void readEmbeddedColorProfileChunk(EmbeddedColorProfileChunk chunk) {
+		profile = new ColorProfile(chunk.getProfileName(), chunk.getProfile());
+	}
+	
+	/**
+	 * Reads a gamma chunk and assigns properties based on it.
+	 *
+	 * @param chunk
+	 * The gamma chunk.
+	 */
+	private void readGammaChunk(GammaChunk chunk) {
+		gamma = chunk.getGamma();
+		gammaSet = true;
+	}
+	
+	/**
+	 * Reads a header chunk and assigns properties based on it.
+	 *
+	 * @param header
+	 * The header chunk.
+	 */
+	private void readHeaderChunk(HeaderChunk header) {
+		unknownChunks = unknownColorSpaceChunks;
+		bitDepth = header.getBitDepth();
+		height = header.getHeight();
+		width = header.getWidth();
+		colorMode = header.getColorType();
+	}
+	
+	/**
+	 * Reads international text data into this PNG.
+	 * 
+	 * @param chunk
+	 * The international text data chunk.
+	 */
+	private void readInternationalTextDataChunk(InternationalTextDataChunk chunk) {
+		addText(chunk.getKeyword(), chunk.getText());
+	}
+	
+	/**
+	 * Gets the last modified information from that chunk.
+	 *
+	 * @param chunk
+	 * The last modification time chunk.
+	 */
+	private void readModificationTimeChunk(ModificationTimeChunk chunk) {
+		Calendar c = Calendar.getInstance();
+		c.set(chunk.getYear(), chunk.getMonth(), chunk.getDay(), chunk.getHour(), chunk.getMinute(), chunk.getSecond());
+		lastModified = c.getTime();
+	}
+	/**
+	 * Reads a palette chunk and assigns properties based on it.
+	 *
+	 * @param chunk
+	 * The palette chunk.
+	 */
+	private void readPaletteChunk(PaletteChunk chunk) {
+		unknownChunks = unknownPreDataChunks;
+		paletteColors = chunk.getPalette();
+	}
+	
+	/**
+	 * Gets the histogram information from the chunk data.
+	 *
+	 * @param chunk
+	 * The palette histogram chunk.
+	 */
+	private void readPaletteHistogramChunk(PaletteHistogramChunk chunk) {
+		paletteFrequencies = chunk.getFrequencies();
+	}
+	
+	/**
+	 * Reads dimensions.
+	 *
+	 * @param chunk
+	 * The dimension chunk.
+	 */
+	private void readPhysicalPixelDimensionsChunk(PhysicalPixelDimensionsChunk chunk) {
+		resolution = new Resolution(chunk.getWidth(), chunk.getHeight());
+	}
+	
+	/**
+	 * Reads the number of significant bits present in the original
+	 * file.
+	 *
+	 * @param chunk
+	 * The SignificantBitsChunk.
+	 */
+	private void readSignificantBitsChunk(SignificantBitsChunk chunk) {
+		significantColorBits = chunk.getColorBits();
+		if(colorMode == COLOR_TYPE_GRAYSCALE_ALPHA || colorMode == COLOR_TYPE_COLOR_ALPHA) {
+			significantAlphaBits = chunk.getAlphaBits();
+		}
+		significantBitsSet = true;
+	}
+	
+	/**
+	 * Reads a standard RGB color space chunk and assigns
+	 * properties based on it.
+	 *
+	 * @param chunk
+	 * The standard RGB color space chunk.
+	 */
+	private void readStandardRgbColorSpaceChunk(StandardRgbColorSpaceChunk chunk) {
+		renderingIntent = chunk.getRenderingIntent();
+		renderingIntentSet = true;
+	}
+	
+	/**
+	 * Reads the suggested palette from the chunk data.
+	 *
+	 * @param chunk
+	 * The suggested palette chunk.
+	 */
+	private void readSuggestedPaletteChunk(SuggestedPaletteChunk chunk) {
+		Color[] c = chunk.getPaletteEntries();
+		int[] f = chunk.getFrequencies();
+		reducedPalette = new Palette(chunk.getPaletteName(), chunk.getSampleDepth(), c, f);
+	}
+	
+	/**
+	 * Reads text data into this PNG.
+	 * 
+	 * @param chunk
+	 * The text data chunk.
+	 */
+	private void readTextDataChunk(TextDataChunk chunk) {
+		addText(chunk.getKeyword(), chunk.getText());
+	}
+	
+	/**
+	 * Reads a transparency chunk and assigns properties based
+	 * on it.
+	 *
+	 * @param chunk
+	 * The transparency chunk.
+	 */
+	private void readTransparencyChunk(TransparencyChunk chunk) {
+		chunk.parseWithColorMode(colorMode);
+		if(chunk.getColorMode() == colorMode) {
+			switch(chunk.getColorMode()) {
+				case COLOR_TYPE_GRAYSCALE:
+					transparentColor = new GrayColor(chunk.getTransparentColor());
+					
+				case COLOR_TYPE_COLOR:
+					transparentColor = chunk.getTransparentColor();
+					break;
+					
+				case COLOR_TYPE_COLOR_PALETTE:
+					paletteAlphas = chunk.getPaletteAlphas();
+					break;
+			}
+		} else {
+			throw new RuntimeException("Color mode mismatch!");
+		}
 	}
 	
 	/**

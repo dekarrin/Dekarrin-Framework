@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.zip.CRC32;
 
 import com.dekarrin.io.StreamFailureException;
+import com.dekarrin.util.ArrayHelper;
 
 public class ChunkOutputStream extends DataOutputStream {
 	
@@ -37,7 +38,8 @@ public class ChunkOutputStream extends DataOutputStream {
 			magicNumberWritten = true;
 			for(int i = 0; i < MAGIC_NUMBER.length; i++) {
 				try {
-					writeInt(MAGIC_NUMBER[i]);
+					byte nextNumber = (byte)(MAGIC_NUMBER[i] & 0xff);
+					write(new byte[]{nextNumber}, 0, 1);
 				} catch(IOException e) {
 					throw new StreamFailureException(e.getMessage());
 				}
