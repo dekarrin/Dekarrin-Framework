@@ -89,15 +89,20 @@ public abstract class ConsoleProgram {
 	 * @param index
 	 * The index of the argument to get.
 	 * 
+	 * @param defaultValue
+	 * The value to give if the int is not correctly
+	 * formatted.
+	 * 
 	 * @return
-	 * The argument as an int.
+	 * The argument as an int, or -1 if it was
+	 * invalid.
 	 */
-	int getArgumentAsInt(int index) {
+	int getArgumentAsInt(int index, int defaultValue) {
 		int iArg = 0;
 		try {
 			iArg = Integer.parseInt(getArgument(index));
 		} catch(NumberFormatException e) {
-			giveFatalError(argumentNames.get(index) + " must be an integer.");
+			iArg = defaultValue;
 		}
 		return iArg;
 	}

@@ -19,42 +19,38 @@ public class PngReader extends ConsoleProgram {
 		addArgs();
 		String file = getArgument(0);
 		String output = getArgument(1);
+		String command = getArgument(2);
 		PortableNetworkGraphic pic = null;
-		
+		ui.println("Loading image...");
 		try {
 			pic = new PortableNetworkGraphic(file);
 		} catch(Exception e) {
 			giveFatalError(e.getMessage());
 		}
-		ColorProfile profile = pic.getProfile();
 		Image image = pic.getImage();
-		Color c;
-		for(int y = 0; y < image.height; y++) {
-			for(int x = 0; x < image.width; x++) {
-				c = image.getColorAt(x, y);
-				p(c.hexValue(false)+"|");
-			}
-			pl("");
+		ImageManipulator im = new ImageManipulator(image);
+		if(command.equalsIgnoreCase("desaturate")) {
+			ui.println("Desaturating...");
+			im.desaturate();
+		} else if(command.equalsIgnoreCase("pixelate")) {
+			ui.println("Pixelating...");
+			int scale = getArgumentAsInt(3, 2);
+			im.pixelate(scale);
+		} else {
+			ui.println("Cannot apply unknown command '"+command+"'");
 		}
-		PortableNetworkGraphic pic2 = new PortableNetworkGraphic(image, pic.getColorMode());
-		pic2.setProfile(profile);
+		ui.println("Saving image...");
 		try {
-			pic2.save(output);
+			pic.save(output);
 		} catch(StreamFailureException e) {
 			giveFatalError(e.getMessage());
 		}
 	}
 	
-	private void pl(String message) {
-		System.out.println(message);
-	}
-	
-	private void p(String message) {
-		System.out.print(message);
-	}
-	
 	private void addArgs() {
 		addArgument("filename", false);
 		addArgument("output", false);
+		addArgument("command", false);
+		addArgument("param1", true);
 	}
 }
