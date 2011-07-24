@@ -29,10 +29,14 @@ public class ChunkInputStream extends DataInputStream {
 	}
 	
 	/**
-	 * Confirms that the magic number is correct.
+	 * Confirms that the magic number is correct. If
+	 * it is not correct, an exception is thrown.
 	 * 
-	 * @return
-	 * True if the PNG contains the correct header.
+	 * @throws InvalidFormatException
+	 * If the magic number is incorrect.
+	 *
+	 * @throws StreamFailureException
+	 * If an IOException occurs.
 	 */
 	public void verifyPng() throws InvalidFormatException, StreamFailureException {
 		if(!verified) {

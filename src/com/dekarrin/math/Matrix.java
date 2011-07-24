@@ -18,9 +18,6 @@ public class Matrix implements Cloneable {
 	 * 
 	 * @param elements
 	 * The array to build the matrix around.
-	 * 
-	 * @return
-	 * The Matrix created from the given array.
 	 */
 	public Matrix(double[][] elements) {
 		this(elements[0].length, elements.length);
@@ -37,11 +34,11 @@ public class Matrix implements Cloneable {
 	 * Creates a new matrix. All elements are set
 	 * to 0.
 	 * 
-	 * @param width
-	 * The width of the matrix.
+	 * @param rows
+	 * The number of rows in the Matrix.
 	 * 
-	 * @param height
-	 * The height of the matrix.
+	 * @param columns
+	 * The number of columns in the Matrix.
 	 */
 	public Matrix(int rows, int columns) {
 		innerMatrix = new double[rows][columns];

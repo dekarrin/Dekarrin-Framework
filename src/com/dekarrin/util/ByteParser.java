@@ -480,9 +480,6 @@ public class ByteParser {
 	 * Gets the rest of the data as one String using a character
 	 * width of 1 byte.
 	 *
-	 * @param characterWidth
-	 * The width of each character in bytes.
-	 *
 	 * @return
 	 * The rest of the data.
 	 */

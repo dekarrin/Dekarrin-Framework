@@ -497,7 +497,8 @@ public class PortableNetworkGraphic {
 	/**
 	 * Gets the filtering method used in this png.
 	 *
-	 * @param filtering method.
+	 * @return
+	 * The filtering method.
 	 */
 	public int getFilterMethod() {
 		return filterMethod;

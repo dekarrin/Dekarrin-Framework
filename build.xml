@@ -1,6 +1,6 @@
 <project name="Dekarrin-Framework" basedir="." default="compile">
 	<property name="source" value="src"/>
-	<property name="docs" value="docs"/>
+	<property name="docs" value="../docs"/>
 	<property name="build" value="../bin"/>
 	<property name="dekarrin" value="/com/dekarrin"/>
 	<condition property="warning_count" value="${warnings}" else="all">

@@ -15,7 +15,7 @@ public class ImageManipulator {
 	/**
 	 * Creates a new ImageManipulator for an Image.
 	 * 
-	 * @param Image
+	 * @param image
 	 * The image to perform the operations on.
 	 */
 	public ImageManipulator(Image image) {

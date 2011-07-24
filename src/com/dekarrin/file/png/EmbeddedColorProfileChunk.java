@@ -45,7 +45,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * @param name
 	 * The name of the profile.
 	 *
-	 * @parma data
+	 * @param data
 	 * The profile data.
 	 */
 	public EmbeddedColorProfileChunk(String name, byte[] data) {

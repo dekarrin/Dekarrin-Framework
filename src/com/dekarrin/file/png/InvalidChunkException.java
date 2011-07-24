@@ -17,7 +17,7 @@ public class InvalidChunkException extends MessageException {
 	 * Creates a new InvalidChunkException with the specified
 	 * message.
 	 *
-	 * @param message.
+	 * @param message
 	 * The message held by this InvalidChunkException.
 	 */
 	public InvalidChunkException(String message) {

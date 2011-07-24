@@ -85,8 +85,14 @@ public class PointTransformer {
 	 * @param p
 	 * The Point to rotate.
 	 * 
-	 * @param angle
-	 * The amount to rotate the point by.
+	 * @param angleX
+	 * The amount in degrees to rotate about the x-axis.
+	 *
+	 * @param angleY
+	 * The amount in degrees to rotate about the y-axis.
+	 *
+	 * @param angleZ
+	 * The amount in degrees to rotate about the z-axis.
 	 * 
 	 * @return
 	 * The rotated Point.

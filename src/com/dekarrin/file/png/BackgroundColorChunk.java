@@ -87,7 +87,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	/**
 	 * Gets the palette reference.
 	 *
-	 * @param index
+	 * @return
 	 * The index of the color in the palette.
 	 */
 	public int getPaletteIndex() {

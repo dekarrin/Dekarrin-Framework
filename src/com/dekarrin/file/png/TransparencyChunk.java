@@ -37,8 +37,9 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @param data
 	 * The data in the chunk.
 	 *
-	 * @param crc
-	 * The CRC for this chunk.
+	 * @param colorMode
+	 * The color mode of the PNG file that this chunk is a part
+	 * of.
 	 */
 	public TransparencyChunk(byte[] data, int colorMode) {
 		super(Chunk.tRNS, data);

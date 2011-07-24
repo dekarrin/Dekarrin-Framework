@@ -393,7 +393,7 @@ public class Image {
 	/**
 	 * Changes the bit depth of the samples.
 	 * 
-	 * @param newBitDepth
+	 * @param bitDepth
 	 * The bit depth to change it to.
 	 */
 	public void changeBitDepth(int bitDepth) {
