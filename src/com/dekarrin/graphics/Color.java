@@ -65,6 +65,76 @@ public class Color {
 	private int alpha;
 	
 	/**
+	 * The predefined Color for red. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color RED = new Color(8, 255, 0, 0);
+	
+	/**
+	 * The predefined Color for orange. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color ORANGE = new Color(8, 255, 128, 0);
+	
+	/**
+	 * The predefined Color for yellow. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color YELLOW = new Color(8, 255, 255, 0);
+	
+	/**
+	 * The prefefined Color for green. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color GREEN = new Color(8, 0, 255, 0);
+	
+	/**
+	 * The predefined Color for blue. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color BLUE = new Color(8, 0, 0, 255);
+	
+	/**
+	 * The predefined Color for violet. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color PURPLE = new Color(8, 128, 0, 128);
+	
+	/**
+	 * The predefined Color for brown. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color BROWN = new Color(8, 150, 75, 0);
+	
+	/**
+	 * The predefined Color for black. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color BLACK = new Color(8, 0, 0, 0);
+	
+	/**
+	 * The predefined Color for gray. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color GRAY = new Color(8, 128, 128, 128);
+	
+	/**
+	 * The predefined Color for white. This Color has a sample
+	 * depth of 8; it will need to be converted for use with
+	 * systems that have different sample depths.
+	 */
+	public static final Color WHITE = new Color(8, 255, 255, 255);
+	
+	/**
 	 * Gets color values as an HTML-notation hex string.
 	 * 
 	 * @param r
@@ -174,8 +244,50 @@ public class Color {
 	 * The bit depth to set the color to.
 	 */
 	public Color(int bitDepth) {
+		this(bitDepth, 0, 0, 0);
+	}
+	
+	/**
+	 * Creates a new Color with a maximum alpha.
+	 *
+	 * @param bitDepth
+	 * The bit depth to set the color to.
+	 *
+	 * @param r
+	 * The red value of the new Color.
+	 *
+	 * @param g
+	 * The green value of the new Color.
+	 *
+	 * @param b
+	 * The blue value of the new Color.
+	 */
+	public Color(int bitDepth, int r, int g, int b) {
 		this.bitDepth = bitDepth;
-		setSamples(0, 0, 0, maximumValue());
+		setSamples(r, g, b, maximumValue());
+	}
+	
+	/**
+	 * Creates a new Color.
+	 *
+	 * @param bitDepth
+	 * The bit depth to set the color to.
+	 *
+	 * @param r
+	 * The red value of the new Color.
+	 *
+	 * @param g
+	 * The green value of the new Color.
+	 *
+	 * @param b
+	 * The blue value of the new Color.
+	 *
+	 * @param a
+	 * The value of the alpha sample.
+	 */
+	public Color(int bitDepth, int r, int g, int b, int a) {
+		this.bitDepth = bitDepth;
+		setSamples(r, g, b, a);
 	}
 	
 	/**
