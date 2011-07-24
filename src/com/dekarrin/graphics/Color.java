@@ -120,6 +120,51 @@ public class Color {
 		return hex;
 	}
 	
+
+	/**
+	 * Gets a color from a String containing some sort of color
+	 * representation. Currently only implemented for # hex value
+	 * strings.
+	 * 
+	 * @param colorString
+	 * The representation of this Color.
+	 * 
+	 * @param depth
+	 * The sample depth of the Color to create.
+	 * 
+	 * @return
+	 * The Color created from the String.
+	 */
+	public static Color parseColor(String colorString, int depth) {
+		if(!colorString.matches("#[0-9a-fA-F]+")) {
+			throw new ColorFormatException("Color must be a hex code preceeded by '#'");
+		}
+		Color parsedColor = new Color(depth);
+		String colorCode = colorString.substring(1);
+		if(colorCode.length() % 3 == 0) {
+			int interval = colorCode.length() / 3;
+			String rString = colorCode.substring(0, interval);
+			String gString = colorCode.substring(interval, interval*2);
+			String bString = colorCode.substring(interval*2, interval*3);
+			int r = hexToValue(rString);
+			int g = hexToValue(gString);
+			int b = hexToValue(bString);
+			try {
+				parsedColor.setSamples(r, g, b);
+			} catch(ValueOutOfRangeException e) {
+				throw new ColorFormatException(e.getMessage());
+			}
+		} else {
+			int value = hexToValue(colorCode);
+			try {
+				parsedColor.setSamples(value, value, value);
+			} catch(ValueOutOfRangeException e) {
+				throw new ColorFormatException(e.getMessage());
+			}
+		}
+		return parsedColor;
+	}
+	
 	/**
 	 * Creates a new Color at the specified bit depth. The
 	 * new Color will have the default value of 0 in every
@@ -693,5 +738,19 @@ public class Color {
 		HelperString padded = new HelperString(unpadded);
 		padded.padLeft(paddingLevel, '0');
 		return padded.toString();
+	}
+	
+	/**
+	 * Converts a hex value into the color value it represents.
+	 * 
+	 * @param hexValue
+	 * The hex value to get the color value for.
+	 * 
+	 * @return
+	 * The color value for the given hex string.
+	 */
+	private static int hexToValue(String hex) {
+		int value = Integer.parseInt(hex, 16);
+		return value;
 	}
 }

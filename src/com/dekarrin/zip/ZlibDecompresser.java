@@ -3,8 +3,6 @@ package com.dekarrin.zip;
 import java.util.zip.*;
 import java.io.UnsupportedEncodingException;
 
-import com.dekarrin.file.png.Chunk;
-
 /**
  * Decompresses binary data using ZLIB.
  */

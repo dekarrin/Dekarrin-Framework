@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.util.zip.CRC32;
 
 import com.dekarrin.io.StreamFailureException;
-import com.dekarrin.util.ArrayHelper;
 
 public class ChunkOutputStream extends DataOutputStream {
 	

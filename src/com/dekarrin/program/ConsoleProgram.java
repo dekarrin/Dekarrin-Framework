@@ -63,7 +63,9 @@ public abstract class ConsoleProgram {
 	}
 	
 	/**
-	 * Gets a command line argument. If none exists, gives an error message.
+	 * Gets a command line argument. If none exists and it was set
+	 * as a required argument, an error message is given and the
+	 * program terminates.
 	 *
 	 * @param index
 	 * The index of the argument to get.
@@ -74,6 +76,7 @@ public abstract class ConsoleProgram {
 	protected String getArgument(int index) {
 		String arg = null;
 		if(!hasArgument(index)) {
+			System.out.println(argumentIsOptional(index));
 			if(!argumentIsOptional(index)) {
 				giveSyntaxError();
 			}
@@ -94,15 +97,18 @@ public abstract class ConsoleProgram {
 	 * formatted.
 	 * 
 	 * @return
-	 * The argument as an int, or -1 if it was
-	 * invalid.
+	 * The argument as an int.
 	 */
 	int getArgumentAsInt(int index, int defaultValue) {
 		int iArg = 0;
+		String argName = hasArgument(index) ? argumentNames.get(index) : "argument #"+index;
 		try {
 			iArg = Integer.parseInt(getArgument(index));
-		} catch(NumberFormatException e) {
+		} catch(NullPointerException e) {
+			ui.println("No value given for "+argName+"; using "+defaultValue);
 			iArg = defaultValue;
+		} catch(NumberFormatException e) {
+			giveFatalError(argName + " must be an integer.");
 		}
 		return iArg;
 	}
@@ -113,15 +119,23 @@ public abstract class ConsoleProgram {
 	 * @param index
 	 * The index of the argument to get.
 	 * 
+	 * @param defaultValue
+	 * The value to give if the double is not correctly
+	 * formatted.
+	 * 
 	 * @return
 	 * The argument as an double.
 	 */
-	double getArgumentAsDouble(int index) {
+	double getArgumentAsDouble(int index, double defaultValue) {
 		double dArg = 0;
+		String argName = hasArgument(index) ? argumentNames.get(index) : "argument #"+index;
 		try {
 			dArg = Double.parseDouble(getArgument(index));
+		} catch(NullPointerException e) {
+			ui.println("No value given for "+argName+"; using "+defaultValue);
+			dArg = defaultValue;
 		} catch(NumberFormatException e) {
-			giveFatalError(argumentNames.get(index) + " must be a real number.");
+			giveFatalError(argName + " must be a real number.");
 		}
 		return dArg;
 	}
@@ -190,7 +204,11 @@ public abstract class ConsoleProgram {
 	 * True if the argument is optional; false otherwise.
 	 */
 	protected boolean argumentIsOptional(int index) {
-		return optionalArgument.get(index);
+		if(optionalArgument.contains(index)) {
+			return optionalArgument.get(index);
+		} else {
+			return true;
+		}
 	}
 	
 	/**

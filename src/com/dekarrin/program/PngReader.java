@@ -1,9 +1,9 @@
 package com.dekarrin.program;
 
+
 import com.dekarrin.file.png.*;
 import com.dekarrin.graphics.*;
 import com.dekarrin.io.*;
-import com.dekarrin.util.HelperString;
 
 /**
  * Reads information on Png files.
@@ -17,6 +17,7 @@ public class PngReader extends ConsoleProgram {
 	public PngReader(String[] args) {
 		super(args);
 		addArgs();
+		
 		String file = getArgument(0);
 		String output = getArgument(1);
 		String command = getArgument(2);
@@ -29,15 +30,37 @@ public class PngReader extends ConsoleProgram {
 		}
 		Image image = pic.getImage();
 		ImageManipulator im = new ImageManipulator(image);
-		if(command.equalsIgnoreCase("desaturate")) {
+		ImageResizer is = new ImageResizer(image);
+		if(command.equalsIgnoreCase("desat")) {
 			ui.println("Desaturating...");
 			im.desaturate();
-		} else if(command.equalsIgnoreCase("pixelate")) {
+		} else if(command.equalsIgnoreCase("pixel")) {
+			addArgument("scaleFactor", true);
 			ui.println("Pixelating...");
 			int scale = getArgumentAsInt(3, 2);
 			im.pixelate(scale);
+		} else if(command.equalsIgnoreCase("mono")) {
+			addArgument("color", false);
+			String colorString = getArgument(3);
+			System.out.println(colorString);
+			Color hueColor = Color.parseColor(colorString, image.bitDepth);
+			im.monochrome(hueColor);
+		} else if(command.equalsIgnoreCase("replace")) {
+			addArgument("oldColor", false);
+			addArgument("newColor", false);
+			addArgument("tolerance", true);
+			String oldColorString = getArgument(3);
+			String newColorString = getArgument(4);
+			double tolerance = getArgumentAsDouble(5, 0.0);
+			Color oldColor = Color.parseColor(oldColorString, image.bitDepth);
+			Color newColor = Color.parseColor(newColorString, image.bitDepth);
+			im.replaceColor(oldColor, newColor, tolerance);
+		} else if(command.equalsIgnoreCase("sepia")) {
+			im.sepia();
+		} else if(command.equalsIgnoreCase("scale")) {
+			is.scale(2);
 		} else {
-			ui.println("Cannot apply unknown command '"+command+"'");
+			giveFatalError("Cannot apply unknown command '"+command+"'");
 		}
 		ui.println("Saving image...");
 		try {
@@ -51,6 +74,5 @@ public class PngReader extends ConsoleProgram {
 		addArgument("filename", false);
 		addArgument("output", false);
 		addArgument("command", false);
-		addArgument("param1", true);
 	}
 }

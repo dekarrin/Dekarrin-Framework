@@ -460,7 +460,7 @@ public class PortableNetworkGraphic {
 	 * The bit depth.
 	 */
 	public int getBitDepth() {
-		return bitDepth;
+		return image.bitDepth;
 	}
 	
 	/**
@@ -520,7 +520,7 @@ public class PortableNetworkGraphic {
 	 * The height.
 	 */
 	public int getHeight() {
-		return height;
+		return image.height;
 	}
 	
 	/**
@@ -725,7 +725,7 @@ public class PortableNetworkGraphic {
 	 * The width.
 	 */
 	public int getWidth() {
-		return width;
+		return image.width;
 	}
 	
 	/**
@@ -1625,7 +1625,7 @@ public class PortableNetworkGraphic {
 	 * The resulting HeaderChunk.
 	 */
 	private HeaderChunk headerToChunk() {
-		HeaderChunk hc = new HeaderChunk(width, height, bitDepth, colorMode, compressionMethod, filterMethod, interlaceMethod);
+		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.bitDepth, colorMode, compressionMethod, filterMethod, interlaceMethod);
 		return hc;
 	}
 	
