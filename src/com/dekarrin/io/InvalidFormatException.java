@@ -1,12 +1,10 @@
 package com.dekarrin.io;
 
-import com.dekarrin.error.*;
-
 /**
  * Exception indicating that the file being read is corrupt,
  * or that it is the wrong format.
  */
-public class InvalidFormatException extends MessageException {
+public class InvalidFormatException extends Exception {
 	
 	private static final long serialVersionUID = -5479990326795564244L;
 	

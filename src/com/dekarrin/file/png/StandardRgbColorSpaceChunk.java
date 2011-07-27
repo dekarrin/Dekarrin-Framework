@@ -1,5 +1,6 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.file.png.PortableNetworkGraphic.RenderingIntent;
 import com.dekarrin.util.ByteComposer;
 
 /**
@@ -10,7 +11,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	/**
 	 * The rendering intent of this png.
 	 */
-	private int renderingIntent;
+	private RenderingIntent renderingIntent;
 	
 	/**
 	 * Creates a new StandardRgbColorSpaceChunk. The supplied data is parsed.
@@ -29,7 +30,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * @param renderingIntent
 	 * What the rendering intent is to be.
 	 */
-	public StandardRgbColorSpaceChunk(int renderingIntent) {
+	public StandardRgbColorSpaceChunk(RenderingIntent renderingIntent) {
 		super(Chunk.sRGB);
 		setProperties(renderingIntent);
 		setChunkData(createDataBytes());
@@ -41,7 +42,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * @return
 	 * The rendering intent.
 	 */
-	public int getRenderingIntent() {
+	public RenderingIntent getRenderingIntent() {
 		return renderingIntent;
 	}
 	
@@ -49,7 +50,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * Parses the chunk data.
 	 */
 	private void parseData() {
-		int intent = parser.parseInt(1);
+		RenderingIntent intent = RenderingIntent.values()[parser.parseInt(1)];
 		setProperties(intent);
 	}
 	
@@ -61,7 +62,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 */
 	private byte[] createDataBytes() {
 		ByteComposer composer = new ByteComposer(1);
-		composer.composeInt(renderingIntent, 1);
+		composer.composeInt(renderingIntent.ordinal(), 1);
 		return composer.toArray();
 	}
 	
@@ -72,7 +73,7 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * @param renderingIntent
 	 * The rendering intent of this chunk.
 	 */
-	private void setProperties(int renderingIntent) {
+	private void setProperties(RenderingIntent renderingIntent) {
 		this.renderingIntent = renderingIntent;
 	}
 }

@@ -1,6 +1,6 @@
 package com.dekarrin.error;
 
-public class UnknownCommandException extends MessageException {
+public class UnknownCommandException extends Exception {
 	
 	private static final long serialVersionUID = 2344198275789992192L;
 

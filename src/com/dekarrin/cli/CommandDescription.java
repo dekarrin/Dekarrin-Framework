@@ -54,7 +54,7 @@ public class CommandDescription {
 	
 	/**
 	 * Creates a new Command that accepts arguments but not
-	 * flag.
+	 * flags.
 	 *
 	 * @param name
 	 * The name of the new Command. This is what the user

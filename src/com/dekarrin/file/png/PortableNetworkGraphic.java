@@ -36,95 +36,162 @@ import com.dekarrin.zip.ZlibDecompresser;
 public class PortableNetworkGraphic {
 	
 	/**
-	 * Color type for color used.
+	 * The model used for each pixel's representation.
 	 */
-	public static final int COLOR_TYPE_COLOR = 2;
+	public enum ColorMode {
+		
+		/**
+		 * Color type for no colors.
+		 */
+		GRAYSCALE (0, 1),
+		
+		/**
+		 * Colors used; each pixel is an RGB triple.
+		 */
+		TRUECOLOR (2, 3),
+		
+		/**
+		 * Color type for using both color and a palette.
+		 */
+		INDEXED (3, 1),
+		
+		/**
+		 * Color type for using only an alpha channel.
+		 */
+		GRAYSCALE_ALPHA (4, 2),
+		
+		/**
+		 * Color type for using both an alpha channel and color.
+		 */
+		TRUECOLOR_ALPHA (6, 4);
+		
+		/**
+		 * The value that is written to disk for this ColorMode.
+		 */
+		private int dataValue;
+		
+		/**
+		 * The number of samples in each pixel of this ColorMode.
+		 */
+		private int samplesPerPixel;
+		
+		/**
+		 * Creates a new ColorType.
+		 * 
+		 * @param value
+		 * The value of this ColorType as it is written to disk.
+		 * 
+		 * @param samples
+		 * The number of samples every single pixel in an image
+		 * with this color mode contains.
+		 */
+		private ColorMode(int value, int samples) {
+			dataValue = value;
+			samplesPerPixel = samples;
+		}
+		
+		/**
+		 * Gets a ColorMode from a data value.
+		 * 
+		 * @param dataValue
+		 * The data value of the desired ColorMode.
+		 * 
+		 * @return
+		 * The ColorMode that has the given data value.
+		 */
+		public static ColorMode forDataValue(int dataValue) {
+			ColorMode mode = null;
+			ColorMode[] allModes = ColorMode.values();
+			for(ColorMode cm: allModes) {
+				if(cm.dataValue() == dataValue) {
+					mode = cm;
+				}
+			}
+			return mode;
+		}
+		
+		/**
+		 * Gets the value of the color mode on disk.
+		 * 
+		 * @return
+		 * What value to write for this ColorMode.
+		 */
+		public int dataValue() {
+			return dataValue;
+		}
+		
+		/**
+		 * Gets the number of samples in each pixel of this ColorMode.
+		 * 
+		 * @return
+		 * The number of samples in each pixel.
+		 */
+		public int samples() {
+			return samplesPerPixel;
+		}
+	}
 	
 	/**
-	 * Color type for using both an alpha channel and color.
+	 * The compression method used in this PNG.
 	 */
-	public static final int COLOR_TYPE_COLOR_ALPHA = 6;
+	public enum CompressionMethod {
+		
+		/**
+		 * Uses DEFLATE/INFLATE compression algorithm.
+		 */
+		ZLIB;
+	}
 	
 	/**
-	 * Color type for using both color and a palette.
+	 * The filtering method used in this PNG.
 	 */
-	public static final int COLOR_TYPE_COLOR_PALETTE = 3;
+	public enum FilterMethod {
+		
+		/**
+		 * Uses adaptive filtering that changes depending on
+		 * which one is best.
+		 */
+		ADAPTIVE;
+	}
 	
 	/**
-	 * Color type for no colors.
+	 * The interlace method used in this PNG.
 	 */
-	public static final int COLOR_TYPE_GRAYSCALE = 0;
+	public enum InterlaceMethod {
+		
+		/**
+		 * Uses no interlacing.
+		 */
+		NONE,
+		
+		/**
+		 * Uses the Adam7 interlacing algorithm.
+		 */
+		ADAM7;
+	}
 	
 	/**
-	 * Color type for using only an alpha channel.
+	 * Represents a specific unit of length.
 	 */
-	public static final int COLOR_TYPE_GRAYSCALE_ALPHA = 4;
+	public enum Unit {
+		UNKNOWN,
+		METER;
+	}
 	
 	/**
-	 * The compression method value for deflate/inflate.
+	 * Represents a rendering intent of the standard RGB color space.
 	 */
-	public static final int COMPRESSION_METHOD_ZLIB = 0;
-	
-	/**
-	 * Filter method for adaptive filtering with five basic filter
-	 * types.
-	 */
-	public static final int FILTER_METHOD_ADAPTIVE = 0;
-	
-	/**
-	 * The background mode for grayscale.
-	 */
-	public static final int GRAYSCALE_MODE = 1;
+	public enum RenderingIntent {
+		PERCEPTUAL, // 0
+		RELATIVE_COLORIMETRIC, // 1
+		SATURATION, // 2
+		ABSOLUTE_COLORIMETRIC; // 3
+	}
 	
 	/**
 	 * The number of bytes in each image data chunk.
 	 */
 	public static final int IDAT_BUFFER_LENGTH = 50;
-	
-	/**
-	 * The background mode for indexed colors.
-	 */
-	public static final int INDEXED_COLOR_MODE = 0;
-	
-	/**
-	 * Interlace method for Adam7 interlacing.
-	 */
-	public static final int INTERLACE_METHOD_ADAM7 = 1;
-	
-	/**
-	 * Interlace method for no interlacing.
-	 */
-	public static final int INTERLACE_METHOD_NONE = 0;
-	
-	/**
-	 * Unit specifier for the meter.
-	 */
-	public static final int METER_UNIT = 1;
-	
-	/**
-	 * The rendering intent of absolute colorimetric.
-	 */
-	public static final int RENDERING_INTENT_ABSOLUTE_COLORIMETRIC = 3;
-	
-	/**
-	 * The rendering intent of perceptual.
-	 */
-	public static final int RENDERING_INTENT_PERCEPTUAL = 0;
-	
-	/**
-	 * The rendering intent of relative colorimetric.
-	 */
-	public static final int RENDERING_INTENT_RELATIVE_COLORIMETRIC = 1;
-	
-	/**
-	 * The rendering intent of saturation.
-	 */
-	public static final int RENDERING_INTENT_SATURATION = 2;
-	
-	/**
-	 * The background mode for truecolor.
-	 */
-	public static final int TRUECOLOR_MODE = 2;
 	
 	/**
 	 * The amount of data that can be written uncompressed in
@@ -134,19 +201,9 @@ public class PortableNetworkGraphic {
 	public static final int UNCOMPRESSED_DATA_LIMIT = 1024;
 	
 	/**
-	 * Unit specifier for unknown.
-	 */
-	public static final int UNKNOWN_UNIT = 0;
-	
-	/**
 	 * The background color to show the image against.
 	 */
 	private Color backgroundColor;
-	
-	/**
-	 * The image deflater.
-	 */
-	//private Deflater imageCompresser;
 	
 	/**
 	 * A reference to a palette color for use as the
@@ -165,14 +222,14 @@ public class PortableNetworkGraphic {
 	private Chromaticity chromaticity;
 	
 	/**
-	 * The color type of this image.
+	 * The color mode of this image.
 	 */
-	private int colorMode;
+	private ColorMode mode;
 	
 	/**
 	 * The compression method used in this Png's image data.
 	 */
-	private int compressionMethod;
+	private CompressionMethod compressionMethod;
 	
 	/**
 	 * Whether or not critical Chunks have been modified.
@@ -188,7 +245,7 @@ public class PortableNetworkGraphic {
 	/**
 	 * The filter method used in this Png's image data.
 	 */
-	private int filterMethod;
+	private FilterMethod filterMethod;
 	
 	/**
 	 * The image gamma.
@@ -212,7 +269,7 @@ public class PortableNetworkGraphic {
 	/**
 	 * What method of interlacing this Png uses.
 	 */
-	private int interlaceMethod;
+	private InterlaceMethod interlaceMethod;
 	
 	/**
 	 * The time that this was last modified.
@@ -257,7 +314,7 @@ public class PortableNetworkGraphic {
 	/**
 	 * The rendering intent of this image.
 	 */
-	private int renderingIntent;
+	private RenderingIntent renderingIntent;
 	
 	/**
 	 * Whether the rendering intent is set.
@@ -327,37 +384,38 @@ public class PortableNetworkGraphic {
 	 * @param image
 	 * The Image to create the file from.
 	 *
-	 * @param colorType
+	 * @param colorMode
 	 * Which color mode should be used for saving the image.
 	 */
-	public PortableNetworkGraphic(Image image, int colorType) {
+	public PortableNetworkGraphic(Image image, ColorMode colorMode) {
 		this.image = image;
 		width = image.width;
 		height = image.height;
 		bitDepth = image.bitDepth;
-		colorMode = colorType;
-		compressionMethod = COMPRESSION_METHOD_ZLIB;
-		filterMethod = FILTER_METHOD_ADAPTIVE;
-		interlaceMethod = INTERLACE_METHOD_NONE;
-		switch(colorType) {
-			case COLOR_TYPE_GRAYSCALE:
+		mode = colorMode;
+		compressionMethod = CompressionMethod.ZLIB;
+		filterMethod = FilterMethod.ADAPTIVE;
+		interlaceMethod = InterlaceMethod.NONE;
+		switch(colorMode) {
+			case GRAYSCALE:
 				if(bitDepth != 1 && bitDepth != 2 && bitDepth != 4 && bitDepth != 8 && bitDepth != 16) {
 					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in grayscale mode.");
 				}
 				break;
 			
-			case COLOR_TYPE_COLOR_PALETTE:
+			case INDEXED:
 				if(bitDepth != 8 && bitDepth != 4 && bitDepth != 2 && bitDepth != 1) {
 					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in indexed mode.");
 				}
 				break;
 				
-			case COLOR_TYPE_GRAYSCALE_ALPHA:
-			case COLOR_TYPE_COLOR:
-			case COLOR_TYPE_COLOR_ALPHA:
+			case GRAYSCALE_ALPHA:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				if(bitDepth != 8 && bitDepth != 16) {
 					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in current color mode.");
 				}
+				break;
 		}
 	}
 	
@@ -479,8 +537,8 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The color mode.
 	 */
-	public int getColorMode() {
-		return colorMode;
+	public ColorMode getColorMode() {
+		return mode;
 	}
 	
 	/**
@@ -490,7 +548,7 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The compression method.
 	 */
-	public int getCompressionMethod() {
+	public CompressionMethod getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -500,7 +558,7 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The filtering method.
 	 */
-	public int getFilterMethod() {
+	public FilterMethod getFilterMethod() {
 		return filterMethod;
 	}
 
@@ -596,7 +654,7 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The rendering intent.
 	 */
-	public int getRenderingIntent() {
+	public RenderingIntent getRenderingIntent() {
 		return renderingIntent;
 	}
 	
@@ -782,7 +840,7 @@ public class PortableNetworkGraphic {
 	 * Whether it does.
 	 */
 	public boolean hasPalette() {
-		return (colorMode == COLOR_TYPE_COLOR_PALETTE);
+		return (mode == ColorMode.INDEXED);
 	}
 	
 	/**
@@ -855,13 +913,13 @@ public class PortableNetworkGraphic {
 	 */
 	public boolean hasTransparencyData() {
 		boolean has;
-		switch(colorMode) {
-			case COLOR_TYPE_COLOR:
-			case COLOR_TYPE_GRAYSCALE:
+		switch(mode) {
+			case TRUECOLOR:
+			case GRAYSCALE:
 				has = (transparentColor != null);
 				break;
 				
-			case COLOR_TYPE_COLOR_PALETTE:
+			case INDEXED:
 				has = (paletteAlphas != null);
 				break;
 			
@@ -878,7 +936,7 @@ public class PortableNetworkGraphic {
 	 * Whether it is.
 	 */
 	public boolean isInterlaced() {
-		return (interlaceMethod != INTERLACE_METHOD_NONE);
+		return (interlaceMethod != InterlaceMethod.NONE);
 	}
 	
 	/**
@@ -1013,7 +1071,7 @@ public class PortableNetworkGraphic {
 	 * @param renderingIntent
 	 * The rendering intent.
 	 */
-	public void setRenderingIntent(int renderingIntent) {
+	public void setRenderingIntent(RenderingIntent renderingIntent) {
 		this.renderingIntent = renderingIntent;
 		renderingIntentSet = true;
 	}
@@ -1060,14 +1118,10 @@ public class PortableNetworkGraphic {
 	 */
 	private BackgroundColorChunk backgroundColorToChunk() {
 		BackgroundColorChunk bcc;
-		if(colorMode == COLOR_TYPE_COLOR_PALETTE) {
+		if(mode == ColorMode.INDEXED) {
 			bcc = new BackgroundColorChunk(palette.indexOf(backgroundColor));
 		} else {
-			if(colorMode == COLOR_TYPE_COLOR && colorMode == COLOR_TYPE_COLOR_ALPHA) {
-				bcc = new BackgroundColorChunk(backgroundColor, TRUECOLOR_MODE);
-			} else {
-				bcc = new BackgroundColorChunk(backgroundColor, GRAYSCALE_MODE);
-			}
+			bcc = new BackgroundColorChunk(backgroundColor, mode);
 		}
 		return bcc;
 	}
@@ -1181,7 +1235,7 @@ public class PortableNetworkGraphic {
 	 * The completed image.
 	 */
 	private void constructColorImage(Scanline[] scanlines) {
-		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
+		boolean hasAlpha = (mode == ColorMode.TRUECOLOR_ALPHA);
 		image = new Image(width, height, bitDepth, hasAlpha);
 		Color color = new Color(bitDepth);
 		for(int y = 0; y < scanlines.length; y++) {
@@ -1210,7 +1264,7 @@ public class PortableNetworkGraphic {
 	 * The completed image.
 	 */
 	private void constructGrayscaleImage(Scanline[] scanlines) {
-		boolean hasAlpha = (colorMode == COLOR_TYPE_GRAYSCALE_ALPHA);
+		boolean hasAlpha = (mode == ColorMode.GRAYSCALE_ALPHA);
 		image = new Image(width, height, bitDepth, hasAlpha);
 		GrayColor color = new GrayColor(bitDepth);
 		for(int y = 0; y < scanlines.length; y++) {
@@ -1233,18 +1287,18 @@ public class PortableNetworkGraphic {
 	 * The scanlines that make up the image data.
 	 */
 	private void constructImage(Scanline[] scanlines) {
-		switch(colorMode) {
-			case COLOR_TYPE_GRAYSCALE:
-			case COLOR_TYPE_GRAYSCALE_ALPHA:
+		switch(mode) {
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
 				constructGrayscaleImage(scanlines);
 				break;
 				
-			case COLOR_TYPE_COLOR:
-			case COLOR_TYPE_COLOR_ALPHA:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				constructColorImage(scanlines);
 				break;
 				
-			case COLOR_TYPE_COLOR_PALETTE:
+			case INDEXED:
 				constructIndexedImage(scanlines);
 				break;
 		}
@@ -1416,11 +1470,11 @@ public class PortableNetworkGraphic {
 	 * The scanlines that make up the image.
 	 */
 	private Scanline[] deconstructColorImage(Image img) {
-		boolean hasAlpha = (colorMode == COLOR_TYPE_COLOR_ALPHA);
+		boolean hasAlpha = (mode == ColorMode.TRUECOLOR_ALPHA);
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
+			lines[y] = new Scanline(mode.samples(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
 				color = img.getColorAt(x, y);
 				lines[y].setSample(x, Scanline.RED_SAMPLE, color.getRed());
@@ -1445,11 +1499,11 @@ public class PortableNetworkGraphic {
 	 * The scanlines that make up the image.
 	 */
 	private Scanline[] deconstructGrayscaleImage(Image img) {
-		boolean hasAlpha = (colorMode == COLOR_TYPE_GRAYSCALE_ALPHA);
+		boolean hasAlpha = (mode == ColorMode.GRAYSCALE_ALPHA);
 		Scanline[] lines = new Scanline[height];
 		GrayColor color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
+			lines[y] = new Scanline(mode.samples(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
 				color = new GrayColor(bitDepth);
 				color.setValue(image.valueAt(Image.GRAY, x, y));
@@ -1472,18 +1526,18 @@ public class PortableNetworkGraphic {
 	 */
 	private Scanline[] deconstructImage() {
 		Scanline[] scanlines = null;
-		switch(colorMode) {
-			case COLOR_TYPE_GRAYSCALE:
-			case COLOR_TYPE_GRAYSCALE_ALPHA:
+		switch(mode) {
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
 				scanlines = deconstructGrayscaleImage(image);
 				break;
 				
-			case COLOR_TYPE_COLOR:
-			case COLOR_TYPE_COLOR_ALPHA:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				scanlines = deconstructColorImage(image);
 				break;
 				
-			case COLOR_TYPE_COLOR_PALETTE:
+			case INDEXED:
 				scanlines = deconstructImageFromPalette(image);
 				break;
 		}
@@ -1504,7 +1558,7 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(samplesPerPixel(), bitDepth, width);
+			lines[y] = new Scanline(mode.samples(), bitDepth, width);
 			for(int x = 0; x < width; x++) {
 				color = img.getColorAt(x, y);
 				int paletteIndex = palette.indexOf(color);
@@ -1581,7 +1635,7 @@ public class PortableNetworkGraphic {
 	 */
 	private double getPixelWidth() {
 		double pw;
-		pw = samplesPerPixel() * ((double)bitDepth / 8);
+		pw = mode.samples() * ((double)bitDepth / 8);
 		return pw;
 	}
 	
@@ -1603,7 +1657,7 @@ public class PortableNetworkGraphic {
 			start = i*getScanlineWidth();
 			end = (i+1)*getScanlineWidth();
 			scanlineData = Arrays.copyOfRange(data, start, end);
-			lines[i] = new Scanline(samplesPerPixel(), bitDepth, scanlineData);
+			lines[i] = new Scanline(mode.samples(), bitDepth, scanlineData);
 		}
 		return lines;
 	}
@@ -1626,7 +1680,7 @@ public class PortableNetworkGraphic {
 	 * The resulting HeaderChunk.
 	 */
 	private HeaderChunk headerToChunk() {
-		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.bitDepth, colorMode, compressionMethod, filterMethod, interlaceMethod);
+		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.bitDepth, mode, compressionMethod, filterMethod, interlaceMethod);
 		return hc;
 	}
 	
@@ -1940,21 +1994,10 @@ public class PortableNetworkGraphic {
 	 * The background color chunk.
 	 */
 	private void readBackgroundColorChunk(BackgroundColorChunk chunk) {
-		if(chunk.getColorMode() == colorMode) {
-			switch(chunk.getColorMode()) {
-				case COLOR_TYPE_GRAYSCALE:
-				case COLOR_TYPE_GRAYSCALE_ALPHA:
-				case COLOR_TYPE_COLOR:
-				case COLOR_TYPE_COLOR_ALPHA:
-					backgroundColor = chunk.getColor();
-					break;
-					
-				case COLOR_TYPE_COLOR_PALETTE:
-					backgroundColorIndex = chunk.getPaletteIndex();
-					break;
-			}
+		if(mode == ColorMode.INDEXED) {
+			backgroundColorIndex = chunk.getPaletteIndex();
 		} else {
-			throw new RuntimeException("Color mode mismatch!");
+			backgroundColor = chunk.getColor();
 		}
 	}
 	
@@ -2015,7 +2058,7 @@ public class PortableNetworkGraphic {
 		bitDepth = header.getBitDepth();
 		height = header.getHeight();
 		width = header.getWidth();
-		colorMode = header.getColorType();
+		mode = header.getColorMode();
 	}
 	
 	/**
@@ -2079,7 +2122,7 @@ public class PortableNetworkGraphic {
 	 */
 	private void readSignificantBitsChunk(SignificantBitsChunk chunk) {
 		significantColorBits = chunk.getColorBits();
-		if(colorMode == COLOR_TYPE_GRAYSCALE_ALPHA || colorMode == COLOR_TYPE_COLOR_ALPHA) {
+		if(mode == ColorMode.GRAYSCALE_ALPHA || mode == ColorMode.TRUECOLOR_ALPHA) {
 			significantAlphaBits = chunk.getAlphaBits();
 		}
 		significantBitsSet = true;
@@ -2127,22 +2170,21 @@ public class PortableNetworkGraphic {
 	 * The transparency chunk.
 	 */
 	private void readTransparencyChunk(TransparencyChunk chunk) {
-		chunk.parseWithColorMode(colorMode);
-		if(chunk.getColorMode() == colorMode) {
-			switch(chunk.getColorMode()) {
-				case COLOR_TYPE_GRAYSCALE:
-					transparentColor = new GrayColor(chunk.getTransparentColor());
-					
-				case COLOR_TYPE_COLOR:
-					transparentColor = chunk.getTransparentColor();
-					break;
-					
-				case COLOR_TYPE_COLOR_PALETTE:
-					paletteAlphas = chunk.getPaletteAlphas();
-					break;
-			}
-		} else {
-			throw new RuntimeException("Color mode mismatch!");
+		chunk.parseWithColorMode(mode);
+		switch(chunk.getColorMode()) {
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
+				transparentColor = new GrayColor(chunk.getTransparentColor());
+				break;
+			
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
+				transparentColor = chunk.getTransparentColor();
+				break;
+				
+			case INDEXED:
+				paletteAlphas = chunk.getPaletteAlphas();
+				break;
 		}
 	}
 	
@@ -2164,40 +2206,8 @@ public class PortableNetworkGraphic {
 	 * The resulting PhysicalPixelDimensionsChunk.
 	 */
 	private PhysicalPixelDimensionsChunk resolutionToChunk() {
-		PhysicalPixelDimensionsChunk ppdc = new PhysicalPixelDimensionsChunk(resolution.x, resolution.y, METER_UNIT);
+		PhysicalPixelDimensionsChunk ppdc = new PhysicalPixelDimensionsChunk(resolution.x, resolution.y, Unit.METER);
 		return ppdc;
-	}
-	
-	/**
-	 * Gets the number of samples in each pixel.
-	 *
-	 * @return
-	 * The number of samples.
-	 */
-	private int samplesPerPixel() {
-		int samples = 0;
-		switch(colorMode) {
-			case COLOR_TYPE_GRAYSCALE:
-				samples = 1;
-				break;
-				
-			case COLOR_TYPE_COLOR:
-				samples = 3;
-				break;
-				
-			case COLOR_TYPE_COLOR_PALETTE:
-				samples = 1;
-				break;
-				
-			case COLOR_TYPE_GRAYSCALE_ALPHA:
-				samples = 2;
-				break;
-				
-			case COLOR_TYPE_COLOR_ALPHA:
-				samples = 4;
-				break;
-		}
-		return samples;
 	}
 	
 	/**
@@ -2205,7 +2215,7 @@ public class PortableNetworkGraphic {
 	 * was provided.
 	 */
 	private void setIndexedBackgroundColor() {
-		if(colorMode == COLOR_TYPE_COLOR_PALETTE) {
+		if(mode == ColorMode.INDEXED) {
 			backgroundColor = palette.getColor(backgroundColorIndex);
 		}
 	}
@@ -2218,21 +2228,21 @@ public class PortableNetworkGraphic {
 	 */
 	private SignificantBitsChunk significantBitsToChunk() {
 		SignificantBitsChunk sbc = null;
-		switch(colorMode) {
-			case COLOR_TYPE_GRAYSCALE:
+		switch(mode) {
+			case GRAYSCALE:
 				sbc = new SignificantBitsChunk(getSignificantGrayscaleBits());
 				break;
 				
-			case COLOR_TYPE_COLOR:
-			case COLOR_TYPE_COLOR_PALETTE:
+			case TRUECOLOR:
+			case INDEXED:
 				sbc = new SignificantBitsChunk(getSignificantRedBits(), getSignificantGreenBits(), getSignificantBlueBits());
 				break;
 				
-			case COLOR_TYPE_GRAYSCALE_ALPHA:
+			case GRAYSCALE_ALPHA:
 				sbc = new SignificantBitsChunk(getSignificantGrayscaleBits(), getSignificantAlphaBits());
 				break;
 				
-			case COLOR_TYPE_COLOR_ALPHA:
+			case TRUECOLOR_ALPHA:
 				sbc = new SignificantBitsChunk(getSignificantRedBits(), getSignificantGreenBits(), getSignificantBlueBits(), getSignificantAlphaBits());
 				break;
 		}
@@ -2276,7 +2286,7 @@ public class PortableNetworkGraphic {
 			for(String contents: texts) {
 				TextChunk tc = null;
 				if(contents.length() > UNCOMPRESSED_DATA_LIMIT) {
-					tc = new CompressedTextDataChunk(keyword, contents, COMPRESSION_METHOD_ZLIB);
+					tc = new CompressedTextDataChunk(keyword, contents, compressionMethod);
 				} else {
 					tc = new TextDataChunk(keyword, contents);
 				}
@@ -2294,13 +2304,19 @@ public class PortableNetworkGraphic {
 	 */
 	private TransparencyChunk transparencyDataToChunk() {
 		TransparencyChunk tc = null;
-		if(colorMode == COLOR_TYPE_COLOR_PALETTE) {
-			int[] transparencies = extractTransparencies();
-			tc = new TransparencyChunk(transparencies);
-		} else if(colorMode == COLOR_TYPE_GRAYSCALE) {
-			tc = new TransparencyChunk(((GrayColor)transparentColor).getValue());
-		} else {
-			tc = new TransparencyChunk(transparentColor.getRed(), transparentColor.getGreen(), transparentColor.getBlue());
+		switch(mode) {
+			case INDEXED:
+				int[] transparencies = extractTransparencies();
+				tc = new TransparencyChunk(transparencies);
+				break;
+				
+			case GRAYSCALE:
+				tc = new TransparencyChunk(((GrayColor)transparentColor).getValue());
+				break;
+				
+			case TRUECOLOR:
+				tc = new TransparencyChunk(transparentColor.getRed(), transparentColor.getGreen(), transparentColor.getBlue());
+				break;
 		}
 		return tc;
 	}

@@ -231,7 +231,7 @@ public class HelperString implements CharSequence, Appendable {
 	 * @return
 	 * This HelperString.
 	 */
-	public HelperString capitalize(String subject) {
+	public HelperString capitalize() {
 		String[] words = internalString.split(" ");
 		String finished = "";
 		for(String w: words) {
@@ -240,6 +240,81 @@ public class HelperString implements CharSequence, Appendable {
 		}
 		finished = finished.substring(0, finished.length() - 1);
 		internalString = finished;
+		return this;
+	}
+	
+	/**
+	 * Wraps this HelperString to a specified number of characters.
+	 * A character is inserted after the limit, or before the last
+	 * word if the limit is not at a word boundary. Existing newline
+	 * characters are disregarded.
+	 * 
+	 * @param limit
+	 * The number of characters per line.
+	 * 
+	 * @param newlineChar
+	 * The character to insert after every line.
+	 * 
+	 * @param removeNewlines
+	 * Whether to remove instances of {@code newlineChar} that
+	 * already exist in this HelperString.
+	 * 
+	 * @return
+	 * This HelperString.
+	 */
+	public HelperString wrap(int limit, char newlineChar, boolean removeNewlines) {
+		if(removeNewlines) {
+			internalString = internalString.replace(newlineChar, ' ');
+		}
+		StringBuffer wrapped = new StringBuffer("");
+		StringBuffer line = new StringBuffer("");
+		String[] words = internalString.split(" ");
+		for(int i = 0; i < words.length; i++) {
+			// handle the case of the newline character left in.
+			String[] wordPieces = words[i].split(Character.toString(newlineChar));
+			if(wordPieces.length > 1) {
+				for(int j = 0; j < wordPieces.length; j++) {
+					if(line.length() + " ".length() + wordPieces[j].length() < limit) {
+						line.append(" "+wordPieces[i]);
+						if(j < wordPieces.length-1) {
+							wrapped.append(line.toString());
+							wrapped.append(newlineChar);
+							line = new StringBuffer("");
+						}
+					} else {
+						wrapped.append(line.toString());
+						wrapped.append(newlineChar);
+						line = new StringBuffer("");
+					}
+				}
+			} else {
+				if(line.length() + " ".length() + words[i].length() < limit) {
+					line.append(" "+words[i]);
+				} else {
+					wrapped.append(line.toString());
+					wrapped.append(newlineChar);
+					line = new StringBuffer("");
+				}
+			}
+		}
+		internalString = wrapped.toString();
+		return this;
+	}
+	
+	/**
+	 * Wraps this HelperString to a specified number of characters.
+	 * A character is inserted after the limit, or before the last
+	 * word if the limit is not at a word boundary. Existing newline
+	 * characters are preserved.
+	 * 
+	 * @param limit
+	 * The maximum number of characters per line.
+	 * 
+	 * @return
+	 * This HelperString.
+	 */
+	public HelperString wrap(int limit) {
+		wrap(limit, '\n', false);
 		return this;
 	}
 	

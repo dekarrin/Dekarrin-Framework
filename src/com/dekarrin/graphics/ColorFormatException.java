@@ -1,8 +1,6 @@
 package com.dekarrin.graphics;
 
-import com.dekarrin.error.RuntimeMessageException;
-
-public class ColorFormatException extends RuntimeMessageException {
+public class ColorFormatException extends NumberFormatException {
 	
 	private static final long serialVersionUID = -5739773093310247748L;
 

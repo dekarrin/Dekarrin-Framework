@@ -13,12 +13,12 @@ public class InteractionModule {
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 	}
 	
-	public void print(String message) {
-		System.out.print(message);
+	public void print(CharSequence message) {
+		System.out.print(message.toString());
 	}
 	
-	public void println(String message) {
-		System.out.println(message);
+	public void println(CharSequence message) {
+		System.out.println(message.toString());
 	}
 	
 	public void println() {

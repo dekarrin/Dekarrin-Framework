@@ -1,33 +1,16 @@
 package com.dekarrin.graphics;
 
-import com.dekarrin.math.Slope;
+import com.dekarrin.math.*;
 
 /**
  * Provides methods for drawing straight lines on an Image.
  */
 public class Pencil extends Tool {
-
-	/**
-	 * How many pixels wide lines drawn by this Pencil are.
-	 */
-	private int lineWidth = 1;
 	
 	/**
 	 * The color of lines drawn by this Pencil.
 	 */
 	private Color lineColor = Color.BLACK;
-	
-	/**
-	 * What the mode should be used for styling the end
-	 * points of lines drawn by this Pencil.
-	 */
-	private int lineJoint = JOINT_STRAIGHT;
-	
-	/**
-	 * How many units a miter joint can extend before being
-	 * chopped off.
-	 */
-	private int lineMiterJoint = 3;
 	
 	/**
 	 * Whether the edges of a line is smoothed.
@@ -84,9 +67,9 @@ public class Pencil extends Tool {
 	 */
 	@Override
 	public void move(int deltaX, int deltaY) {
-		x = position.get(Point.X) + deltaX;
-		y = position.get(Point.Y) + deltaY;
-		Point nextPosition = new Point(x, y);
+		double x = position.get(Point.X) + deltaX;
+		double y = position.get(Point.Y) + deltaY;
+		Point nextPosition = new Point(2, x, y);
 		moveTo(nextPosition);
 	}
 	
@@ -107,16 +90,6 @@ public class Pencil extends Tool {
 	}
 	
 	/**
-	 * Sets the Pencil thickness.
-	 *
-	 * @param w
-	 * The new width, in pixels.
-	 */
-	public void setWidth(int w) {
-		lineWidth = w;
-	}
-	
-	/**
 	 * Sets the Pencil color.
 	 *
 	 * @param c
@@ -124,28 +97,6 @@ public class Pencil extends Tool {
 	 */
 	public void setColor(Color c) {
 		lineColor = c;
-	}
-	
-	/**
-	 * Sets the end point shape for lines created by this
-	 * Pencil.
-	 *
-	 * @param shape
-	 * A shape, selected from one of the class constants.
-	 */
-	public void setJoint(int shape) {
-		lineJoint = shape;
-	}
-	
-	/**
-	 * Sets the miter limit for angled joints. This will only
-	 * affect the Pencil when the joint is set to JOINT_MITER.
-	 *
-	 * @param limit
-	 * The new miter limit.
-	 */
-	public void setMiterLimit(int limit) {
-		lineMiterLimit = limit;
 	}
 	
 	/**
@@ -187,12 +138,12 @@ public class Pencil extends Tool {
 	 */
 	private void bresenhamLine(Point p1, Point p2) {
 		com.dekarrin.math.Slope slope = new com.dekarrin.math.Slope(p1, p2);
-		boolean steep := Math.abs(slope.getSlope()) > 1;
+		boolean steep = Math.abs(slope.slope()) > 1;
 		int x1,x2,y1,y2;
-		x1 = (!steep) ? p1.get(Point.X) : p1.get(Point.Y);
-		y1 = (!steep) ? p1.get(Point.Y) : p1.get(Point.X);
-		x2 = (!steep) ? p2.get(Point.X) : p2.get(Point.Y);
-		y2 = (!steep) ? p2.get(Point.Y) : p2.get(Point.X);
+		x1 = (!steep) ? (int)p1.get(Point.X) : (int)p1.get(Point.Y);
+		y1 = (!steep) ? (int)p1.get(Point.Y) : (int)p1.get(Point.X);
+		x2 = (!steep) ? (int)p2.get(Point.X) : (int)p2.get(Point.Y);
+		y2 = (!steep) ? (int)p2.get(Point.Y) : (int)p2.get(Point.X);
 		int dx = (int)Math.abs(x2-x1);
 		int dy = (int)Math.abs(y2-y1);
 		int error = dx / 2;
@@ -200,9 +151,9 @@ public class Pencil extends Tool {
 		int yStep = (y1 < y2) ? 1 : -1;
 		for(int y=y1,x=x1; x < x2; x += xStep) {
 			if(!steep) {
-				plot(x, y, 1, slope);
+				plot(x, y, 1);
 			} else {
-				plot(y, x, 1, slope);
+				plot(y, x, 1);
 			}
 			error -= dy;
 			if(error < 0) {
@@ -223,12 +174,12 @@ public class Pencil extends Tool {
 	 */
 	private void xiaolinLine(Point p1, Point p2) {
 		com.dekarrin.math.Slope slope = new com.dekarrin.math.Slope(p1, p2);
-		boolean steep := Math.abs(slope.getSlope()) > 1;
+		boolean steep = Math.abs(slope.slope()) > 1;
 		int x1,x2,y1,y2;
-		x1 = (!steep) ? p1.get(Point.X) : p1.get(Point.Y);
-		y1 = (!steep) ? p1.get(Point.Y) : p1.get(Point.X);
-		x2 = (!steep) ? p2.get(Point.X) : p2.get(Point.Y);
-		y2 = (!steep) ? p2.get(Point.Y) : p2.get(Point.X);
+		x1 = (!steep) ? (int)p1.get(Point.X) : (int)p1.get(Point.Y);
+		y1 = (!steep) ? (int)p1.get(Point.Y) : (int)p1.get(Point.X);
+		x2 = (!steep) ? (int)p2.get(Point.X) : (int)p2.get(Point.Y);
+		y2 = (!steep) ? (int)p2.get(Point.Y) : (int)p2.get(Point.X);
 		int dx = x2 - x1;
 		int dy = y2 - y1;
 		if(x2 < x1) {
@@ -243,24 +194,24 @@ public class Pencil extends Tool {
 		// handle first endpoint
 		int xend = (int)Math.round(x1);
 		double yend = y1 + gradient * (xend - x1);
-		double xgap = rfpart(x1 + 0.5);
+		double xgap = rfPart(x1 + 0.5);
 		int xpxl1 = xend; // this will be used in the main loop
 		int ypxl1 = (int)Math.floor(yend);
-		plot(xpxl1, ypxl1, rfpart(yend) * xgap, slope);
-		plot(xpxl1, ypxl1 + 1, fpart(yend) * xgap, slope);
+		plot(xpxl1, ypxl1, rfPart(yend) * xgap);
+		plot(xpxl1, ypxl1 + 1, fPart(yend) * xgap);
 		double intery = yend + gradient; // first y-intersection for the main loop
 		// handle second endpoint
 		xend = (int)Math.round(x2);
 		yend = y2 + gradient * (xend - x2);
-		xgap = fpart(x2 + 0.5);
+		xgap = fPart(x2 + 0.5);
 		int xpxl2 = xend; // this will be used in the main loop
 		int ypxl2 = (int)Math.floor(yend);
-		plot(xpxl2, ypxl2, rfpart(yend) * xgap, slope);
-		plot(xpxl2, ypxl2 + 1, fpart(yend) * xgap, slope);
+		plot(xpxl2, ypxl2, rfPart(yend) * xgap);
+		plot(xpxl2, ypxl2 + 1, fPart(yend) * xgap);
 		// main loop
 		for(int x = xpxl1 + 1; x < xpxl2; x++) {
-			plot(x, (int)Math.floor(intery), rfpart(intery), slope);
-			plot(x, (int)Math.floor(intery) + 1, fpart(intery), slope);
+			plot(x, (int)Math.floor(intery), rfPart(intery));
+			plot(x, (int)Math.floor(intery) + 1, fPart(intery));
 			intery += gradient;
 		}
 	}
@@ -297,11 +248,10 @@ public class Pencil extends Tool {
 	 * @param intensity
 	 * The amount that the color overpowers
 	 * whatever else is there.
-	 *
-	 * @param slope
-	 * The slope of the line being drawn.
 	 */
-	private void plot(int x, int y, double intensity, double slope) {
-		
+	private void plot(int x, int y, double intensity) {
+		int alpha = (int)(intensity*lineColor.maximumValue());
+		lineColor.setAlpha(alpha);
+		image.setColorAt(x, y, lineColor);
 	}
 }

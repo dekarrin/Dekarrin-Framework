@@ -3,11 +3,8 @@ package com.dekarrin.error;
 /**
  * Exception indicating that the passed-in value exceeds the range.
  */
-public class ValueOutOfRangeException extends RuntimeMessageException {
+public class ValueOutOfRangeException extends RuntimeException {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4977388225914136878L;
 
 	/**

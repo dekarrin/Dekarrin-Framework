@@ -72,7 +72,13 @@ public class Command {
 	 * Whether or not the flag exists.
 	 */
 	public boolean hasFlag(String name) {
-		return flags.contains(name);
+		// both the long and short name need to be checked.
+		String[] names = getBothFlagNames(name);
+		if(flags.contains(names[0]) || flags.contains(names[1])) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -85,7 +91,14 @@ public class Command {
 	 * The value of the flag.
 	 */
 	public String getFlag(String name) {
-		return flags.getValue(name);
+		String[] names = getBothFlagNames(name);
+		if(flags.contains(names[0])) {
+			return flags.getValue(names[0]);
+		} else if(flags.contains(names[1])) {
+			return flags.getValue(names[1]);
+		} else {
+			return null;
+		}
 	}
 	
 	/**
@@ -205,5 +218,28 @@ public class Command {
 			}
 		}
 		return minimum;
+	}
+	
+	/**
+	 * Gets both the short and long names of a flag.
+	 * 
+	 * @param name
+	 * Either the short or long name; doesn't matter.
+	 * 
+	 * @return
+	 * An array containing the short name at index 0
+	 * and the long name at index 1. Both of these will
+	 * be null if there is no tag that has the given
+	 * name.
+	 */
+	private String[] getBothFlagNames(String name) {
+		String[] names = new String[2];
+		for(FlagDescription fd: description.flags) {
+			if(fd.name.equalsIgnoreCase(name) || fd.longName.equalsIgnoreCase(name)) {
+				names[0] = fd.name;
+				names[1] = fd.longName;
+			}
+		}
+		return names;
 	}
 }

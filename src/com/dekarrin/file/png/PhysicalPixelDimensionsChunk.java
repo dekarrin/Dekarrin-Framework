@@ -1,6 +1,8 @@
 package com.dekarrin.file.png;
 
 import java.awt.Dimension;
+
+import com.dekarrin.file.png.PortableNetworkGraphic.Unit;
 import com.dekarrin.util.ByteComposer;
 
 /**
@@ -17,7 +19,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	/**
 	 * The unit specifier.
 	 */
-	private int unitSpecifier;
+	private Unit unitSpecifier;
 	
 	/**
 	 * Creates a new PhyscialPixelDimensionsChunk.
@@ -43,7 +45,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * @param unitSpecifier
 	 * The unit that the pixel dimensions are in.
 	 */
-	public PhysicalPixelDimensionsChunk(int x, int y, int unitSpecifier) {
+	public PhysicalPixelDimensionsChunk(int x, int y, Unit unitSpecifier) {
 		super(Chunk.pHYs);
 		setProperties(x, y, unitSpecifier);
 		setChunkData(createDataBytes());
@@ -81,8 +83,11 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	
 	/**
 	 * Gets the unit specifier.
+	 * 
+	 * @return
+	 * The unit.
 	 */
-	public int getUnitSpecifier() {
+	public Unit getUnitSpecifier() {
 		return unitSpecifier;
 	}
 	
@@ -92,8 +97,8 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	private void parseData() {
 		int x = parser.parseInt();
 		int y = parser.parseInt();
-		dimensions = new Dimension(x, y);
-		unitSpecifier = parser.parseByte();
+		Unit unit = Unit.values()[parser.parseInt(1)];
+		setProperties(x, y, unit);
 	}
 	
 	/**
@@ -108,9 +113,9 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 	 * @param unitSpecifier
 	 * The unit that the pixel dimensions are in.
 	 */
-	private void setProperties(int x, int y, int unitSpecifier) {
+	private void setProperties(int x, int y, Unit unit) {
 		dimensions = new Dimension(x, y);
-		this.unitSpecifier = unitSpecifier;
+		this.unitSpecifier = unit;
 	}
 	
 	/**
@@ -123,7 +128,7 @@ public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
 		ByteComposer composer = new ByteComposer(9);
 		composer.composeInt(getWidth());
 		composer.composeInt(getHeight());
-		composer.composeInt(unitSpecifier, 1);
+		composer.composeInt(unitSpecifier.ordinal(), 1);
 		return composer.toArray();
 	}
 }

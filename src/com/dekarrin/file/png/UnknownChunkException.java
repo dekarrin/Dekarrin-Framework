@@ -1,18 +1,14 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.error.MessageException;
-
 /**
  * Represents an unknown chunk. This is typically thrown if an
  * operation that requires a known chunk encounters a chunk
  * whose type is unrecognized.
  */
-public class UnknownChunkException extends MessageException {
-	
-	/**
-	 * 
-	 */
+public class UnknownChunkException extends Exception {
+
 	private static final long serialVersionUID = -5423917208795073148L;
+	
 	/**
 	 * The type of the chunk that was encountered.
 	 */

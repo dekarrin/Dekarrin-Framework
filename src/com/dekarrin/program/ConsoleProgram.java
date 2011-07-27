@@ -1,9 +1,11 @@
 package com.dekarrin.program;
 
+import com.dekarrin.cli.ArgumentDescription;
 import com.dekarrin.cli.FlagArgumentList;
 import com.dekarrin.io.InteractionModule;
+import com.dekarrin.util.HelperString;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Program to be run from the command line. Processes flags automatically.
@@ -33,14 +35,15 @@ public abstract class ConsoleProgram {
 	protected String programName;
 	
 	/**
-	 * A list of argument names for syntax help.
+	 * The current position of the assignment pointer for
+	 * assigning arguments.
 	 */
-	private ArrayList<String> argumentNames = new ArrayList<String>(2);
+	private int assign = 0;
 	
 	/**
-	 * A list of whether each argument is optional.
+	 * A list of argument names for syntax help.
 	 */
-	private ArrayList<Boolean> optionalArgument = new ArrayList<Boolean>(2);
+	private HashMap<String,ArgumentDescription> arguments = new HashMap<String,ArgumentDescription>(2);
 	
 	/**
 	 * Do not use; immediately throws an exception. The use of this constructor
@@ -67,21 +70,20 @@ public abstract class ConsoleProgram {
 	 * as a required argument, an error message is given and the
 	 * program terminates.
 	 *
-	 * @param index
-	 * The index of the argument to get.
+	 * @param name
+	 * The name of the argument to get.
 	 *
 	 * @return
 	 * The argument.
 	 */
-	protected String getArgument(int index) {
+	protected String getArgument(String name) {
 		String arg = null;
-		if(!hasArgument(index)) {
-			System.out.println(argumentIsOptional(index));
-			if(!argumentIsOptional(index)) {
+		if(!hasArgument(name)) {
+			if(!argumentIsOptional(name)) {
 				giveSyntaxError();
 			}
 		} else {
-			arg = args[index];
+			arg = args[arguments.get(name).position];
 		}
 		return arg;
 	}
@@ -89,8 +91,8 @@ public abstract class ConsoleProgram {
 	/**
 	 * Gets a command line argument as an integer.
 	 * 
-	 * @param index
-	 * The index of the argument to get.
+	 * @param name
+	 * The name of the argument to get.
 	 * 
 	 * @param defaultValue
 	 * The value to give if the int is not correctly
@@ -99,16 +101,14 @@ public abstract class ConsoleProgram {
 	 * @return
 	 * The argument as an int.
 	 */
-	int getArgumentAsInt(int index, int defaultValue) {
+	int getArgumentAsInt(String name, int defaultValue) {
 		int iArg = 0;
-		String argName = hasArgument(index) ? argumentNames.get(index) : "argument #"+index;
 		try {
-			iArg = Integer.parseInt(getArgument(index));
+			iArg = Integer.parseInt(getArgument(name));
 		} catch(NullPointerException e) {
-			ui.println("No value given for "+argName+"; using "+defaultValue);
 			iArg = defaultValue;
 		} catch(NumberFormatException e) {
-			giveFatalError(argName + " must be an integer.");
+			giveFatalError(name + " must be an integer.");
 		}
 		return iArg;
 	}
@@ -116,8 +116,8 @@ public abstract class ConsoleProgram {
 	/**
 	 * Gets a command line argument as a double.
 	 * 
-	 * @param index
-	 * The index of the argument to get.
+	 * @param name
+	 * The name of the argument to get.
 	 * 
 	 * @param defaultValue
 	 * The value to give if the double is not correctly
@@ -126,16 +126,14 @@ public abstract class ConsoleProgram {
 	 * @return
 	 * The argument as an double.
 	 */
-	double getArgumentAsDouble(int index, double defaultValue) {
+	double getArgumentAsDouble(String name, double defaultValue) {
 		double dArg = 0;
-		String argName = hasArgument(index) ? argumentNames.get(index) : "argument #"+index;
 		try {
-			dArg = Double.parseDouble(getArgument(index));
+			dArg = Double.parseDouble(getArgument(name));
 		} catch(NullPointerException e) {
-			ui.println("No value given for "+argName+"; using "+defaultValue);
 			dArg = defaultValue;
 		} catch(NumberFormatException e) {
-			giveFatalError(argName + " must be a real number.");
+			giveFatalError(name + " must be a real number.");
 		}
 		return dArg;
 	}
@@ -146,9 +144,18 @@ public abstract class ConsoleProgram {
 	 * by subclasses.
 	 */
 	private void giveSyntaxError() {
-		String error = "usage: java "+programName+" ";
-		for(int i = 0; i < argumentNames.size(); i++) {
-			error = error + String.format(argumentIsOptional(i) ? "<%s> " : "[%s] ", argumentNames.get(i));
+		String error = "usage: java "+programName;
+		if(arguments.size() > 0) {
+			error += " ";
+			for(ArgumentDescription a: arguments.values()) {
+				error += String.format(a.isOptional ? "<%s> " : "[%s] ", a.name);
+			}
+		}
+		if(arguments.size() > 0) {
+			error += "\nARGUMENTS:";
+			for(ArgumentDescription a: arguments.values()) {
+				error += "\n\t" + (new HelperString(a.name)).padRight(15).toString() + " - " + a.description;
+			}
 		}
 		giveFatalError(error);
 	}
@@ -178,8 +185,28 @@ public abstract class ConsoleProgram {
 	 * Whether or not the argument can be omitted.
 	 */
 	protected void addArgument(String name, boolean isOptional) {
-		argumentNames.add(name);
-		optionalArgument.add(isOptional);
+		addArgument(name, "", isOptional);
+	}
+	
+	/**
+	 * Adds an argument to the internal lists. The arguments are used
+	 * for syntax help generation. Note that it is not necessary to add
+	 * every argument you plan on using; however, any argument not added
+	 * will not be displayed in an automatically-generated syntax error.
+	 *
+	 * @param name
+	 * The name of the argument.
+	 * 
+	 * @param description
+	 * A description of the argument.
+	 *
+	 * @param isOptional
+	 * Whether or not the argument can be omitted.
+	 */
+	protected void addArgument(String name, String description, boolean isOptional) {
+		ArgumentDescription arg = new ArgumentDescription(name, description, isOptional);
+		arg.position = assign++;
+		arguments.put(arg.name, arg);
 	}
 	
 	/**
@@ -197,15 +224,15 @@ public abstract class ConsoleProgram {
 	/**
 	 * Checks if an argument is optional.
 	 * 
-	 * @param index
-	 * The index of the argument to check.
+	 * @param name
+	 * The name of the argument to check.
 	 * 
 	 * @return
 	 * True if the argument is optional; false otherwise.
 	 */
-	protected boolean argumentIsOptional(int index) {
-		if(optionalArgument.contains(index)) {
-			return optionalArgument.get(index);
+	protected boolean argumentIsOptional(String name) {
+		if(name != null) {
+			return arguments.get(name).isOptional;
 		} else {
 			return true;
 		}
@@ -215,13 +242,44 @@ public abstract class ConsoleProgram {
 	 * Checks if this program was given a certain
 	 * argument.
 	 * 
-	 * @param index
-	 * The index of the argument to check for.
+	 * @param name
+	 * The name of the argument to check for.
 	 * 
 	 * @return
 	 * True if the argument exists; false otherwise.
 	 */
-	protected boolean hasArgument(int index) {
-		return (index < args.length);
+	protected boolean hasArgument(String name) {
+		ArgumentDescription a = arguments.get(name);
+		boolean has = false;
+		if(a != null) {
+			if(a.position - optionalsBefore(name) < args.length) {
+				has = true;
+			}
+		}
+		return has;
+	}
+	
+	/**
+	 * Gets the number of optional arguments that occur before a
+	 * certain one.
+	 * 
+	 * @param name
+	 * The name of the argument to check.
+	 * 
+	 * @return
+	 * The number of arguments that occur before the given one
+	 * and that are optional.
+	 */
+	private int optionalsBefore(String name) {
+		ArgumentDescription a = arguments.get(name);
+		int p = a.position;
+		ArgumentDescription[] argDefs = arguments.values().toArray(new ArgumentDescription[0]);
+		int opt = 0;
+		for(int i = 0; i < p; i++) {
+			if(argDefs[i].isOptional) {
+				opt++;
+			}
+		}
+		return opt;
 	}
 }

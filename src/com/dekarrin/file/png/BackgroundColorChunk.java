@@ -1,5 +1,6 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.file.png.PortableNetworkGraphic.ColorMode;
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
 import com.dekarrin.util.ByteComposer;
@@ -18,7 +19,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * chunk varies with each type, so it can use this
 	 * information to process itself.
 	 */
-	private int colorMode;
+	private ColorMode mode;
 	
 	/**
 	 * The palette index of the background color. This may or may
@@ -52,9 +53,9 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * @param colorMode
 	 * THe color mode to process the color as.
 	 */
-	public BackgroundColorChunk(Color color, int colorMode) {
+	public BackgroundColorChunk(Color color, ColorMode colorMode) {
 		super(Chunk.bKGD);
-		this.colorMode = colorMode;
+		this.mode = colorMode;
 		setProperties(color);
 		setChunkData(createDataBytes());
 	}
@@ -69,7 +70,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 */
 	public BackgroundColorChunk(int index) {
 		super(Chunk.bKGD);
-		this.colorMode = INDEXED_COLOR_MODE;
+		this.mode = ColorMode.INDEXED;
 		setProperties(index);
 		setChunkData(createDataBytes());
 	}
@@ -80,8 +81,8 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 * @return
 	 * The color mode.
 	 */
-	public int getColorMode() {
-		return colorMode;
+	public ColorMode getColorMode() {
+		return mode;
 	}
 	
 	/**
@@ -119,11 +120,11 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 */
 	private void setColorMode() {
 		if(getLength() == 1) {
-			colorMode = INDEXED_COLOR_MODE;
+			mode = ColorMode.INDEXED;
 		} else if(getLength() == 2) {
-			colorMode = GRAYSCALE_MODE;
+			mode = ColorMode.GRAYSCALE;
 		} else if(getLength() == 6) {
-			colorMode = TRUECOLOR_MODE;
+			mode = ColorMode.TRUECOLOR;
 		}
 	}
 	
@@ -133,19 +134,21 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 */
 	private void parseBackgroundProperty() {
 		int r,g,b;
-		switch(colorMode) {
-			case INDEXED_COLOR_MODE:
+		switch(mode) {
+			case INDEXED:
 				setProperties(parser.parseInt(1));
 				break;
 				
-			case GRAYSCALE_MODE:
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
 				g = parser.parseInt(2);
 				GrayColor c = new GrayColor();
 				c.setValue(g);
 				setProperties(c);
 				break;
 				
-			case TRUECOLOR_MODE:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				r = parser.parseInt(2);
 				g = parser.parseInt(2);
 				b = parser.parseInt(2);
@@ -184,18 +187,20 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	 */
 	private byte[] createDataBytes() {
 		ByteComposer composer = null;
-		switch(colorMode) {
-			case INDEXED_COLOR_MODE:
+		switch(mode) {
+			case INDEXED:
 				composer = new ByteComposer(1);
 				composer.composeInt(paletteIndex, 1);
 				break;
 				
-			case GRAYSCALE_MODE:
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
 				composer = new ByteComposer(2);
 				composer.composeInt(color.getRed(), 2);
 				break;
 				
-			case TRUECOLOR_MODE:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				composer = new ByteComposer(6);
 				composer.composeInt(color.getRed(), 2);
 				composer.composeInt(color.getGreen(), 2);

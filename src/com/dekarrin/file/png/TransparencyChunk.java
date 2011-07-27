@@ -1,5 +1,6 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.file.png.PortableNetworkGraphic.ColorMode;
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
 import com.dekarrin.util.ByteComposer;
@@ -16,7 +17,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * chunk varies with each type, so it can use this
 	 * information to process itself.
 	 */
-	private int colorMode;
+	private ColorMode mode;
 	
 	/**
 	 * The alpha values for the palettes. This may or may
@@ -41,9 +42,9 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * The color mode of the PNG file that this chunk is a part
 	 * of.
 	 */
-	public TransparencyChunk(byte[] data, int colorMode) {
+	public TransparencyChunk(byte[] data, ColorMode colorMode) {
 		super(Chunk.tRNS, data);
-		this.colorMode = colorMode;
+		this.mode = colorMode;
 		parseData();
 	}
 	
@@ -68,7 +69,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 */
 	public TransparencyChunk(int[] transparencies) {
 		super(Chunk.tRNS);
-		colorMode = INDEXED_COLOR_MODE;
+		mode = ColorMode.INDEXED;
 		setProperties(transparencies);
 		setChunkData(createDataBytes());
 	}
@@ -82,7 +83,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 */
 	public TransparencyChunk(int grayValue) {
 		super(Chunk.tRNS);
-		colorMode = GRAYSCALE_MODE;
+		mode = ColorMode.GRAYSCALE;
 		setProperties(grayValue);
 		setChunkData(createDataBytes());
 	}
@@ -102,7 +103,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 */
 	public TransparencyChunk(int redValue, int greenValue, int blueValue) {
 		super(Chunk.tRNS);
-		colorMode = TRUECOLOR_MODE;
+		mode = ColorMode.TRUECOLOR;
 		setProperties(redValue, greenValue, blueValue);
 		setChunkData(createDataBytes());
 	}
@@ -113,8 +114,8 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @return
 	 * The color mode, or null if it is not set.
 	 */
-	public int getColorMode() {
-		return colorMode;
+	public ColorMode getColorMode() {
+		return mode;
 	} 
 	
 	/**
@@ -158,8 +159,8 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * @param colorMode
 	 * The color mode to parse with respect to.
 	 */
-	public void parseWithColorMode(int colorMode) {
-		this.colorMode = colorMode;
+	public void parseWithColorMode(ColorMode colorMode) {
+		this.mode = colorMode;
 		if(color == null && paletteAlphas == null) {
 			parseData();
 		}
@@ -177,16 +178,18 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * Only one of the two properties is needed.
 	 */
 	private void parseTransparencyProperty() {
-		switch(colorMode) {
-			case INDEXED_COLOR_MODE:
+		switch(mode) {
+			case INDEXED:
 				setProperties(parser.parseRemainingInts(1));
 				break;
 				
-			case GRAYSCALE_MODE:
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
 				setProperties(parser.parseInt(2));
 				break;
 				
-			case TRUECOLOR_MODE:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				setProperties(parser.parseInt(2), parser.parseInt(2), parser.parseInt(2));
 				break;
 		}
@@ -241,20 +244,22 @@ public class TransparencyChunk extends AncillaryChunk {
 	 */
 	private byte[] createDataBytes() {
 		ByteComposer composer = null;
-		switch(colorMode) {
-			case INDEXED_COLOR_MODE:
+		switch(mode) {
+			case INDEXED:
 				composer = new ByteComposer(paletteAlphas.length);
 				for(int i = 0; i < paletteAlphas.length; i++) {
 					composer.composeInt(paletteAlphas[i], 1);
 				}
 				break;
 				
-			case GRAYSCALE_MODE:
+			case GRAYSCALE:
+			case GRAYSCALE_ALPHA:
 				composer = new ByteComposer(2);
 				composer.composeInt(((GrayColor)color).getValue(), 2);
 				break;
 				
-			case TRUECOLOR_MODE:
+			case TRUECOLOR:
+			case TRUECOLOR_ALPHA:
 				composer = new ByteComposer(6);
 				composer.composeInt(color.getRed(), 2);
 				composer.composeInt(color.getGreen(), 2);

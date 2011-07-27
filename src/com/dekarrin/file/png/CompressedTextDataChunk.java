@@ -1,6 +1,7 @@
 package com.dekarrin.file.png;
 
 import com.dekarrin.zip.*;
+import com.dekarrin.file.png.PortableNetworkGraphic.CompressionMethod;
 import com.dekarrin.util.ByteComposer;
 
 /**
@@ -16,7 +17,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	/**
 	 * The method used for compression.
 	 */
-	private int compressionMethod;
+	private CompressionMethod compressionMethod;
 	
 	/**
 	 * Creates a new CompressedTextDataChunk. Does not decompress
@@ -43,7 +44,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * The method to use for compression/decompression of the text
 	 * data.
 	 */
-	public CompressedTextDataChunk(String keyword, String contents, int compressionMethod) {
+	public CompressedTextDataChunk(String keyword, String contents, CompressionMethod compressionMethod) {
 		super(Chunk.zTXt);
 		setProperties(keyword, contents, null, compressionMethod);
 		setChunkData(createDataBytes());
@@ -65,7 +66,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * @return
 	 * The compression method.
 	 */
-	public int getCompressionMethod() {
+	public CompressionMethod getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -90,7 +91,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 */
 	private void parseData() {
 		String keyword = parser.parseString();
-		int compressionMethod = parser.parseInt(1);
+		CompressionMethod compressionMethod = CompressionMethod.values()[parser.parseInt(1)];
 		String compressed = parser.parseRemainingString();
 		setProperties(keyword, null, compressed, compressionMethod);
 	}
@@ -129,7 +130,7 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * The method to use for compression/decompression of the text
 	 * data.
 	 */
-	private void setProperties(String keyword, String contents, String compressedContents, int compressionMethod) {
+	private void setProperties(String keyword, String contents, String compressedContents, CompressionMethod compressionMethod) {
 		this.keyword = keyword;
 		this.compressionMethod = compressionMethod;
 		if(contents != null) {
@@ -156,7 +157,7 @@ public class CompressedTextDataChunk extends TextChunk {
 		int dataLength = keyword.length() + compressedText.length() + 2;
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeString(keyword, true);
-		composer.composeInt(compressionMethod, 1);
+		composer.composeInt(compressionMethod.ordinal(), 1);
 		composer.composeString(compressedText, false);
 		return composer.toArray();
 	}

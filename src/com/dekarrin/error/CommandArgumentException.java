@@ -1,6 +1,6 @@
 package com.dekarrin.error;
 
-public class CommandArgumentException extends MessageException {
+public class CommandArgumentException extends Exception {
 	
 	private static final long serialVersionUID = 9087509873464380983L;
 

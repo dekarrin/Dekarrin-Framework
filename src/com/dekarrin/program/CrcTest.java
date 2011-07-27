@@ -14,7 +14,7 @@ public class CrcTest extends ConsoleProgram {
 	public CrcTest(String[] args) {
 		super(args);
 		addArgument("hex data", false);
-		String hex = getArgument(0);
+		String hex = getArgument("hex data");
 		if(hex.length() % 2 != 0) {
 			giveFatalError("data must be in hex pairs!");
 		}

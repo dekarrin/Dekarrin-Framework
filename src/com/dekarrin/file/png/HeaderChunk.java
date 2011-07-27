@@ -1,5 +1,9 @@
 package com.dekarrin.file.png;
 
+import com.dekarrin.file.png.PortableNetworkGraphic.ColorMode;
+import com.dekarrin.file.png.PortableNetworkGraphic.CompressionMethod;
+import com.dekarrin.file.png.PortableNetworkGraphic.FilterMethod;
+import com.dekarrin.file.png.PortableNetworkGraphic.InterlaceMethod;
 import com.dekarrin.util.ByteComposer;
 
 /**
@@ -31,25 +35,25 @@ public class HeaderChunk extends CriticalChunk {
 	 * 4 - Each pixel is a grayscale sample followed by alpha
 	 * 6 - Each pixel is an RGB triple followed by alpha
 	 */
-	private int colorType;
+	private ColorMode mode;
 	
 	/**
 	 * Compression method. Currently, only deflate/inflate is
 	 * defined. If this is not 0, it should result in an error.
 	 */
-	private int compressionMethod;
+	private CompressionMethod compressionMethod;
 	
 	/**
 	 * Filter method. Only 0 is defined, and an error should
 	 * result from any other value.
 	 */
-	private int filterMethod;
+	private FilterMethod filterMethod;
 	
 	/**
 	 * Interlace method. Typically either 0 (none) or 1
 	 * (Adam7).
 	 */
-	private int interlaceMethod;
+	private InterlaceMethod interlaceMethod;
 	
 	/**
 	 * Creates a new HeaderChunk. The supplied data is parsed.
@@ -87,9 +91,9 @@ public class HeaderChunk extends CriticalChunk {
 	 * @param interlaceMethod
 	 * The interlace method to use for this png.
 	 */
-	public HeaderChunk(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
+	public HeaderChunk(int width, int height, int depth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
 		super(Chunk.IHDR);
-		setProperties(width, height, bitDepth, colorType, compressionMethod, filterMethod, interlaceMethod);
+		setProperties(width, height, depth, mode, cm, fm, im);
 		setChunkData(createDataBytes());
 	}
 	
@@ -129,8 +133,8 @@ public class HeaderChunk extends CriticalChunk {
 	 * @return
 	 * The color type.
 	 */
-	public int getColorType() {
-		return colorType;
+	public ColorMode getColorMode() {
+		return mode;
 	}
 	
 	/**
@@ -139,7 +143,7 @@ public class HeaderChunk extends CriticalChunk {
 	 * @return
 	 * The compression method.
 	 */
-	public int getCompressionMethod() {
+	public CompressionMethod getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -149,7 +153,7 @@ public class HeaderChunk extends CriticalChunk {
 	 * @return
 	 * The filter method.
 	 */
-	public int getFilterMethod() {
+	public FilterMethod getFilterMethod() {
 		return filterMethod;
 	}
 	
@@ -159,7 +163,7 @@ public class HeaderChunk extends CriticalChunk {
 	 * @return
 	 * The interlace method.
 	 */
-	public int getInterlaceMethod() {
+	public InterlaceMethod getInterlaceMethod() {
 		return interlaceMethod;
 	}
 	
@@ -167,13 +171,13 @@ public class HeaderChunk extends CriticalChunk {
 	 * Parses chunk data for header information.
 	 */
 	private void parseData() {
-		int w			= parser.parseInt();
-		int h			= parser.parseInt();
-		int depth		= parser.parseInt(1);
-		int mode		= parser.parseInt(1);
-		int compression	= parser.parseInt(1);
-		int filter		= parser.parseInt(1);
-		int interlace	= parser.parseInt(1);
+		int w							= parser.parseInt();
+		int h							= parser.parseInt();
+		int depth						= parser.parseInt(1);
+		ColorMode mode					= ColorMode.forDataValue(parser.parseInt(1));
+		CompressionMethod compression	= CompressionMethod.values()[parser.parseInt(1)];
+		FilterMethod filter				= FilterMethod.values()[parser.parseInt(1)];
+		InterlaceMethod interlace		= InterlaceMethod.values()[parser.parseInt(1)];
 		setProperties(w, h, depth, mode, compression, filter, interlace);
 	}
 	
@@ -201,14 +205,14 @@ public class HeaderChunk extends CriticalChunk {
 	 * @param interlaceMethod
 	 * The interlace method to use for this png.
 	 */
-	private void setProperties(int width, int height, int bitDepth, int colorType, int compressionMethod, int filterMethod, int interlaceMethod) {
+	private void setProperties(int width, int height, int bitDepth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
 		this.width = width;
 		this.height = height;
 		this.bitDepth = bitDepth;
-		this.colorType = colorType;
-		this.compressionMethod = compressionMethod;
-		this.filterMethod = filterMethod;
-		this.interlaceMethod = interlaceMethod;
+		this.mode = mode;
+		this.compressionMethod = cm;
+		this.filterMethod = fm;
+		this.interlaceMethod = im;
 	}
 	
 	/**
@@ -222,10 +226,10 @@ public class HeaderChunk extends CriticalChunk {
 		composer.composeInt(width);
 		composer.composeInt(height);
 		composer.composeInt(bitDepth, 1);
-		composer.composeInt(colorType, 1);
-		composer.composeInt(compressionMethod, 1);
-		composer.composeInt(filterMethod, 1);
-		composer.composeInt(interlaceMethod, 1);
+		composer.composeInt(mode.dataValue(), 1);
+		composer.composeInt(compressionMethod.ordinal(), 1);
+		composer.composeInt(filterMethod.ordinal(), 1);
+		composer.composeInt(interlaceMethod.ordinal(), 1);
 		return composer.toArray();
 	}
 	

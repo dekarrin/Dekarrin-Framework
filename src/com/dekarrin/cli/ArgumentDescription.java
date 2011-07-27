@@ -21,6 +21,12 @@ public class ArgumentDescription {
 	public boolean isOptional;
 	
 	/**
+	 * The position in the args array that this command could
+	 * occupy.
+	 */
+	public int position;
+	
+	/**
 	 * Creates a new ArgumentDescription that is not
 	 * optional.
 	 *

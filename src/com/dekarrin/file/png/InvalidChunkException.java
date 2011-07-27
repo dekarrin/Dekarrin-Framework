@@ -1,16 +1,11 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.error.MessageException;
-
 /**
  * Represents an invalid chunk. This is typically thrown if a Png
  * Chunk generates a crc that does not match the CRC read from disk.
  */
-public class InvalidChunkException extends MessageException {
+public class InvalidChunkException extends Exception {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3392588602015984994L;
 
 	/**

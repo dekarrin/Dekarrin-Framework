@@ -3,11 +3,8 @@ package com.dekarrin.error;
 /**
  * Exception indicating that the mode being used is invalid.
  */
-public class IllegalModeException extends RuntimeMessageException {
-	
-	/**
-	 * 
-	 */
+public class IllegalModeException extends RuntimeException {
+
 	private static final long serialVersionUID = 1363967626569560295L;
 
 	/**
