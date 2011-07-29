@@ -6,7 +6,7 @@ import java.util.zip.CRC32;
 import com.dekarrin.io.InvalidFormatException;
 import com.dekarrin.io.StreamFailureException;
 
-public class ChunkInputStream extends DataInputStream {
+class ChunkInputStream extends DataInputStream {
 	
 	/**
 	 * Whether the PNG has been verified yet.
@@ -14,7 +14,7 @@ public class ChunkInputStream extends DataInputStream {
 	private boolean verified = false;
 	
 	/**
-	 * The values in the header of a valid png file.
+	 * The values in the header of a valid PNG file.
 	 */
 	public static final int[] MAGIC_NUMBER = {137, 80, 78, 71, 13, 10, 26, 10};
 	
@@ -132,7 +132,7 @@ public class ChunkInputStream extends DataInputStream {
 	 * Reads the cyclic redundancy code from the chunk.
 	 * 
 	 * @return
-	 * The crc.
+	 * The CRC.
 	 */
 	private long readCrc() throws EOFException, IOException {
 		long crc = makeUnsigned(readInt());
@@ -144,7 +144,7 @@ public class ChunkInputStream extends DataInputStream {
 	 * the one read from the chunk.
 	 * 
 	 * @param readChecksum
-	 * The crc read from the chunk.
+	 * The CRC read from the chunk.
 	 * 
 	 * @param type
 	 * The type code of the chunk being verified.

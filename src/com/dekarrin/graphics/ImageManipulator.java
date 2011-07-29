@@ -95,7 +95,7 @@ public class ImageManipulator {
 	 * Makes the image sepia-toned.
 	 */
 	public void sepia() {
-		Color sepia = new Color(image.bitDepth);
+		Color sepia = new Color(image.sampleDepth);
 		sepia.setSamples(112, 66, 20);
 		monochrome(sepia);
 	}
@@ -149,7 +149,7 @@ public class ImageManipulator {
 			b += ((colors[i].getBlue()*weights[i]) / weightSum);
 			a += ((colors[i].getAlpha()*weights[i]) / weightSum);
 		}
-		Color avgColor = new Color(image.bitDepth);
+		Color avgColor = new Color(image.sampleDepth);
 		avgColor.setSamples((int)r, (int)g, (int)b, (int)a);
 		return avgColor;
 	}

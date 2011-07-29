@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Compresses binary data using ZLIB.
  */
-public class ZlibCompresser {
+public class ZlibCompresser implements Compresser {
 	
 	/**
 	 * The data being operated on. This is uncompressed.
@@ -22,7 +22,7 @@ public class ZlibCompresser {
 	 * The size of the output buffer. This is how many bytes
 	 * are attempted to be compressed each time.
 	 */
-	private static final int OUTPUT_BUFFER_SIZE = 50;
+	private int outputBufferSize = 50;
 	
 	/**
 	 * Creates a new ZlibCompresser for the specified data.
@@ -63,11 +63,7 @@ public class ZlibCompresser {
 	}
 	
 	/**
-	 * Compresses the data. If the data has already been compressed,
-	 * the stored output is returned and the compression is skipped.
-	 *
-	 * @return
-	 * The compressed data.
+	 * {@inheritDoc}
 	 */
 	public byte[] compress() {
 		if(!alreadyCompressed()) {
@@ -77,11 +73,7 @@ public class ZlibCompresser {
 	}
 	
 	/**
-	 * Compresses the data into a String. The string uses the default
-	 * encoding for the system.
-	 *
-	 * @return
-	 * The compressed String.
+	 * {@inheritDoc}
 	 */
 	public String compressString() {
 		compress();
@@ -90,14 +82,7 @@ public class ZlibCompresser {
 	}
 	
 	/**
-	 * Compresses the data into a String using a specified encoding.
-	 *
-	 * @param encoding
-	 * The encoding to use. If this is invalid, the String will be
-	 * encoded using the default character set.
-	 *
-	 * @return
-	 * The compressed String.
+	 * {@inheritDoc}
 	 */
 	public String compressString(String encoding) {
 		compress();
@@ -111,13 +96,20 @@ public class ZlibCompresser {
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 */
+	public void setBufferSize(int newSize) {
+		outputBufferSize = newSize;
+	}
+	
+	/**
 	 * Compresses the stored data.
 	 */
 	private void compressInputData() {
 		Deflater compresser = new Deflater();
 		compresser.setInput(uncompressedData);
 		compresser.finish();
-		byte[] outputBuffer = new byte[OUTPUT_BUFFER_SIZE];
+		byte[] outputBuffer = new byte[outputBufferSize];
 		int actualLength = 0;
 		while(!compresser.finished()) {
 			actualLength = compresser.deflate(outputBuffer);

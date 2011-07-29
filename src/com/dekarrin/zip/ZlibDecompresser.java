@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Decompresses binary data using ZLIB.
  */
-public class ZlibDecompresser {
+public class ZlibDecompresser implements Decompresser {
 	
 	/**
 	 * The data being operated on. This is zip compressed.
@@ -22,7 +22,7 @@ public class ZlibDecompresser {
 	 * The size of the output buffer. This is how many bytes
 	 * are attempted to be decompressed each time.
 	 */
-	private static final int OUTPUT_BUFFER_SIZE = 50;
+	private int outputBufferSize = 50;
 	
 	/**
 	 * Creates a new ZlibDecompresser for the specified data.
@@ -63,11 +63,7 @@ public class ZlibDecompresser {
 	}
 	
 	/**
-	 * Decompresses the data. If the data has already been decompressed,
-	 * the stored output is returned and the decompression is skipped.
-	 *
-	 * @return
-	 * The decompressed data.
+	 * {@inheritDoc}
 	 */
 	public byte[] decompress() {
 		if(!alreadyDecompressed()) {
@@ -77,11 +73,7 @@ public class ZlibDecompresser {
 	}
 	
 	/**
-	 * Decompresses the data into a String. The string uses the default
-	 * encoding for the system.
-	 *
-	 * @return
-	 * The decompressed String.
+	 * {@inheritDoc}
 	 */
 	public String decompressString() {
 		decompress();
@@ -90,14 +82,7 @@ public class ZlibDecompresser {
 	}
 	
 	/**
-	 * Decompresses the data into a String using a specified encoding.
-	 *
-	 * @param encoding
-	 * The encoding to use. If this is invalid, the String will be
-	 * encoded using the default character set.
-	 *
-	 * @return
-	 * The decompressed String.
+	 * {@inheritDoc}
 	 */
 	public String decompressString(String encoding) {
 		decompress();
@@ -111,12 +96,19 @@ public class ZlibDecompresser {
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 */
+	public void setBufferSize(int newSize) {
+		outputBufferSize = newSize;
+	}
+	
+	/**
 	 * Decompresses the stored data.
 	 */
 	private void decompressInputData() {
 		Inflater decompresser = new Inflater();
 		decompresser.setInput(compressedData);
-		byte[] outputBuffer = new byte[OUTPUT_BUFFER_SIZE];
+		byte[] outputBuffer = new byte[outputBufferSize];
 		int actualLength = 0;
 		while(!decompresser.finished()) {
 			try {

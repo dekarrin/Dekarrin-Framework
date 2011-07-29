@@ -274,8 +274,10 @@ public class HelperString implements CharSequence, Appendable {
 			String[] wordPieces = words[i].split(Character.toString(newlineChar));
 			if(wordPieces.length > 1) {
 				for(int j = 0; j < wordPieces.length; j++) {
-					if(line.length() + " ".length() + wordPieces[j].length() < limit) {
-						line.append(" "+wordPieces[i]);
+					String nextWord = (line.length() > 0) ? " " : "";
+					nextWord += wordPieces[j];
+					if(line.length() + nextWord.length() < limit) {
+						line.append(nextWord);
 						if(j < wordPieces.length-1) {
 							wrapped.append(line.toString());
 							wrapped.append(newlineChar);
@@ -284,16 +286,18 @@ public class HelperString implements CharSequence, Appendable {
 					} else {
 						wrapped.append(line.toString());
 						wrapped.append(newlineChar);
-						line = new StringBuffer("");
+						line = new StringBuffer(wordPieces[j]);
 					}
 				}
 			} else {
-				if(line.length() + " ".length() + words[i].length() < limit) {
-					line.append(" "+words[i]);
+				String nextWord = (line.length() > 0) ? " " : "";
+				nextWord += words[i];
+				if(line.length() + nextWord.length() < limit) {
+					line.append(nextWord);
 				} else {
 					wrapped.append(line.toString());
 					wrapped.append(newlineChar);
-					line = new StringBuffer("");
+					line = new StringBuffer(words[i]);
 				}
 			}
 		}

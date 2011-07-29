@@ -2,14 +2,13 @@ package com.dekarrin.file.png;
 
 import java.awt.Dimension;
 
-import com.dekarrin.file.png.PortableNetworkGraphic.Unit;
 import com.dekarrin.util.ByteComposer;
 
 /**
  * Stores the intended pixel size or aspect ratio. Holds pixels
  * per unit measurements.
  */
-public class PhysicalPixelDimensionsChunk extends AncillaryChunk {
+class PhysicalPixelDimensionsChunk extends Chunk {
 	
 	/**
 	 * The dimensions of the pixels.

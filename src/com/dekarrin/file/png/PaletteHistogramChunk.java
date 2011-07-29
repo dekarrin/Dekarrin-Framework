@@ -5,7 +5,7 @@ import com.dekarrin.util.ByteComposer;
 /**
  * Holds information on the frequency of each palette color.
  */
-public class PaletteHistogramChunk extends AncillaryChunk {
+class PaletteHistogramChunk extends Chunk {
 	
 	/**
 	 * The frequencies of each palette item.

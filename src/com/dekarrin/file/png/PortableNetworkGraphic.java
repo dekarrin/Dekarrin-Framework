@@ -26,167 +26,12 @@ import com.dekarrin.io.InvalidFormatException;
 import com.dekarrin.io.StreamFailureException;
 import com.dekarrin.util.ArrayHelper;
 import com.dekarrin.util.ByteHolder;
-import com.dekarrin.zip.ZlibCompresser;
-import com.dekarrin.zip.ZlibDecompresser;
 
 /**
  * Represents a PNG file. This class is attempting to be compliant
  * with version 1.2 of the PNG standard; it's not there yet.
  */
 public class PortableNetworkGraphic {
-	
-	/**
-	 * The model used for each pixel's representation.
-	 */
-	public enum ColorMode {
-		
-		/**
-		 * Color type for no colors.
-		 */
-		GRAYSCALE (0, 1),
-		
-		/**
-		 * Colors used; each pixel is an RGB triple.
-		 */
-		TRUECOLOR (2, 3),
-		
-		/**
-		 * Color type for using both color and a palette.
-		 */
-		INDEXED (3, 1),
-		
-		/**
-		 * Color type for using only an alpha channel.
-		 */
-		GRAYSCALE_ALPHA (4, 2),
-		
-		/**
-		 * Color type for using both an alpha channel and color.
-		 */
-		TRUECOLOR_ALPHA (6, 4);
-		
-		/**
-		 * The value that is written to disk for this ColorMode.
-		 */
-		private int dataValue;
-		
-		/**
-		 * The number of samples in each pixel of this ColorMode.
-		 */
-		private int samplesPerPixel;
-		
-		/**
-		 * Creates a new ColorType.
-		 * 
-		 * @param value
-		 * The value of this ColorType as it is written to disk.
-		 * 
-		 * @param samples
-		 * The number of samples every single pixel in an image
-		 * with this color mode contains.
-		 */
-		private ColorMode(int value, int samples) {
-			dataValue = value;
-			samplesPerPixel = samples;
-		}
-		
-		/**
-		 * Gets a ColorMode from a data value.
-		 * 
-		 * @param dataValue
-		 * The data value of the desired ColorMode.
-		 * 
-		 * @return
-		 * The ColorMode that has the given data value.
-		 */
-		public static ColorMode forDataValue(int dataValue) {
-			ColorMode mode = null;
-			ColorMode[] allModes = ColorMode.values();
-			for(ColorMode cm: allModes) {
-				if(cm.dataValue() == dataValue) {
-					mode = cm;
-				}
-			}
-			return mode;
-		}
-		
-		/**
-		 * Gets the value of the color mode on disk.
-		 * 
-		 * @return
-		 * What value to write for this ColorMode.
-		 */
-		public int dataValue() {
-			return dataValue;
-		}
-		
-		/**
-		 * Gets the number of samples in each pixel of this ColorMode.
-		 * 
-		 * @return
-		 * The number of samples in each pixel.
-		 */
-		public int samples() {
-			return samplesPerPixel;
-		}
-	}
-	
-	/**
-	 * The compression method used in this PNG.
-	 */
-	public enum CompressionMethod {
-		
-		/**
-		 * Uses DEFLATE/INFLATE compression algorithm.
-		 */
-		ZLIB;
-	}
-	
-	/**
-	 * The filtering method used in this PNG.
-	 */
-	public enum FilterMethod {
-		
-		/**
-		 * Uses adaptive filtering that changes depending on
-		 * which one is best.
-		 */
-		ADAPTIVE;
-	}
-	
-	/**
-	 * The interlace method used in this PNG.
-	 */
-	public enum InterlaceMethod {
-		
-		/**
-		 * Uses no interlacing.
-		 */
-		NONE,
-		
-		/**
-		 * Uses the Adam7 interlacing algorithm.
-		 */
-		ADAM7;
-	}
-	
-	/**
-	 * Represents a specific unit of length.
-	 */
-	public enum Unit {
-		UNKNOWN,
-		METER;
-	}
-	
-	/**
-	 * Represents a rendering intent of the standard RGB color space.
-	 */
-	public enum RenderingIntent {
-		PERCEPTUAL, // 0
-		RELATIVE_COLORIMETRIC, // 1
-		SATURATION, // 2
-		ABSOLUTE_COLORIMETRIC; // 3
-	}
 	
 	/**
 	 * The number of bytes in each image data chunk.
@@ -212,9 +57,9 @@ public class PortableNetworkGraphic {
 	private int backgroundColorIndex;
 	
 	/**
-	 * The bit depth of this image.
+	 * The sample depth of this image.
 	 */
-	private int bitDepth;
+	private int sampleDepth;
 	
 	/**
 	 * The color space for this Image;
@@ -227,7 +72,7 @@ public class PortableNetworkGraphic {
 	private ColorMode mode;
 	
 	/**
-	 * The compression method used in this Png's image data.
+	 * The compression method used in this PNG's image data.
 	 */
 	private CompressionMethod compressionMethod;
 	
@@ -238,12 +83,12 @@ public class PortableNetworkGraphic {
 	
 	/**
 	 * The image data chunks. These are preserved in case unknown unsafe
-	 * to copy chunks exist in the png.
+	 * to copy chunks exist in the PNG.
 	 */
 	private Vector<ImageDataChunk> dataChunks = new Vector<ImageDataChunk>();
 	
 	/**
-	 * The filter method used in this Png's image data.
+	 * The filter method used in this PNG's image data.
 	 */
 	private FilterMethod filterMethod;
 	
@@ -263,11 +108,11 @@ public class PortableNetworkGraphic {
 	private int height;
 	
 	/**
-	 * The image contained by this Png.
+	 * The image contained by this PNG.
 	 */
 	private Image image;
 	/**
-	 * What method of interlacing this Png uses.
+	 * What method of interlacing this PNG uses.
 	 */
 	private InterlaceMethod interlaceMethod;
 	
@@ -301,7 +146,7 @@ public class PortableNetworkGraphic {
 	private int[] paletteFrequencies;
 	
 	/**
-	 * The color profile for this png.
+	 * The color profile for this PNG.
 	 */
 	private ColorProfile profile;
 	
@@ -343,7 +188,7 @@ public class PortableNetworkGraphic {
 	private Color significantColorBits;
 	
 	/**
-	 * The textual data from this png.
+	 * The textual data from this PNG.
 	 */
 	private HashMap<String,ArrayList<String>> textData;
 	
@@ -379,7 +224,7 @@ public class PortableNetworkGraphic {
 	private int width;
 	
 	/**
-	 * Creates a new png file from an image.
+	 * Creates a new PNG file from an image.
 	 *
 	 * @param image
 	 * The Image to create the file from.
@@ -391,29 +236,29 @@ public class PortableNetworkGraphic {
 		this.image = image;
 		width = image.width;
 		height = image.height;
-		bitDepth = image.bitDepth;
+		sampleDepth = image.sampleDepth;
 		mode = colorMode;
 		compressionMethod = CompressionMethod.ZLIB;
 		filterMethod = FilterMethod.ADAPTIVE;
 		interlaceMethod = InterlaceMethod.NONE;
 		switch(colorMode) {
 			case GRAYSCALE:
-				if(bitDepth != 1 && bitDepth != 2 && bitDepth != 4 && bitDepth != 8 && bitDepth != 16) {
-					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in grayscale mode.");
+				if(sampleDepth != 1 && sampleDepth != 2 && sampleDepth != 4 && sampleDepth != 8 && sampleDepth != 16) {
+					throw new ValueOutOfRangeException("Cannot set bit depth to "+sampleDepth+" in grayscale mode.");
 				}
 				break;
 			
 			case INDEXED:
-				if(bitDepth != 8 && bitDepth != 4 && bitDepth != 2 && bitDepth != 1) {
-					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in indexed mode.");
+				if(sampleDepth != 8 && sampleDepth != 4 && sampleDepth != 2 && sampleDepth != 1) {
+					throw new ValueOutOfRangeException("Cannot set bit depth to "+sampleDepth+" in indexed mode.");
 				}
 				break;
 				
 			case GRAYSCALE_ALPHA:
 			case TRUECOLOR:
 			case TRUECOLOR_ALPHA:
-				if(bitDepth != 8 && bitDepth != 16) {
-					throw new ValueOutOfRangeException("Cannot set bit depth to "+bitDepth+" in current color mode.");
+				if(sampleDepth != 8 && sampleDepth != 16) {
+					throw new ValueOutOfRangeException("Cannot set bit depth to "+sampleDepth+" in current color mode.");
 				}
 				break;
 		}
@@ -423,7 +268,7 @@ public class PortableNetworkGraphic {
 	 * Creates a new PNG from a file.
 	 *
 	 * @param file
-	 * The file to load the png data from.
+	 * The file to load the PNG data from.
 	 *
 	 * @throws FileNotFoundException
 	 * If the specified file does not exist.
@@ -440,7 +285,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Adds comment text data to this Png. This is inserted with
+	 * Adds comment text data to this PNG. This is inserted with
 	 * the generic tag 'Comment'.
 	 *
 	 * @param message
@@ -451,7 +296,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Adds text data to this Png.
+	 * Adds text data to this PNG.
 	 *
 	 * @param keyword
 	 * The keyword of the text data.
@@ -475,16 +320,16 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Copies the image data of this Png to disk. Its image data is
+	 * Copies the image data of this PNG to disk. Its image data is
 	 * copied from the original source data unmodified.
 	 * 
 	 * @param location
-	 * Where to save the Png file.
+	 * Where to save the PNG file.
 	 *
 	 * @throws StreamFailureException
 	 * If the file stream failed.
 	 */
-	public void copy(String location) throws StreamFailureException {
+	public void copy(String location) throws StreamFailureException, InvalidFormatException {
 		writePngFile(location, true);
 	}
 	
@@ -518,11 +363,11 @@ public class PortableNetworkGraphic {
 	 * The bit depth.
 	 */
 	public int getBitDepth() {
-		return image.bitDepth;
+		return image.sampleDepth;
 	}
 	
 	/**
-	 * Gets the chromaticity for this png image.
+	 * Gets the chromaticity for this PNG image.
 	 *
 	 * @return
 	 * The chromaticity used.
@@ -532,7 +377,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the color mode of this png.
+	 * Gets the color mode of this PNG.
 	 *
 	 * @return
 	 * The color mode.
@@ -543,7 +388,7 @@ public class PortableNetworkGraphic {
 	
 	/**
 	 * Checks which compression method is being used by the
-	 * Png.
+	 * PNG.
 	 *
 	 * @return
 	 * The compression method.
@@ -553,7 +398,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the filtering method used in this png.
+	 * Gets the filtering method used in this PNG.
 	 *
 	 * @return
 	 * The filtering method.
@@ -563,7 +408,7 @@ public class PortableNetworkGraphic {
 	}
 
 	/**
-	 * Gets the gamma of this png image.
+	 * Gets the gamma of this PNG image.
 	 *
 	 * @return
 	 * The gamma.
@@ -583,7 +428,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the image data from this png. This modifies the Png so
+	 * Gets the image data from this PNG. This modifies the PNG so
 	 * that unsafe-to-copy unknown chunks cannot be copied, because
 	 * if the image is accessed, it can be changed.
 	 *
@@ -596,7 +441,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets all keywords in this Png that have text
+	 * Gets all keywords in this PNG that have text
 	 * data associated with them.
 	 *
 	 * @return
@@ -607,7 +452,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the last modification time of this Png.
+	 * Gets the last modification time of this PNG.
 	 *
 	 * @return
 	 * The last modification time.
@@ -628,7 +473,7 @@ public class PortableNetworkGraphic {
 	
 	/**
 	 * Gets the International Color Consortium Color profile
-	 * for this png.
+	 * for this PNG.
 	 *
 	 * @return
 	 * The profile.
@@ -649,7 +494,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the rendering intent for this png image.
+	 * Gets the rendering intent for this PNG image.
 	 *
 	 * @return
 	 * The rendering intent.
@@ -726,7 +571,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets text data from this Png.
+	 * Gets text data from this PNG.
 	 *
 	 * @param keyword
 	 * The keyword to get the data for.
@@ -752,7 +597,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets all the chunks that this Png was unable to parse.
+	 * Gets all the chunks that this PNG was unable to parse.
 	 * This is useful for classes that might extend
 	 * PortableNetworkGraphic.
 	 *
@@ -788,7 +633,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has a background color.
+	 * Checks to see if this PNG has a background color.
 	 *
 	 * @return
 	 * Whether it does.
@@ -798,7 +643,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has chromaticity data.
+	 * Checks to see if this PNG has chromaticity data.
 	 *
 	 * @return
 	 * Whether it does.
@@ -808,7 +653,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has gamma set.
+	 * Checks to see if this PNG has gamma set.
 	 *
 	 * @return
 	 * Whether it does.
@@ -818,7 +663,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has a histogram.
+	 * Checks to see if this PNG has a histogram.
 	 *
 	 * @return
 	 * Whether it does.
@@ -834,7 +679,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has a palette.
+	 * Checks to see if this PNG has a palette.
 	 *
 	 * @return
 	 * Whether it does.
@@ -844,7 +689,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has a color profile.
+	 * Checks to see if this PNG has a color profile.
 	 *
 	 * @return
 	 * Whether it does.
@@ -854,7 +699,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has a rendering intent.
+	 * Checks to see if this PNG has a rendering intent.
 	 *
 	 * @return
 	 * Whether it does.
@@ -864,7 +709,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has resolution data.
+	 * Checks to see if this PNG has resolution data.
 	 *
 	 * @return
 	 * Whether it does.
@@ -874,7 +719,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has significat bits
+	 * Checks to see if this PNG has significat bits
 	 * data.
 	 *
 	 * @return
@@ -885,7 +730,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has a suggested palette.
+	 * Checks to see if this PNG has a suggested palette.
 	 *
 	 * @return
 	 * Whether it does.
@@ -895,7 +740,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png has text data.
+	 * Checks to see if this PNG has text data.
 	 *
 	 * @return
 	 * Whether it does.
@@ -905,7 +750,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Checks to see if this png should output
+	 * Checks to see if this PNG should output
 	 * a tRNS chunk.
 	 *
 	 * @return
@@ -940,12 +785,12 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Loads this Png from disk. The disk data is read, the image
+	 * Loads this PNG from disk. The disk data is read, the image
 	 * data is defiltered, compressable chunks are decompressed,
 	 * and the chunks are converted into object data.
 	 *
 	 * @param location
-	 * Where to load the Png file from.
+	 * Where to load the PNG file from.
 	 *
 	 * @throws FileNotFoundException
 	 * If the specified file does not exist.
@@ -962,18 +807,21 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Saves this Png to disk. Its data is converted into Chunks,
-	 * compressable chunks are compressed, and the image data is
+	 * Saves this PNG to disk. Its data is converted into Chunks,
+	 * compressible chunks are compressed, and the image data is
 	 * filtered. The resulting Chunk array is then written to a
 	 * file.
 	 *
 	 * @param location
-	 * Where to save the Png file.
+	 * Where to save the PNG file.
 	 *
 	 * @throws StreamFailureException
 	 * If the file stream failed.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid value is written to the PNG.
 	 */
-	public void save(String location) throws StreamFailureException {
+	public void save(String location) throws StreamFailureException, InvalidFormatException {
 		writePngFile(location, false);
 	}
 	
@@ -988,7 +836,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Sets the chromaticity for this png image.
+	 * Sets the chromaticity for this PNG image.
 	 *
 	 * @param chromaticity
 	 * The chromaticity to use.
@@ -998,7 +846,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Sets the gamma of this png image.
+	 * Sets the gamma of this PNG image.
 	 *
 	 * @param gamma
 	 * The gamma.
@@ -1009,14 +857,14 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Sets the last modified time of this Png to the current time.
+	 * Sets the last modified time of this PNG to the current time.
 	 */
 	public void setModified() {
 		lastModified = new Date();
 	}
 	
 	/**
-	 * Sets the palette for this Png.
+	 * Sets the palette for this PNG.
 	 *
 	 * @param palette
 	 * The palette to be used for the image.
@@ -1045,7 +893,7 @@ public class PortableNetworkGraphic {
 	
 	/**
 	 * Sets the International Color Consortium Color profile
-	 * for this png.
+	 * for this PNG.
 	 *
 	 * @param profile
 	 * The profile.
@@ -1066,7 +914,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Sets the rendering intent for this png image.
+	 * Sets the rendering intent for this PNG image.
 	 *
 	 * @param renderingIntent
 	 * The rendering intent.
@@ -1103,7 +951,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Sets this png to not copy unsafe to copy chunks when
+	 * Sets this PNG to not copy unsafe to copy chunks when
 	 * it saves.
 	 */
 	protected void criticallyModify() {
@@ -1162,7 +1010,7 @@ public class PortableNetworkGraphic {
 	private void combinePaletteComponents() {
 		if(paletteColors != null) {
 			Color[] colorList = new Color[paletteColors.length];
-			Arrays.fill(colorList, new Color(bitDepth));
+			Arrays.fill(colorList, new Color(sampleDepth));
 			if(paletteAlphas != null) {
 				int i = 0;
 				for(; i < paletteAlphas.length; i++) {
@@ -1179,7 +1027,7 @@ public class PortableNetworkGraphic {
 			} else {
 				colorList = paletteColors;
 			}
-			palette = new Palette("untitled", bitDepth, colorList, paletteFrequencies);
+			palette = new Palette("untitled", sampleDepth, colorList, paletteFrequencies);
 		}
 	}
 	
@@ -1202,10 +1050,14 @@ public class PortableNetworkGraphic {
 	 *
 	 * @return
 	 * The compressed data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If the compression method specified by this PNG
+	 * is invalid.
 	 */
-	private byte[] compressData(byte[] data) {
-		ZlibCompresser compresser = new ZlibCompresser(data);
-		return compresser.compress();
+	private byte[] compressData(byte[] data) throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(data, compressionMethod);
+		return eng.compress();
 	}
 	
 	/**
@@ -1236,8 +1088,8 @@ public class PortableNetworkGraphic {
 	 */
 	private void constructColorImage(Scanline[] scanlines) {
 		boolean hasAlpha = (mode == ColorMode.TRUECOLOR_ALPHA);
-		image = new Image(width, height, bitDepth, hasAlpha);
-		Color color = new Color(bitDepth);
+		image = new Image(width, height, sampleDepth, hasAlpha);
+		Color color = new Color(sampleDepth);
 		for(int y = 0; y < scanlines.length; y++) {
 			for(int x = 0; x < scanlines[y].pixels(); x++) {
 				color.setRed(scanlines[y].getSample(x, Scanline.RED_SAMPLE));
@@ -1265,8 +1117,8 @@ public class PortableNetworkGraphic {
 	 */
 	private void constructGrayscaleImage(Scanline[] scanlines) {
 		boolean hasAlpha = (mode == ColorMode.GRAYSCALE_ALPHA);
-		image = new Image(width, height, bitDepth, hasAlpha);
-		GrayColor color = new GrayColor(bitDepth);
+		image = new Image(width, height, sampleDepth, hasAlpha);
+		GrayColor color = new GrayColor(sampleDepth);
 		for(int y = 0; y < scanlines.length; y++) {
 			for(int x = 0; x < scanlines[y].pixels(); x++) {
 				color.setValue(scanlines[y].getSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE));
@@ -1315,7 +1167,7 @@ public class PortableNetworkGraphic {
 	 * The completed image.
 	 */
 	private void constructIndexedImage(Scanline[] scanlines) {
-		image = new Image(width, height, bitDepth);
+		image = new Image(width, height, sampleDepth);
 		Color color;
 		for(int y = 0; y < scanlines.length; y++) {
 			for(int x = 0; x < scanlines[y].pixels(); x++) {
@@ -1327,13 +1179,17 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Converts the data in this Png into chunks to be written
+	 * Converts the data in this PNG into chunks to be written
 	 * to disk.
 	 * 
 	 * @param forcePreservation
 	 * Whether or not the image data is preserved from the source.
+	 * 
+	 * @throws InvalidFormatException
+	 * If one of the chunks specifies an incorrect value for the
+	 * PNG standard.
 	 */
-	private Chunk[] convertToChunks(boolean forcePreservation) {
+	private Chunk[] convertToChunks(boolean forcePreservation) throws InvalidFormatException {
 		Vector<Chunk> chunks = new Vector<Chunk>();
 		chunks.add(headerToChunk());
 		if(unknownColorSpaceChunks.size() > 0) {
@@ -1453,10 +1309,14 @@ public class PortableNetworkGraphic {
 	 *
 	 * @return
 	 * The decompressed data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If the compression method specified by this PNG
+	 * is invalid.
 	 */
-	private byte[] decompressData(byte[] data) {
-		ZlibDecompresser decompresser = new ZlibDecompresser(data);
-		return decompresser.decompress();
+	private byte[] decompressData(byte[] data) throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(data, compressionMethod);
+		return eng.decompress();
 	}
 	
 	/**
@@ -1474,7 +1334,7 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(mode.samples(), bitDepth, width);
+			lines[y] = new Scanline(mode.samples(), sampleDepth, width, filterMethod);
 			for(int x = 0; x < width; x++) {
 				color = img.getColorAt(x, y);
 				lines[y].setSample(x, Scanline.RED_SAMPLE, color.getRed());
@@ -1503,9 +1363,9 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		GrayColor color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(mode.samples(), bitDepth, width);
+			lines[y] = new Scanline(mode.samples(), sampleDepth, width, filterMethod);
 			for(int x = 0; x < width; x++) {
-				color = new GrayColor(bitDepth);
+				color = new GrayColor(sampleDepth);
 				color.setValue(image.valueAt(Image.GRAY, x, y));
 				color.setAlpha(image.valueAt(Image.GRAY_ALPHA, x, y));
 				lines[y].setSample(x, Scanline.GRAYSCALE_VALUE_SAMPLE, color.getValue());
@@ -1558,7 +1418,7 @@ public class PortableNetworkGraphic {
 		Scanline[] lines = new Scanline[height];
 		Color color;
 		for(int y = 0; y < height; y++) {
-			lines[y] = new Scanline(mode.samples(), bitDepth, width);
+			lines[y] = new Scanline(mode.samples(), sampleDepth, width, filterMethod);
 			for(int x = 0; x < width; x++) {
 				color = img.getColorAt(x, y);
 				int paletteIndex = palette.indexOf(color);
@@ -1576,8 +1436,11 @@ public class PortableNetworkGraphic {
 	 *
 	 * @return
 	 * The data of the scanlines.
+	 * 
+	 * @throws InvalidFormatException
+	 * If the filter method is invalid.
 	 */
-	private byte[] deconstructScanlines(Scanline[] lines) {
+	private byte[] deconstructScanlines(Scanline[] lines) throws InvalidFormatException {
 		ByteHolder holder = new ByteHolder(lines.length * getScanlineWidth());
 		byte[] buffer;
 		for(Scanline sl: lines) {
@@ -1592,8 +1455,11 @@ public class PortableNetworkGraphic {
 	 *
 	 * @return
 	 * The ImageDataChunks that decode to the image data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If a format error occurs with one of the header values.
 	 */
-	private ImageDataChunk[] encodeImageData() {
+	private ImageDataChunk[] encodeImageData() throws InvalidFormatException {
 		Scanline[] rawData = deconstructImage();
 		byte[] uncompressedData = deconstructScanlines(rawData);
 		byte[] compressedData = compressData(uncompressedData);
@@ -1635,7 +1501,7 @@ public class PortableNetworkGraphic {
 	 */
 	private double getPixelWidth() {
 		double pw;
-		pw = mode.samples() * ((double)bitDepth / 8);
+		pw = mode.samples() * ((double)sampleDepth / 8);
 		return pw;
 	}
 	
@@ -1657,7 +1523,7 @@ public class PortableNetworkGraphic {
 			start = i*getScanlineWidth();
 			end = (i+1)*getScanlineWidth();
 			scanlineData = Arrays.copyOfRange(data, start, end);
-			lines[i] = new Scanline(mode.samples(), bitDepth, scanlineData);
+			lines[i] = new Scanline(mode.samples(), sampleDepth, scanlineData, filterMethod);
 		}
 		return lines;
 	}
@@ -1680,7 +1546,7 @@ public class PortableNetworkGraphic {
 	 * The resulting HeaderChunk.
 	 */
 	private HeaderChunk headerToChunk() {
-		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.bitDepth, mode, compressionMethod, filterMethod, interlaceMethod);
+		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.sampleDepth, mode, compressionMethod, filterMethod, interlaceMethod);
 		return hc;
 	}
 	
@@ -1697,7 +1563,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Reads the png data from a file.
+	 * Reads the PNG data from a file.
 	 *
 	 * @param file
 	 * The name of the file load the data from.
@@ -1832,9 +1698,9 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Gets the appropriate data from this Png's palette and converts
+	 * Gets the appropriate data from this PNG's palette and converts
 	 * it into a chunk. This will only convert the palette color value;
-	 * Png PLTE chunks do not hold transparency information.
+	 * PNG PLTE chunks do not hold transparency information.
 	 *
 	 * @return
 	 * The resulting PaletteChunk.
@@ -1981,9 +1847,12 @@ public class PortableNetworkGraphic {
 	 *
 	 * @return
 	 * The resulting EmbeddedColorProfileChunk.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private EmbeddedColorProfileChunk profileToChunk() {
-		EmbeddedColorProfileChunk ecpc = new EmbeddedColorProfileChunk(profile.name, profile.data);
+	private EmbeddedColorProfileChunk profileToChunk() throws InvalidFormatException {
+		EmbeddedColorProfileChunk ecpc = new EmbeddedColorProfileChunk(profile.name, profile.data, compressionMethod);
 		return ecpc;
 	}
 	
@@ -2055,7 +1924,7 @@ public class PortableNetworkGraphic {
 	 */
 	private void readHeaderChunk(HeaderChunk header) {
 		unknownChunks = unknownColorSpaceChunks;
-		bitDepth = header.getBitDepth();
+		sampleDepth = header.getSampleDepth();
 		height = header.getHeight();
 		width = header.getWidth();
 		mode = header.getColorMode();
@@ -2277,8 +2146,11 @@ public class PortableNetworkGraphic {
 	 *
 	 * @return
 	 * The resulting TextChunk array.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private TextChunk[] textDataToChunks() {
+	private TextChunk[] textDataToChunks() throws InvalidFormatException {
 		Vector<TextChunk> chunks = new Vector<TextChunk>();
 		for(Map.Entry<String,ArrayList<String>> keywordSet: textData.entrySet()) {
 			String keyword = keywordSet.getKey();
@@ -2322,7 +2194,7 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Writes the png data to a file.
+	 * Writes the PNG data to a file.
 	 *
 	 * @param location
 	 * The name of the file to write the data to.
@@ -2333,8 +2205,11 @@ public class PortableNetworkGraphic {
 	 *
 	 * @throws StreamFailureException
 	 * If the file stream failed.
+	 * 
+	 * @throws InvalidFormatException
+	 * If a chunk specifies an invalid value for a PNG file.
 	 */
-	private void writePngFile(String location, boolean forcePreservation) throws StreamFailureException {
+	private void writePngFile(String location, boolean forcePreservation) throws StreamFailureException, InvalidFormatException {
 		Chunk[] chunks = convertToChunks(forcePreservation);
 		FileOutputStream file = null;
 		while(file == null) {

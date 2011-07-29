@@ -42,7 +42,7 @@ public class Color {
 	/**
 	 * The bit depth of each sample.
 	 */
-	private int bitDepth;
+	private int sampleDepth;
 	
 	/**
 	 * The red sample for this color.
@@ -240,17 +240,17 @@ public class Color {
 	 * new Color will have the default value of 0 in every
 	 * sample, but the alpha will be at the maximum.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to set the color to.
 	 */
-	public Color(int bitDepth) {
-		this(bitDepth, 0, 0, 0);
+	public Color(int sampleDepth) {
+		this(sampleDepth, 0, 0, 0);
 	}
 	
 	/**
 	 * Creates a new Color with a maximum alpha.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to set the color to.
 	 *
 	 * @param r
@@ -262,15 +262,15 @@ public class Color {
 	 * @param b
 	 * The blue value of the new Color.
 	 */
-	public Color(int bitDepth, int r, int g, int b) {
-		this.bitDepth = bitDepth;
+	public Color(int sampleDepth, int r, int g, int b) {
+		this.sampleDepth = sampleDepth;
 		setSamples(r, g, b, maximumValue());
 	}
 	
 	/**
 	 * Creates a new Color.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to set the color to.
 	 *
 	 * @param r
@@ -285,8 +285,8 @@ public class Color {
 	 * @param a
 	 * The value of the alpha sample.
 	 */
-	public Color(int bitDepth, int r, int g, int b, int a) {
-		this.bitDepth = bitDepth;
+	public Color(int sampleDepth, int r, int g, int b, int a) {
+		this.sampleDepth = sampleDepth;
 		setSamples(r, g, b, a);
 	}
 	
@@ -338,10 +338,10 @@ public class Color {
 		g1 = this.sampleAsFactor(green);
 		b1 = this.sampleAsFactor(blue);
 		a1 = this.sampleAsFactor(alpha);
-		r2 = getDepthFactor(color.getRed(), color.bitDepth());
-		g2 = getDepthFactor(color.getGreen(), color.bitDepth());
-		b2 = getDepthFactor(color.getBlue(), color.bitDepth());
-		a2 = getDepthFactor(color.getAlpha(), color.bitDepth());
+		r2 = getDepthFactor(color.getRed(), color.sampleDepth());
+		g2 = getDepthFactor(color.getGreen(), color.sampleDepth());
+		b2 = getDepthFactor(color.getBlue(), color.sampleDepth());
+		a2 = getDepthFactor(color.getAlpha(), color.sampleDepth());
 		double rDiff = Math.abs(r1 - r2);
 		double gDiff = Math.abs(g1 - g2);
 		double bDiff = Math.abs(b1 - b2);
@@ -403,8 +403,8 @@ public class Color {
 	 * @return
 	 * The bit depth.
 	 */
-	public int bitDepth() {
-		return bitDepth;
+	public int sampleDepth() {
+		return sampleDepth;
 	}
 	
 	/**
@@ -412,12 +412,12 @@ public class Color {
 	 * are changed into whatever value at the new bit depth is
 	 * closest to the sample value at the old bit depth.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to change this Color to.
 	 */
-	public void changeBitDepth(int bitDepth) {
-		convertSampleBitDepths(bitDepth);
-		this.bitDepth = bitDepth;
+	public void changeBitDepth(int sampleDepth) {
+		convertSampleBitDepths(sampleDepth);
+		this.sampleDepth = sampleDepth;
 	}
 	
 	/**
@@ -428,7 +428,7 @@ public class Color {
 	 * The maximum possible value.
 	 */
 	public int maximumValue() {
-		return maximumValue(bitDepth);
+		return maximumValue(sampleDepth);
 	}
 	
 	/**
@@ -476,7 +476,7 @@ public class Color {
 	 *
 	 * @param value
 	 * The new value to set the red to. This must be within
-	 * the range of this Color. The range is [0, 2^bitDepth-1].
+	 * the range of this Color. The range is [0, 2^sampleDepth-1].
 	 *
 	 * @throws ValueOutOfRangeException
 	 * If the value is not within this Color's range.
@@ -494,7 +494,7 @@ public class Color {
 	 *
 	 * @param value
 	 * The new value to set the green to. This must be within
-	 * the range of this Color. The range is [0, 2^bitDepth-1].
+	 * the range of this Color. The range is [0, 2^sampleDepth-1].
 	 *
 	 * @throws ValueOutOfRangeException
 	 * If the value is not within this Color's range.
@@ -512,7 +512,7 @@ public class Color {
 	 *
 	 * @param value
 	 * The new value to set the blue to. This must be within
-	 * the range of this Color. The range is [0, 2^bitDepth-1].
+	 * the range of this Color. The range is [0, 2^sampleDepth-1].
 	 *
 	 * @throws ValueOutOfRangeException
 	 * If the value is not within this Color's range.
@@ -530,7 +530,7 @@ public class Color {
 	 *
 	 * @param value
 	 * The new value to set the alpha to. This must be within
-	 * the range of this Color. The range is [0, 2^bitDepth-1].
+	 * the range of this Color. The range is [0, 2^sampleDepth-1].
 	 *
 	 * @throws ValueOutOfRangeException
 	 * If the value is not within this Color's range.
@@ -722,9 +722,9 @@ public class Color {
 		}
 		double brightnessDelta = brightness - chroma;
 		int rFinal,gFinal,bFinal;
-		rFinal = convertSample(rInitial + brightnessDelta, bitDepth);
-		gFinal = convertSample(gInitial + brightnessDelta, bitDepth);
-		bFinal = convertSample(bInitial + brightnessDelta, bitDepth);
+		rFinal = convertSample(rInitial + brightnessDelta, sampleDepth);
+		gFinal = convertSample(gInitial + brightnessDelta, sampleDepth);
+		bFinal = convertSample(bInitial + brightnessDelta, sampleDepth);
 		setSamples(rFinal, gFinal, bFinal);
 	}
 	
@@ -740,12 +740,12 @@ public class Color {
 	 * The hex color string that represents this Color.
 	 */
 	public String hexValue(boolean withAlpha) {
-		String r = valueToHex(red, bitDepth);
-		String g = valueToHex(green, bitDepth);
-		String b = valueToHex(blue, bitDepth);
+		String r = valueToHex(red, sampleDepth);
+		String g = valueToHex(green, sampleDepth);
+		String b = valueToHex(blue, sampleDepth);
 		String a = "";
 		if(withAlpha) {
-			a = valueToHex(alpha, bitDepth);
+			a = valueToHex(alpha, sampleDepth);
 		}
 		String hex = String.format("#%s%s%s%s", r, g, b, a);
 		return hex;
@@ -762,7 +762,7 @@ public class Color {
 	 * The sample as a factor from 0..1.
 	 */
 	private double sampleAsFactor(int sample) {
-		return getDepthFactor(sample, bitDepth);
+		return getDepthFactor(sample, sampleDepth);
 	}
 	
 	/**
@@ -774,10 +774,10 @@ public class Color {
 	 */
 	private void convertSampleBitDepths(int newBitDepth) {
 		double rFactor, gFactor, bFactor, aFactor;
-		rFactor = getDepthFactor(red, bitDepth);
-		gFactor = getDepthFactor(green, bitDepth);
-		bFactor = getDepthFactor(blue, bitDepth);
-		aFactor = getDepthFactor(alpha, bitDepth);
+		rFactor = getDepthFactor(red, sampleDepth);
+		gFactor = getDepthFactor(green, sampleDepth);
+		bFactor = getDepthFactor(blue, sampleDepth);
+		aFactor = getDepthFactor(alpha, sampleDepth);
 		red = convertSample(rFactor, newBitDepth);
 		green = convertSample(gFactor, newBitDepth);
 		blue = convertSample(bFactor, newBitDepth);
@@ -790,28 +790,28 @@ public class Color {
 	 * @param sample
 	 * The sample to get the factor of.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to get the factor at.
 	 *
 	 * @return
 	 * The sample factor at the specified bit depth.
 	 */
-	private double getDepthFactor(int sample, int bitDepth) {
-		double factor = (double)sample / (double)maximumValue(bitDepth);
+	private double getDepthFactor(int sample, int sampleDepth) {
+		double factor = (double)sample / (double)maximumValue(sampleDepth);
 		return factor;
 	}
 	
 	/**
 	 * Finds the maximum value at a specific bit depth.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to get the maximum value for.
 	 *
 	 * @return
 	 * The maximum value of a sample at the specified bit depth.
 	 */
-	private int maximumValue(int bitDepth) {
-		int maxValue = (int)Math.pow(2, bitDepth) - 1;
+	private int maximumValue(int sampleDepth) {
+		int maxValue = (int)Math.pow(2, sampleDepth) - 1;
 		return maxValue;
 	}
 	
@@ -821,14 +821,14 @@ public class Color {
 	 * @param factor
 	 * The intensity factor of the sample. This ranges from 0.0-1.0
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to convert the sample to.
 	 *
 	 * @return
 	 * The calculated value of the sample.
 	 */
-	private int convertSample(double factor, int bitDepth) {
-		int sampleValue = (int)(factor * maximumValue(bitDepth));
+	private int convertSample(double factor, int sampleDepth) {
+		int sampleValue = (int)(factor * maximumValue(sampleDepth));
 		return sampleValue;
 	}
 	

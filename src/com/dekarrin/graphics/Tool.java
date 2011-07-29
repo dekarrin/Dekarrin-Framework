@@ -10,7 +10,7 @@ public abstract class Tool {
 	/**
 	 * The current position of this Pencil.
 	 */
-	protected Point position = new Point(0, 0);
+	protected Point position = new Point(2, 0, 0);
 	
 	/**
 	 * The Image to perform the manipulations on.

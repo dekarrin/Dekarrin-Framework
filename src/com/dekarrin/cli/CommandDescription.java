@@ -21,12 +21,12 @@ public class CommandDescription {
 	/**
 	 * The list of possible arguments for this command.
 	 */
-	public ArgumentDescription[] arguments;
+	public ArgumentDescription[] arguments = new ArgumentDescription[0];
 	
 	/**
 	 * The list of possible flags for this command.
 	 */
-	public FlagDescription[] flags;
+	public FlagDescription[] flags = new FlagDescription[0];
 	
 	/**
 	 * Creates a new Command that accepts flags and arguments.
@@ -165,7 +165,7 @@ public class CommandDescription {
 	}
 	
 	/**
-	 * Gets the syntax for the flags in thie command that
+	 * Gets the syntax for the flags in this command that
 	 * this CommandDescription is associated with.
 	 *
 	 * @return
@@ -178,13 +178,13 @@ public class CommandDescription {
 			String valued = "";
 			for(FlagDescription fd: flags) {
 				if(fd.hasValue) {
-					valued += String.format(" [-%s=%s]", fd.name, fd.longName);
+					valued += String.format(" <-%s=[%s]>", fd.name, fd.longName);
 				} else {
 					noValue += fd.name;
 				}
 			}
 			if(noValue.length() > 0) {
-				noValue = " [" + noValue + "]";
+				noValue = " <" + noValue + ">";
 				flagSyntax += noValue;
 			}
 			if(valued.length() > 0) {
@@ -207,11 +207,11 @@ public class CommandDescription {
 			for(ArgumentDescription ad: arguments) {
 				String lSep, rSep;
 				if(ad.isOptional) {
-					lSep = "[";
-					rSep = "]";
-				} else {
 					lSep = "<";
 					rSep = ">";
+				} else {
+					lSep = "[";
+					rSep = "]";
 				}
 				String argumentLine = String.format(" %s%s%s", lSep, ad.name, rSep);
 				argSyntax = argumentLine;

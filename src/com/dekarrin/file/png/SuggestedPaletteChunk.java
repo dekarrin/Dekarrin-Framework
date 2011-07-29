@@ -6,7 +6,7 @@ import com.dekarrin.util.ByteComposer;
 /**
  * Holds data on a reduced suggested palette.
  */
-public class SuggestedPaletteChunk extends AncillaryChunk {
+class SuggestedPaletteChunk extends Chunk {
 	
 	/**
 	 * The name of the palette.

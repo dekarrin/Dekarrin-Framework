@@ -91,7 +91,9 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		}
 		try {
 			kksParser.addScript(script);
-		} catch(Exception e) {
+		} catch(FileNotFoundException e) {
+			giveFatalError(e.getMessage());
+		} catch(InvalidFormatException e) {
 			giveFatalError(e.getMessage());
 		}
 	}
@@ -111,7 +113,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 	 * The set up ScriptParser;
 	 */
 	private ScriptParser setupScriptParser() {
-		CommandDescription[] commands = new CommandDescription[11];
+		CommandDescription[] commands = new CommandDescription[12];
 		commands[0]		= createNewCommand();
 		commands[1]		= createExecCommand();
 		commands[2]		= createLoadCommand();
@@ -122,7 +124,8 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		commands[7]		= createMonoCommand();
 		commands[8]		= createReplaceCommand();
 		commands[9]		= createSepiaCommand();
-		commands[11]	= createLineCommand();
+		commands[10]	= createLineCommand();
+		commands[11]	= createEchoCommand();
 		ScriptParser sp = createScriptParser(commands);
 		return sp;
 	}
@@ -155,6 +158,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		ArgumentDescription[] args = new ArgumentDescription[2];
 		args[0] = new ArgumentDescription("width", "width of the image");
 		args[1] = new ArgumentDescription("height", "height of the image");
+		args[2] = new ArgumentDescription("color", "the background color");
 		FlagDescription[] flags = new FlagDescription[3];
 		flags[0] = new FlagDescription("g", "use grayscale instead of color");
 		flags[1] = new FlagDescription("a", "do not include an alpha channel");
@@ -299,6 +303,19 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 	}
 	
 	/**
+	 * Creates the CommandDescription for the 'echo' command.
+	 * 
+	 * @return
+	 * The 'echo' command's description.
+	 */
+	private CommandDescription createEchoCommand() {
+		ArgumentDescription[] args = new ArgumentDescription[1];
+		args[0] = new ArgumentDescription("message", "The message to show");
+		CommandDescription com = new CommandDescription("echo", "displays a message", args);
+		return com;
+	}
+	
+	/**
 	 * Executes a command from a script.
 	 * 
 	 * @param command
@@ -330,6 +347,8 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 				commandMakeSepia(command);
 			} else if(name.equals("line")) {
 				commandDrawLine(command);
+			} else if(name.equals("echo")) {
+				commandEchoMessage(command);
 			}
 		} catch(InvalidFormatException e) {
 			ui.printError(e.getMessage());
@@ -349,6 +368,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 	 */
 	private void commandCreateNewImage(Command command) throws ArgumentFormatException {
 		int width=0,height=0,depth=0;
+		Color backgroundColor;
 		try {
 			width = Integer.parseInt(command.getArgument("width"));
 		} catch(NumberFormatException e) {
@@ -364,9 +384,19 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		} catch(NumberFormatException e) {
 			throw new IntegerArgumentException("depth", command.getFlag("s"));
 		}
+		try {
+			backgroundColor = Color.parseColor(command.getArgument("color"), depth);
+		} catch(ColorFormatException e) {
+			throw new ArgumentFormatException("color", command.getArgument("color"), e.getMessage());
+		}
 		boolean hasColor = !(command.hasFlag("g"));
 		boolean hasAlpha = !(command.hasFlag("a"));
 		image = new Image(width, height, depth, hasAlpha, hasColor);
+		for(int y = 0; y < image.height; y++) {
+			for(int x = 0; x < image.width; x++) {
+				image.setColorAt(x, y, backgroundColor);
+			}
+		}
 	}
 	
 	/**
@@ -395,8 +425,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 	 */
 	private void commandLoadImage(Command command) throws InvalidFormatException {
 		String location = command.getArgument("location");
-		String[] parts = location.split(".");
-		String ext = parts[parts.length-1];
+		String ext = location.substring(location.lastIndexOf(".")+1, location.length());
 		if(ext.equalsIgnoreCase("png")) {
 			try {
 				PortableNetworkGraphic png = new PortableNetworkGraphic(location);
@@ -430,8 +459,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 			throw new NullImageException();
 		}
 		String location = command.getArgument("location");
-		String[] parts = location.split(".");
-		String ext = parts[parts.length-1];
+		String ext = location.substring(location.lastIndexOf(".")+1, location.length());
 		if(ext.equalsIgnoreCase("png")) {
 			try {
 				PortableNetworkGraphic.ColorMode mode = selectPngColorMode();
@@ -653,6 +681,16 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		pen.moveTo(p1);
 		pen.down();
 		pen.moveTo(p2);
+	}
+	
+	/**
+	 * Parses the command arguments and uses them to echo a message.
+	 * 
+	 * @param command
+	 * The command that echoed the message.
+	 */
+	private void commandEchoMessage(Command command) {
+		ui.println(command.getArgument("message"));
 	}
 	
 	/**

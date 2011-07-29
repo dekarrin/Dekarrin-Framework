@@ -7,7 +7,7 @@ import com.dekarrin.util.ByteComposer;
 /**
  * Holds last modification time information.
  */
-public class ModificationTimeChunk extends AncillaryChunk {
+class ModificationTimeChunk extends Chunk {
 	
 	/**
 	 * The year of the last modification.

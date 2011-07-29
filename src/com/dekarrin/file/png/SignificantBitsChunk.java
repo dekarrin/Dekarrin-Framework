@@ -7,7 +7,7 @@ import com.dekarrin.util.ByteComposer;
 /**
  * Holds information on original significant bits.
  */
-public class SignificantBitsChunk extends AncillaryChunk {
+class SignificantBitsChunk extends Chunk {
 	
 	/**
 	 * Significant bits in the original colors.

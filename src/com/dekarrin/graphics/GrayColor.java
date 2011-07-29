@@ -18,7 +18,7 @@ public class GrayColor extends Color {
 	 * The color to use as the basis for this GrayColor.
 	 */
 	public GrayColor(Color color) {
-		super(color.bitDepth());
+		super(color.sampleDepth());
 		setValue(color.getRed());
 		setAlpha(color.getAlpha());
 	}

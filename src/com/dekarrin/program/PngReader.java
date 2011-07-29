@@ -90,6 +90,9 @@ public class PngReader extends ConsoleProgram {
 			p.moveTo(p1);
 			p.down();
 			p.moveTo(p2);
+		} else if(command.equalsIgnoreCase("copy")) {
+			ui.println("copying...");
+			
 		} else {
 			giveFatalError("Cannot apply unknown command '"+command+"'");
 		}

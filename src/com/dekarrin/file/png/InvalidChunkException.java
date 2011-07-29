@@ -1,8 +1,8 @@
 package com.dekarrin.file.png;
 
 /**
- * Represents an invalid chunk. This is typically thrown if a Png
- * Chunk generates a crc that does not match the CRC read from disk.
+ * Represents an invalid chunk. This is typically thrown if a PNG
+ * Chunk generates a CRC that does not match the CRC read from disk.
  */
 public class InvalidChunkException extends Exception {
 	

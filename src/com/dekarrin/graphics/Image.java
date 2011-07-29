@@ -14,7 +14,7 @@ public class Image {
 	/**
 	 * The number of bits used for each sample.
 	 */
-	public int bitDepth;
+	public int sampleDepth;
 	
 	/**
 	 * The height of this image.
@@ -67,11 +67,11 @@ public class Image {
 	 * @param height
 	 * The height of the image in pixels.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * How many bits are used for each sample.
 	 */
-	public Image(int width, int height, int bitDepth) {
-		this.bitDepth = bitDepth;
+	public Image(int width, int height, int sampleDepth) {
+		this.sampleDepth = sampleDepth;
 		this.width = width;
 		this.height = height;
 		createChannels(width, height, 3);
@@ -88,14 +88,14 @@ public class Image {
 	 * @param height
 	 * The height of the image in pixels.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * How many bits are used for each sample.
 	 *
 	 * @param withAlpha
 	 * Whether to give the image an alpha channel.
 	 */
-	public Image(int width, int height, int bitDepth, boolean withAlpha) {
-		this.bitDepth = bitDepth;
+	public Image(int width, int height, int sampleDepth, boolean withAlpha) {
+		this.sampleDepth = sampleDepth;
 		this.width = width;
 		this.height = height;
 		int channels = withAlpha ? 4 : 3;
@@ -113,7 +113,7 @@ public class Image {
 	 * @param height
 	 * The height of the image in pixels.
 	 *
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * How many bits are used for each sample.
 	 *
 	 * @param withAlpha
@@ -123,8 +123,8 @@ public class Image {
 	 * Whether or not to use color. If this is false, the
 	 * image will be grayscale.
 	 */
-	public Image(int width, int height, int bitDepth, boolean withAlpha, boolean withColor) {
-		this.bitDepth = bitDepth;
+	public Image(int width, int height, int sampleDepth, boolean withAlpha, boolean withColor) {
+		this.sampleDepth = sampleDepth;
 		this.width = width;
 		this.height = height;
 		int channels = withAlpha ? withColor ? 4 : 2 : withColor ? 3 : 1;
@@ -298,7 +298,7 @@ public class Image {
 	 * A color representing the values of the specified pixel.
 	 */
 	public Color getColorAt(int x, int y) {
-		Color c = new Color(bitDepth);
+		Color c = new Color(sampleDepth);
 		int r = hasChannel(RED) ? valueAt(RED, x, y) : c.maximumValue();
 		int g = hasChannel(GREEN) ? valueAt(GREEN, x, y) : c.maximumValue();
 		int b = hasChannel(BLUE) ? valueAt(BLUE, x, y) : c.maximumValue();
@@ -325,8 +325,8 @@ public class Image {
 	 * If the Color has a different bit depth than this Image.
 	 */
 	public void setColorAt(int x, int y, Color color) throws InvalidBitDepthException {
-		if(color.bitDepth() != bitDepth) {
-			String message = String.format("Color bit depth is %s; should be %s!", color.bitDepth(), bitDepth);
+		if(color.sampleDepth() != sampleDepth) {
+			String message = String.format("Color bit depth is %s; should be %s!", color.sampleDepth(), sampleDepth);
 			throw new InvalidBitDepthException(message);
 		}
 		setValueAt(RED, x, y, color.getRed());
@@ -358,8 +358,8 @@ public class Image {
 	 * If the Color has a different bit depth than this Image.
 	 */
 	public void setColorAt(int x, int y, Color color, boolean addAlpha) throws InvalidBitDepthException {
-		if(color.bitDepth() != bitDepth) {
-			String message = String.format("Color bit depth is %s; should be %s!", color.bitDepth(), bitDepth);
+		if(color.sampleDepth() != sampleDepth) {
+			String message = String.format("Color bit depth is %s; should be %s!", color.sampleDepth(), sampleDepth);
 			throw new InvalidBitDepthException(message);
 		}
 		if(addAlpha && !hasChannel(ALPHA) && color.getAlpha() != color.maximumValue()) {
@@ -393,18 +393,18 @@ public class Image {
 	/**
 	 * Changes the bit depth of the samples.
 	 * 
-	 * @param bitDepth
+	 * @param sampleDepth
 	 * The bit depth to change it to.
 	 */
-	public void changeBitDepth(int bitDepth) {
+	public void changeBitDepth(int sampleDepth) {
 		Color c;
 		for(int x = 0; x < width; x++) {
 			for(int y = 0; y < height; y++) {
 				c = getColorAt(x, y);
-				c.changeBitDepth(bitDepth);
+				c.changeBitDepth(sampleDepth);
 				setColorAt(x, y, c);
 			}
 		}
-		this.bitDepth = bitDepth;
+		this.sampleDepth = sampleDepth;
 	}
 }

@@ -50,7 +50,7 @@ public class Point implements Cloneable {
 	 * The number of dimensions for the Point to have.
 	 */
 	public Point(int d) {
-		coords = new double[d];
+		this.coords = new double[d];
 	}
 	
 	/**
@@ -65,7 +65,7 @@ public class Point implements Cloneable {
 	 * same number of coordinates as there are dimensions.
 	 */
 	public Point(int d, double... coords) {
-		coords = new double[d];
+		this.coords = new double[d];
 		for(int i = 0; i < coords.length; i++) {
 			this.coords[i] = coords[i];
 		}
@@ -76,7 +76,7 @@ public class Point implements Cloneable {
 	 * dimensions.
 	 */
 	public Point() {
-		coords = new double[Point.defaultDimensions];
+		this.coords = new double[Point.defaultDimensions];
 	}
 	
 	/**

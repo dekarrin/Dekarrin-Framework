@@ -1,6 +1,5 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.file.png.PortableNetworkGraphic.ColorMode;
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
 import com.dekarrin.util.ByteComposer;
@@ -11,11 +10,11 @@ import com.dekarrin.util.ByteComposer;
  * must be checked by any item getting the value of the background
  * color.
  */
-public class BackgroundColorChunk extends AncillaryChunk {
+class BackgroundColorChunk extends Chunk {
 	
 	/**
 	 * The mode of this background chunk. This is dependent on
-	 * the color type of the png, but the amount of data in this
+	 * the color type of the PNG, but the amount of data in this
 	 * chunk varies with each type, so it can use this
 	 * information to process itself.
 	 */
@@ -180,7 +179,7 @@ public class BackgroundColorChunk extends AncillaryChunk {
 	}
 	
 	/**
-	 * Creats the data byte array from the internal properties.
+	 * Creates the data byte array from the internal properties.
 	 *
 	 * @return
 	 * The data bytes.

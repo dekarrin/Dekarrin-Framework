@@ -38,7 +38,7 @@ public class InvalidFormatException extends Exception {
 	 * The message.
 	 */
 	public String getMessage() {
-		String errorMessage = String.format("Bad %s file! %s", fileType, super.getMessage());
+		String errorMessage = String.format("Bad '.%s' file! %s", fileType, super.getMessage());
 		return errorMessage;
 	}
 }

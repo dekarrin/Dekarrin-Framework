@@ -1,15 +1,11 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.file.png.PortableNetworkGraphic.ColorMode;
-import com.dekarrin.file.png.PortableNetworkGraphic.CompressionMethod;
-import com.dekarrin.file.png.PortableNetworkGraphic.FilterMethod;
-import com.dekarrin.file.png.PortableNetworkGraphic.InterlaceMethod;
 import com.dekarrin.util.ByteComposer;
 
 /**
- * The header chunk from a png file.
+ * The header chunk from a PNG file.
  */
-public class HeaderChunk extends CriticalChunk {
+class HeaderChunk extends Chunk {
 	
 	/**
 	 * The width of the image.
@@ -22,9 +18,9 @@ public class HeaderChunk extends CriticalChunk {
 	private int height;
 	
 	/**
-	 * The bit depth of the image.
+	 * The sample depth of the image.
 	 */
-	private int bitDepth;
+	private int sampleDepth;
 	
 	/**
 	 * Interpretation of image data.
@@ -71,25 +67,25 @@ public class HeaderChunk extends CriticalChunk {
 	 * data from the parameters.
 	 *
 	 * @param width
-	 * The width of this png.
+	 * The width of this PNG.
 	 *
 	 * @param height
-	 * The height of this png.
+	 * The height of this PNG.
 	 *
-	 * @param bitDepth
-	 * The bit depth of this png.
+	 * @param depth
+	 * The sample depth of this PNG.
 	 *
 	 * @param colorType
-	 * The color type of this png.
+	 * The color type of this PNG.
 	 *
 	 * @param compressionMethod
 	 * The compression method to use for this png's data.
 	 *
 	 * @param filterMethod
-	 * The image data filtering method to use for this png.
+	 * The image data filtering method to use for this PNG.
 	 *
 	 * @param interlaceMethod
-	 * The interlace method to use for this png.
+	 * The interlace method to use for this PNG.
 	 */
 	public HeaderChunk(int width, int height, int depth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
 		super(Chunk.IHDR);
@@ -98,7 +94,7 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
-	 * Gets the width of this png.
+	 * Gets the width of this PNG.
 	 *
 	 * @return
 	 * The width.
@@ -108,7 +104,7 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
-	 * Gets the height of this png.
+	 * Gets the height of this PNG.
 	 *
 	 * @return
 	 * The height.
@@ -118,17 +114,17 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
-	 * Gets the bit depth of this png.
+	 * Gets the sample depth of this PNG.
 	 *
 	 * @return
-	 * The bit depth.
+	 * The sample depth.
 	 */
-	public int getBitDepth() {
-		return bitDepth;
+	public int getSampleDepth() {
+		return sampleDepth;
 	}
 	
 	/**
-	 * Gets the color type of this png.
+	 * Gets the color type of this PNG.
 	 *
 	 * @return
 	 * The color type.
@@ -138,7 +134,7 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
-	 * Gets the compression method of this png.
+	 * Gets the compression method of this PNG.
 	 *
 	 * @return
 	 * The compression method.
@@ -148,7 +144,7 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
-	 * Gets the filter method of this png.
+	 * Gets the filter method of this PNG.
 	 *
 	 * @return
 	 * The filter method.
@@ -158,7 +154,7 @@ public class HeaderChunk extends CriticalChunk {
 	}
 	
 	/**
-	 * Gets the interlace method of this png.
+	 * Gets the interlace method of this PNG.
 	 *
 	 * @return
 	 * The interlace method.
@@ -174,10 +170,10 @@ public class HeaderChunk extends CriticalChunk {
 		int w							= parser.parseInt();
 		int h							= parser.parseInt();
 		int depth						= parser.parseInt(1);
-		ColorMode mode					= ColorMode.forDataValue(parser.parseInt(1));
-		CompressionMethod compression	= CompressionMethod.values()[parser.parseInt(1)];
-		FilterMethod filter				= FilterMethod.values()[parser.parseInt(1)];
-		InterlaceMethod interlace		= InterlaceMethod.values()[parser.parseInt(1)];
+		ColorMode mode					= ColorMode.fromData(parser.parseInt(1));
+		CompressionMethod compression	= CompressionMethod.fromData(parser.parseInt(1));
+		FilterMethod filter				= FilterMethod.fromData(parser.parseInt(1));
+		InterlaceMethod interlace		= InterlaceMethod.fromData(parser.parseInt(1));
 		setProperties(w, h, depth, mode, compression, filter, interlace);
 	}
 	
@@ -185,30 +181,30 @@ public class HeaderChunk extends CriticalChunk {
 	 * Sets the internal properties for this chunk.
 	 *
 	 * @param width
-	 * The width of this png.
+	 * The width of this PNG.
 	 *
 	 * @param height
-	 * The height of this png.
+	 * The height of this PNG.
 	 *
-	 * @param bitDepth
-	 * The bit depth of this png.
+	 * @param depth
+	 * The sample depth of this PNG.
 	 *
 	 * @param colorType
-	 * The color type of this png.
+	 * The color type of this PNG.
 	 *
 	 * @param compressionMethod
 	 * The compression method to use for this png's data.
 	 *
 	 * @param filterMethod
-	 * The image data filtering method to use for this png.
+	 * The image data filtering method to use for this PNG.
 	 *
 	 * @param interlaceMethod
-	 * The interlace method to use for this png.
+	 * The interlace method to use for this PNG.
 	 */
-	private void setProperties(int width, int height, int bitDepth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
+	private void setProperties(int width, int height, int depth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
 		this.width = width;
 		this.height = height;
-		this.bitDepth = bitDepth;
+		this.sampleDepth = depth;
 		this.mode = mode;
 		this.compressionMethod = cm;
 		this.filterMethod = fm;
@@ -225,11 +221,11 @@ public class HeaderChunk extends CriticalChunk {
 		ByteComposer composer = new ByteComposer(13);
 		composer.composeInt(width);
 		composer.composeInt(height);
-		composer.composeInt(bitDepth, 1);
+		composer.composeInt(sampleDepth, 1);
 		composer.composeInt(mode.dataValue(), 1);
-		composer.composeInt(compressionMethod.ordinal(), 1);
-		composer.composeInt(filterMethod.ordinal(), 1);
-		composer.composeInt(interlaceMethod.ordinal(), 1);
+		composer.composeInt(compressionMethod.dataValue(), 1);
+		composer.composeInt(filterMethod.dataValue(), 1);
+		composer.composeInt(interlaceMethod.dataValue(), 1);
 		return composer.toArray();
 	}
 	

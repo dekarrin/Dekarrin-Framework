@@ -4,9 +4,9 @@ import java.awt.Point;
 import com.dekarrin.util.ByteComposer;
 
 /**
- * Png chunk for referencing chromaticities.
+ * PNG chunk for referencing chromaticities.
  */
-public class ChromaticitiesChunk extends AncillaryChunk {
+class ChromaticitiesChunk extends Chunk {
 
 	/**
 	 * White point chromaticity.

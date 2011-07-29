@@ -7,7 +7,7 @@ import java.util.zip.CRC32;
 
 import com.dekarrin.io.StreamFailureException;
 
-public class ChunkOutputStream extends DataOutputStream {
+class ChunkOutputStream extends DataOutputStream {
 	
 	/**
 	 * Whether the magic number has already been written.
@@ -15,7 +15,7 @@ public class ChunkOutputStream extends DataOutputStream {
 	private boolean magicNumberWritten = false;
 
 	/**
-	 * The values in the header of a valid png file.
+	 * The values in the header of a valid PNG file.
 	 */
 	public static final int[] MAGIC_NUMBER = {137, 80, 78, 71, 13, 10, 26, 10};
 	

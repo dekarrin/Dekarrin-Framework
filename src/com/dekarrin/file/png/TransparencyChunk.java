@@ -1,6 +1,5 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.file.png.PortableNetworkGraphic.ColorMode;
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.GrayColor;
 import com.dekarrin.util.ByteComposer;
@@ -9,11 +8,11 @@ import com.dekarrin.util.ByteComposer;
  * Chunk for transparency data. The format of data varies, so the current
  * color type must be passed in at construction for it to parse.
  */
-public class TransparencyChunk extends AncillaryChunk {
+class TransparencyChunk extends Chunk {
 	
 	/**
 	 * The mode of this background chunk. This is dependent on
-	 * the color type of the png, but the amount of data in this
+	 * the color type of the PNG, but the amount of data in this
 	 * chunk varies with each type, so it can use this
 	 * information to process itself.
 	 */
@@ -65,7 +64,7 @@ public class TransparencyChunk extends AncillaryChunk {
 	 * indexed color mode.
 	 *
 	 * @param transparencies
-	 * The tranparency value for each palette color.
+	 * The transparency value for each palette color.
 	 */
 	public TransparencyChunk(int[] transparencies) {
 		super(Chunk.tRNS);

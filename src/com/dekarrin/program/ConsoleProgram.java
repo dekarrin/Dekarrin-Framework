@@ -6,6 +6,7 @@ import com.dekarrin.io.InteractionModule;
 import com.dekarrin.util.HelperString;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Program to be run from the command line. Processes flags automatically.
@@ -43,7 +44,7 @@ public abstract class ConsoleProgram {
 	/**
 	 * A list of argument names for syntax help.
 	 */
-	private HashMap<String,ArgumentDescription> arguments = new HashMap<String,ArgumentDescription>(2);
+	private LinkedHashMap<String,ArgumentDescription> arguments = new LinkedHashMap<String,ArgumentDescription>(2);
 	
 	/**
 	 * Do not use; immediately throws an exception. The use of this constructor

@@ -1,12 +1,12 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.zip.*;
+import com.dekarrin.io.InvalidFormatException;
 import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk for an embedded ICC color profile.
  */
-public class EmbeddedColorProfileChunk extends AncillaryChunk {
+class EmbeddedColorProfileChunk extends Chunk {
 	
 	/**
 	 * The name of the ICC Profile.
@@ -16,7 +16,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	/**
 	 * The compression method of the profile.
 	 */
-	private int compressionMethod;
+	private CompressionMethod compressionMethod;
 	
 	/**
 	 * The compressed profile.
@@ -33,8 +33,11 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The chunk data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	public EmbeddedColorProfileChunk(byte[] data) {
+	public EmbeddedColorProfileChunk(byte[] data) throws InvalidFormatException {
 		super(Chunk.iCCP, data);
 		parseData();
 	}
@@ -47,10 +50,16 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 *
 	 * @param data
 	 * The profile data.
+	 * 
+	 * @param cm
+	 * The compression method to use on the data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	public EmbeddedColorProfileChunk(String name, byte[] data) {
+	public EmbeddedColorProfileChunk(String name, byte[] data, CompressionMethod cm) throws InvalidFormatException {
 		super(Chunk.iCCP);
-		setProperties(name, data, null, 0);
+		setProperties(name, data, null, cm);
 		setChunkData(createDataBytes());
 	}
 	
@@ -70,7 +79,7 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * @return
 	 * The compression method.
 	 */
-	public int getCompressionMethod() {
+	public CompressionMethod getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -91,9 +100,6 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 * The uncompressed profile.
 	 */
 	public byte[] getProfile() {
-		if(profile == null) {
-			decompressProfile();
-		}
 		return profile;
 	}
 	
@@ -115,10 +121,13 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 	 *
 	 * @param compressionMethod
 	 * The compression method to use for compressing the data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void setProperties(String name, byte[] data, byte[] compressedData, int compressionMethod) {
+	private void setProperties(String name, byte[] data, byte[] compressedData, CompressionMethod cm) throws InvalidFormatException {
 		this.profileName = name;
-		this.compressionMethod = compressionMethod;
+		this.compressionMethod = cm;
 		if(data != null) {
 			this.profile = data;
 		}
@@ -143,34 +152,43 @@ public class EmbeddedColorProfileChunk extends AncillaryChunk {
 		int dataLength = 2 + profileName.length() + compressedProfile.length;
 		ByteComposer bytes = new ByteComposer(dataLength);
 		bytes.composeString(profileName, true);
-		bytes.composeInt(compressionMethod, 1);
+		bytes.composeInt(compressionMethod.dataValue(), 1);
 		bytes.composeBytes(compressedProfile);
 		return bytes.toArray();
 	}
 	
 	/**
 	 * Parses data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void parseData() {
+	private void parseData() throws InvalidFormatException {
 		String profileName			= parser.parseString();
-		int compressionMethod		= parser.parseInt(1);
+		CompressionMethod cm		= CompressionMethod.fromData(parser.parseInt(1));
 		byte[] compressedProfile	= parser.parseRemainingBytes();
-		setProperties(profileName, null, compressedProfile, compressionMethod);
+		setProperties(profileName, null, compressedProfile, cm);
 	}
 	
 	/**
 	 * Decompresses profile data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void decompressProfile() {
-		ZlibDecompresser zd = new ZlibDecompresser(compressedProfile);
-		profile = zd.decompress();
+	private void decompressProfile() throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(compressedProfile, compressionMethod);
+		profile = eng.decompress();
 	}
 	
 	/**
 	 * Compresses profile data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void compressProfile() {
-		ZlibCompresser zc = new ZlibCompresser(profile);
-		compressedProfile = zc.compress();
+	private void compressProfile() throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(profile, compressionMethod);
+		compressedProfile = eng.compress();
 	}
 }

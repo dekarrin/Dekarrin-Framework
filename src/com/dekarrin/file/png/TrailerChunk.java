@@ -3,7 +3,7 @@ package com.dekarrin.file.png;
 /**
  * Chunk for image trailer.
  */
-public class TrailerChunk extends CriticalChunk {
+public class TrailerChunk extends Chunk {
 	
 	/**
 	 * Creates a new TrailerChunk.

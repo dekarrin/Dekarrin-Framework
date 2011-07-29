@@ -3,7 +3,7 @@ package com.dekarrin.file.png;
 /**
  * Chunk that represents text data.
  */
-public abstract class TextChunk extends AncillaryChunk {
+abstract class TextChunk extends Chunk {
 	
 	/**
 	 * The keyword of this text data.

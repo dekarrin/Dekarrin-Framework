@@ -4,9 +4,9 @@ import com.dekarrin.graphics.Color;
 import com.dekarrin.util.ByteComposer;
 
 /**
- * A palette chunk from a png file.
+ * A palette chunk from a PNG file.
  */
-public class PaletteChunk extends CriticalChunk {
+class PaletteChunk extends Chunk {
 	
 	/**
 	 * The palette entries.

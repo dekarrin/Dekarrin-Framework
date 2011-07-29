@@ -5,7 +5,7 @@ import com.dekarrin.util.ByteComposer;
 /**
  * Chunk with uncompressed text content.
  */
-public class TextDataChunk extends TextChunk {
+class TextDataChunk extends TextChunk {
 	
 	/**
 	 * Creates a new TextDataChunk.
@@ -42,7 +42,7 @@ public class TextDataChunk extends TextChunk {
 	}
 	
 	/**
-	 * Turns chunk data into useable data.
+	 * Turns chunk data into usable data.
 	 */
 	private void parseData() {
 		keyword	= parser.parseString();

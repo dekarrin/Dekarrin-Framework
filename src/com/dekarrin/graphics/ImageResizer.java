@@ -50,7 +50,7 @@ public class ImageResizer {
 	 */
 	public void scale(double factor) {
 		PointTransformer pt = new PointTransformer(2);
-		Image scaled = new Image((int)(image.width*factor), (int)(image.height*factor), image.bitDepth);
+		Image scaled = new Image((int)(image.width*factor), (int)(image.height*factor), image.sampleDepth);
 		for(int y = 0; y < image.height; y++) {
 			for(int x = 0; x < image.width; x++) {
 				Point pixel = new Point(2, x, y);

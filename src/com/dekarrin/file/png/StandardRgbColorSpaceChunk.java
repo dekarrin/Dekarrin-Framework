@@ -1,15 +1,14 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.file.png.PortableNetworkGraphic.RenderingIntent;
 import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk data for a standard RGB color space.
  */
-public class StandardRgbColorSpaceChunk extends AncillaryChunk {
+class StandardRgbColorSpaceChunk extends Chunk {
 
 	/**
-	 * The rendering intent of this png.
+	 * The rendering intent of this PNG.
 	 */
 	private RenderingIntent renderingIntent;
 	
@@ -50,19 +49,19 @@ public class StandardRgbColorSpaceChunk extends AncillaryChunk {
 	 * Parses the chunk data.
 	 */
 	private void parseData() {
-		RenderingIntent intent = RenderingIntent.values()[parser.parseInt(1)];
+		RenderingIntent intent = RenderingIntent.fromData(parser.parseInt(1));
 		setProperties(intent);
 	}
 	
 	/**
-	 * Creates a databyte array from the internal properties.
+	 * Creates a data byte array from the internal properties.
 	 *
 	 * @return
 	 * The data array.
 	 */
 	private byte[] createDataBytes() {
 		ByteComposer composer = new ByteComposer(1);
-		composer.composeInt(renderingIntent.ordinal(), 1);
+		composer.composeInt(renderingIntent.dataValue(), 1);
 		return composer.toArray();
 	}
 	

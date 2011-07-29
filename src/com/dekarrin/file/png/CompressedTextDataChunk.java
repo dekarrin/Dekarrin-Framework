@@ -1,13 +1,12 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.zip.*;
-import com.dekarrin.file.png.PortableNetworkGraphic.CompressionMethod;
+import com.dekarrin.io.InvalidFormatException;
 import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk holding compressed text data.
  */
-public class CompressedTextDataChunk extends TextChunk {
+class CompressedTextDataChunk extends TextChunk {
 	
 	/**
 	 * The raw, compressed text.
@@ -25,8 +24,11 @@ public class CompressedTextDataChunk extends TextChunk {
 	 *
 	 * @param data
 	 * The chunk data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	public CompressedTextDataChunk(byte[] data) {
+	public CompressedTextDataChunk(byte[] data) throws InvalidFormatException {
 		super(Chunk.zTXt, data);
 		parseData();
 	}
@@ -40,13 +42,16 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * @param contents
 	 * The actual text contents of this chunk.
 	 *
-	 * @param compressionMethod
+	 * @param cm
 	 * The method to use for compression/decompression of the text
 	 * data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	public CompressedTextDataChunk(String keyword, String contents, CompressionMethod compressionMethod) {
+	public CompressedTextDataChunk(String keyword, String contents, CompressionMethod cm) throws InvalidFormatException {
 		super(Chunk.zTXt);
-		setProperties(keyword, contents, null, compressionMethod);
+		setProperties(keyword, contents, null, cm);
 		setChunkData(createDataBytes());
 	}
 	
@@ -80,36 +85,42 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * The uncompressed text.
 	 */
 	public String getText() {
-		if(text == null) {
-			decompressText();
-		}
 		return text;
 	}
 	
 	/**
 	 * Parses data into meaningful contents.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void parseData() {
+	private void parseData() throws InvalidFormatException  {
 		String keyword = parser.parseString();
-		CompressionMethod compressionMethod = CompressionMethod.values()[parser.parseInt(1)];
+		CompressionMethod cm = CompressionMethod.fromData(parser.parseInt(1));
 		String compressed = parser.parseRemainingString();
-		setProperties(keyword, null, compressed, compressionMethod);
+		setProperties(keyword, null, compressed, cm);
 	}
 	
 	/**
 	 * Decompresses the text read from chunk data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void decompressText() {
-		ZlibDecompresser zd = new ZlibDecompresser(compressedText);
-		text = zd.decompressString();
+	private void decompressText() throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(compressedText, compressionMethod);
+		text = eng.decompressString();
 	}
 	
 	/**
 	 * Compresses the text to chunk data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void compressText() {
-		ZlibCompresser zc = new ZlibCompresser(text);
-		compressedText = zc.compressString();
+	private void compressText() throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(text, compressionMethod);
+		compressedText = eng.compressString();
 	}
 	
 	/**
@@ -126,13 +137,16 @@ public class CompressedTextDataChunk extends TextChunk {
 	 * The actual text contents of this chunk, compressed. This
 	 * cannot be null at the same time as contents.
 	 *
-	 * @param compressionMethod
+	 * @param cm
 	 * The method to use for compression/decompression of the text
 	 * data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void setProperties(String keyword, String contents, String compressedContents, CompressionMethod compressionMethod) {
+	private void setProperties(String keyword, String contents, String compressedContents, CompressionMethod cm) throws InvalidFormatException {
 		this.keyword = keyword;
-		this.compressionMethod = compressionMethod;
+		this.compressionMethod = cm;
 		if(contents != null) {
 			text = contents;
 		}
@@ -157,7 +171,7 @@ public class CompressedTextDataChunk extends TextChunk {
 		int dataLength = keyword.length() + compressedText.length() + 2;
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeString(keyword, true);
-		composer.composeInt(compressionMethod.ordinal(), 1);
+		composer.composeInt(compressionMethod.dataValue(), 1);
 		composer.composeString(compressedText, false);
 		return composer.toArray();
 	}

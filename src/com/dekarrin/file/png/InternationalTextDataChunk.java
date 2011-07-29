@@ -1,12 +1,12 @@
 package com.dekarrin.file.png;
 
-import com.dekarrin.zip.*;
+import com.dekarrin.io.InvalidFormatException;
 import com.dekarrin.util.ByteComposer;
 
 /**
  * Chunk that holds international characters.
  */
-public class InternationalTextDataChunk extends TextChunk {
+class InternationalTextDataChunk extends TextChunk {
 
 	/**
 	 * Whether the text data contained is compressed.
@@ -16,7 +16,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	/**
 	 * Which compression method is used.
 	 */
-	private int compressionMethod;
+	private CompressionMethod compressionMethod;
 	
 	/**
 	 * The compressed text.
@@ -38,8 +38,11 @@ public class InternationalTextDataChunk extends TextChunk {
 	 *
 	 * @param data
 	 * The chunk data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	public InternationalTextDataChunk(byte[] data) {
+	public InternationalTextDataChunk(byte[] data) throws InvalidFormatException {
 		super(Chunk.iTXt, data);
 		parseData();
 	}
@@ -49,7 +52,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * data.
 	 *
 	 * @param keyword
-	 * The keyword in the native platform langauge.
+	 * The keyword in the native platform language.
 	 *
 	 * @param translatedKeyword
 	 * The keyword translated into this chunk's language.
@@ -60,14 +63,17 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * @param language
 	 * The RFC-1766 language tag for this text data.
 	 *
-	 * @param compressionMethod
+	 * @param cm
 	 * The compression method to use for this chunk's text
 	 * field.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, int compressionMethod) {
+	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, CompressionMethod cm) throws InvalidFormatException {
 		super(Chunk.iTXt);
 		boolean compressed = (contents.length() > PortableNetworkGraphic.UNCOMPRESSED_DATA_LIMIT) ? true : false;
-		setProperties(keyword, translatedKeyword, contents, null, language, compressionMethod, compressed);
+		setProperties(keyword, translatedKeyword, contents, null, language, cm, compressed);
 		setChunkData(createDataBytes());
 	}
 	
@@ -87,7 +93,7 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * @return
 	 * The compression method.
 	 */
-	public int getCompressionMethod() {
+	public CompressionMethod getCompressionMethod() {
 		return compressionMethod;
 	}
 	
@@ -95,9 +101,6 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * Gets the text of this chunk.
 	 */
 	public String getText() {
-		if(text == null) {
-			decompressText();
-		}
 		return text;
 	}
 	
@@ -123,42 +126,51 @@ public class InternationalTextDataChunk extends TextChunk {
 	
 	/**
 	 * Parses chunk data into usable data.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void parseData() {
+	private void parseData() throws InvalidFormatException {
 		String keyword			= parser.parseString();
 		boolean compressed		= parser.parseBoolean();
-		int method				= parser.parseInt(1);
+		CompressionMethod cm	= CompressionMethod.fromData(parser.parseInt(1));
 		String lang				= parser.parseString();
 		String transKeyword		= parser.parseString();
 		String readText			= parser.parseRemainingString();
 		if(compressed) {
-			setProperties(keyword, transKeyword, null, readText, lang, method, compressed);
+			setProperties(keyword, transKeyword, null, readText, lang, cm, compressed);
 		} else {
-			setProperties(keyword, transKeyword, readText, null, lang, method, compressed);
+			setProperties(keyword, transKeyword, readText, null, lang, cm, compressed);
 		}
 	}
 	
 	/**
-	 * Decomporesses the text to its actual contents.
+	 * Decompresses the text to its actual contents.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void decompressText() {
-		ZlibDecompresser zd = new ZlibDecompresser(compressedText);
-		text = zd.decompressString("UTF-8");
+	private void decompressText() throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(compressedText, compressionMethod);
+		text = eng.decompressString("UTF-8");
 	}
 	
 	/**
 	 * Compresses the actual text to its compact form.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void compressText() {
-		ZlibCompresser zc = new ZlibCompresser(text);
-		compressedText = zc.compressString("UTF-8");
+	private void compressText() throws InvalidFormatException {
+		PngCompressionEngine eng = new PngCompressionEngine(text, compressionMethod);
+		compressedText = eng.compressString("UTF-8");
 	}
 	
 	/**
 	 * Sets the internal properties of this chunk.
 	 *
 	 * @param keyword
-	 * The keyword in the native platform langauge.
+	 * The keyword in the native platform language.
 	 *
 	 * @param translatedKeyword
 	 * The keyword translated into this chunk's language.
@@ -174,17 +186,20 @@ public class InternationalTextDataChunk extends TextChunk {
 	 * @param language
 	 * The RFC-1766 language tag for this text data.
 	 *
-	 * @param compressionMethod
+	 * @param cm
 	 * The compression method to use for this chunk's text
 	 * field.
 	 *
 	 * @param compressed
 	 * Whether or not this chunk data is to be compressed.
+	 * 
+	 * @throws InvalidFormatException
+	 * If an invalid compression method is specified.
 	 */
-	private void setProperties(String keyword, String translatedKeyword, String contents, String compressedContents, String language, int compressionMethod, boolean compressed) {
+	private void setProperties(String keyword, String translatedKeyword, String contents, String compressedContents, String language, CompressionMethod cm, boolean compressed) throws InvalidFormatException {
 		this.keyword = keyword;
 		this.translatedKeyword = translatedKeyword;
-		this.compressionMethod = compressionMethod;
+		this.compressionMethod = cm;
 		this.compressed = compressed;
 		this.languageTag = language;
 		if(contents != null) {
@@ -212,7 +227,7 @@ public class InternationalTextDataChunk extends TextChunk {
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeString(keyword, true);
 		composer.composeBoolean(compressed);
-		composer.composeInt(compressionMethod, 1);
+		composer.composeInt(compressionMethod.dataValue(), 1);
 		composer.composeString(languageTag, true);
 		composer.composeString(translatedKeyword, true);
 		if(compressed) {

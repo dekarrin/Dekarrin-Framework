@@ -80,10 +80,9 @@ public class ScriptParser {
 	 * If the specified file is not the right format.
 	 */
 	public void addScript(String location) throws FileNotFoundException, InvalidFormatException {
-		String[] parts = location.split(".");
-		String ext = parts[parts.length-1];
+		String ext = location.substring(location.lastIndexOf(".")+1, location.length());
 		if(!scriptExtension.equalsIgnoreCase(ext)) {
-			throw new InvalidFormatException("bad file type '"+ext+"'.", scriptExtension);
+			throw new InvalidFormatException("Not a valid KKScript file", scriptExtension);
 		}
 		File scriptFile = new File(location);
 		if(!scriptFile.exists()) {

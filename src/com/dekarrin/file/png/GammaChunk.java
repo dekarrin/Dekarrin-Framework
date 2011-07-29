@@ -5,7 +5,7 @@ import com.dekarrin.util.ByteComposer;
 /**
  * Represents a gamma chunk.
  */
-public class GammaChunk extends AncillaryChunk {
+class GammaChunk extends Chunk {
 
 	/**
 	 * The gamma stored in this chunk.
