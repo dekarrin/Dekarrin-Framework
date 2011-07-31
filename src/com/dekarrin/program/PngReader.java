@@ -47,7 +47,7 @@ public class PngReader extends ConsoleProgram {
 			addArgument("color", false);
 			String colorString = getArgument("color");
 			System.out.println(colorString);
-			Color hueColor = Color.parseColor(colorString, image.bitDepth);
+			Color hueColor = Color.parseColor(colorString, image.sampleDepth);
 			ui.println("Mono toning...");
 			im.monochrome(hueColor);
 		} else if(command.equalsIgnoreCase("replace")) {
@@ -57,8 +57,8 @@ public class PngReader extends ConsoleProgram {
 			String oldColorString = getArgument("oldColor");
 			String newColorString = getArgument("newColor");
 			double tolerance = getArgumentAsDouble("tolerance", 0.0);
-			Color oldColor = Color.parseColor(oldColorString, image.bitDepth);
-			Color newColor = Color.parseColor(newColorString, image.bitDepth);
+			Color oldColor = Color.parseColor(oldColorString, image.sampleDepth);
+			Color newColor = Color.parseColor(newColorString, image.sampleDepth);
 			ui.println("Scaling...");
 			im.replaceColor(oldColor, newColor, tolerance);
 		} else if(command.equalsIgnoreCase("sepia")) {
@@ -83,7 +83,7 @@ public class PngReader extends ConsoleProgram {
 			Color lineColor;
 			Pencil p = (Pencil)tools.get("pencil");
 			if(colorString != null) {
-				lineColor = Color.parseColor(colorString, image.bitDepth);
+				lineColor = Color.parseColor(colorString, image.sampleDepth);
 				p.setColor(lineColor);
 			}
 			ui.println("Creating line...");
@@ -100,6 +100,8 @@ public class PngReader extends ConsoleProgram {
 		try {
 			pic.save(output);
 		} catch(StreamFailureException e) {
+			giveFatalError(e.getMessage());
+		} catch(InvalidFormatException e) {
 			giveFatalError(e.getMessage());
 		}
 	}

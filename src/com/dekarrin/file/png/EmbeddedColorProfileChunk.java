@@ -16,7 +16,7 @@ class EmbeddedColorProfileChunk extends Chunk {
 	/**
 	 * The compression method of the profile.
 	 */
-	private CompressionMethod compressionMethod;
+	private CompressionEngine compressionEngine;
 	
 	/**
 	 * The compressed profile.
@@ -57,7 +57,7 @@ class EmbeddedColorProfileChunk extends Chunk {
 	 * @throws InvalidFormatException
 	 * If an invalid compression method is specified.
 	 */
-	public EmbeddedColorProfileChunk(String name, byte[] data, CompressionMethod cm) throws InvalidFormatException {
+	public EmbeddedColorProfileChunk(String name, byte[] data, CompressionEngine cm) throws InvalidFormatException {
 		super(Chunk.iCCP);
 		setProperties(name, data, null, cm);
 		setChunkData(createDataBytes());
@@ -79,8 +79,8 @@ class EmbeddedColorProfileChunk extends Chunk {
 	 * @return
 	 * The compression method.
 	 */
-	public CompressionMethod getCompressionMethod() {
-		return compressionMethod;
+	public CompressionEngine getCompressionEngine() {
+		return compressionEngine;
 	}
 	
 	/**
@@ -125,9 +125,9 @@ class EmbeddedColorProfileChunk extends Chunk {
 	 * @throws InvalidFormatException
 	 * If an invalid compression method is specified.
 	 */
-	private void setProperties(String name, byte[] data, byte[] compressedData, CompressionMethod cm) throws InvalidFormatException {
+	private void setProperties(String name, byte[] data, byte[] compressedData, CompressionEngine cm) throws InvalidFormatException {
 		this.profileName = name;
-		this.compressionMethod = cm;
+		this.compressionEngine = cm;
 		if(data != null) {
 			this.profile = data;
 		}
@@ -152,7 +152,7 @@ class EmbeddedColorProfileChunk extends Chunk {
 		int dataLength = 2 + profileName.length() + compressedProfile.length;
 		ByteComposer bytes = new ByteComposer(dataLength);
 		bytes.composeString(profileName, true);
-		bytes.composeInt(compressionMethod.dataValue(), 1);
+		bytes.composeInt(compressionEngine.dataValue(), 1);
 		bytes.composeBytes(compressedProfile);
 		return bytes.toArray();
 	}
@@ -165,7 +165,7 @@ class EmbeddedColorProfileChunk extends Chunk {
 	 */
 	private void parseData() throws InvalidFormatException {
 		String profileName			= parser.parseString();
-		CompressionMethod cm		= CompressionMethod.fromData(parser.parseInt(1));
+		CompressionEngine cm		= CompressionEngine.fromData(parser.parseInt(1));
 		byte[] compressedProfile	= parser.parseRemainingBytes();
 		setProperties(profileName, null, compressedProfile, cm);
 	}
@@ -177,8 +177,8 @@ class EmbeddedColorProfileChunk extends Chunk {
 	 * If an invalid compression method is specified.
 	 */
 	private void decompressProfile() throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(compressedProfile, compressionMethod);
-		profile = eng.decompress();
+		compressionEngine.setContents(compressedProfile);
+		profile = compressionEngine.decompress();
 	}
 	
 	/**
@@ -188,7 +188,7 @@ class EmbeddedColorProfileChunk extends Chunk {
 	 * If an invalid compression method is specified.
 	 */
 	private void compressProfile() throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(profile, compressionMethod);
-		compressedProfile = eng.compress();
+		compressionEngine.setContents(profile);
+		compressedProfile = compressionEngine.compress();
 	}
 }

@@ -83,10 +83,10 @@ public class Pencil extends Tool {
 	 */
 	@Override
 	public void moveTo(Point newPosition) {
-		super.moveTo(newPosition);
 		if(down) {
 			drawLine(position, newPosition);
 		}
+		super.moveTo(newPosition);
 	}
 	
 	/**

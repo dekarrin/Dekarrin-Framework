@@ -16,7 +16,7 @@ class InternationalTextDataChunk extends TextChunk {
 	/**
 	 * Which compression method is used.
 	 */
-	private CompressionMethod compressionMethod;
+	private CompressionEngine compressionEngine;
 	
 	/**
 	 * The compressed text.
@@ -70,7 +70,7 @@ class InternationalTextDataChunk extends TextChunk {
 	 * @throws InvalidFormatException
 	 * If an invalid compression method is specified.
 	 */
-	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, CompressionMethod cm) throws InvalidFormatException {
+	public InternationalTextDataChunk(String keyword, String translatedKeyword, String contents, String language, CompressionEngine cm) throws InvalidFormatException {
 		super(Chunk.iTXt);
 		boolean compressed = (contents.length() > PortableNetworkGraphic.UNCOMPRESSED_DATA_LIMIT) ? true : false;
 		setProperties(keyword, translatedKeyword, contents, null, language, cm, compressed);
@@ -93,8 +93,8 @@ class InternationalTextDataChunk extends TextChunk {
 	 * @return
 	 * The compression method.
 	 */
-	public CompressionMethod getCompressionMethod() {
-		return compressionMethod;
+	public CompressionEngine getCompressionEngine() {
+		return compressionEngine;
 	}
 	
 	/**
@@ -133,7 +133,7 @@ class InternationalTextDataChunk extends TextChunk {
 	private void parseData() throws InvalidFormatException {
 		String keyword			= parser.parseString();
 		boolean compressed		= parser.parseBoolean();
-		CompressionMethod cm	= CompressionMethod.fromData(parser.parseInt(1));
+		CompressionEngine cm	= CompressionEngine.fromData(parser.parseInt(1));
 		String lang				= parser.parseString();
 		String transKeyword		= parser.parseString();
 		String readText			= parser.parseRemainingString();
@@ -151,8 +151,8 @@ class InternationalTextDataChunk extends TextChunk {
 	 * If an invalid compression method is specified.
 	 */
 	private void decompressText() throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(compressedText, compressionMethod);
-		text = eng.decompressString("UTF-8");
+		compressionEngine.setContents(compressedText);
+		text = compressionEngine.decompressString("UTF-8");
 	}
 	
 	/**
@@ -162,8 +162,8 @@ class InternationalTextDataChunk extends TextChunk {
 	 * If an invalid compression method is specified.
 	 */
 	private void compressText() throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(text, compressionMethod);
-		compressedText = eng.compressString("UTF-8");
+		compressionEngine.setContents(text);
+		compressedText = compressionEngine.compressString("UTF-8");
 	}
 	
 	/**
@@ -196,10 +196,10 @@ class InternationalTextDataChunk extends TextChunk {
 	 * @throws InvalidFormatException
 	 * If an invalid compression method is specified.
 	 */
-	private void setProperties(String keyword, String translatedKeyword, String contents, String compressedContents, String language, CompressionMethod cm, boolean compressed) throws InvalidFormatException {
+	private void setProperties(String keyword, String translatedKeyword, String contents, String compressedContents, String language, CompressionEngine cm, boolean compressed) throws InvalidFormatException {
 		this.keyword = keyword;
 		this.translatedKeyword = translatedKeyword;
-		this.compressionMethod = cm;
+		this.compressionEngine = cm;
 		this.compressed = compressed;
 		this.languageTag = language;
 		if(contents != null) {
@@ -227,7 +227,7 @@ class InternationalTextDataChunk extends TextChunk {
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeString(keyword, true);
 		composer.composeBoolean(compressed);
-		composer.composeInt(compressionMethod.dataValue(), 1);
+		composer.composeInt(compressionEngine.dataValue(), 1);
 		composer.composeString(languageTag, true);
 		composer.composeString(translatedKeyword, true);
 		if(compressed) {

@@ -74,7 +74,7 @@ public class PortableNetworkGraphic {
 	/**
 	 * The compression method used in this PNG's image data.
 	 */
-	private CompressionMethod compressionMethod;
+	private CompressionEngine compressionEngine;
 	
 	/**
 	 * Whether or not critical Chunks have been modified.
@@ -238,7 +238,7 @@ public class PortableNetworkGraphic {
 		height = image.height;
 		sampleDepth = image.sampleDepth;
 		mode = colorMode;
-		compressionMethod = CompressionMethod.ZLIB;
+		compressionEngine = CompressionEngine.ZLIB;
 		filterMethod = FilterMethod.ADAPTIVE;
 		interlaceMethod = InterlaceMethod.NONE;
 		switch(colorMode) {
@@ -393,8 +393,8 @@ public class PortableNetworkGraphic {
 	 * @return
 	 * The compression method.
 	 */
-	public CompressionMethod getCompressionMethod() {
-		return compressionMethod;
+	public CompressionEngine getCompressionEngine() {
+		return compressionEngine;
 	}
 	
 	/**
@@ -1056,8 +1056,8 @@ public class PortableNetworkGraphic {
 	 * is invalid.
 	 */
 	private byte[] compressData(byte[] data) throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(data, compressionMethod);
-		return eng.compress();
+		compressionEngine.setContents(data);
+		return compressionEngine.compress();
 	}
 	
 	/**
@@ -1315,8 +1315,8 @@ public class PortableNetworkGraphic {
 	 * is invalid.
 	 */
 	private byte[] decompressData(byte[] data) throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(data, compressionMethod);
-		return eng.decompress();
+		compressionEngine.setContents(data);
+		return compressionEngine.decompress();
 	}
 	
 	/**
@@ -1546,7 +1546,7 @@ public class PortableNetworkGraphic {
 	 * The resulting HeaderChunk.
 	 */
 	private HeaderChunk headerToChunk() {
-		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.sampleDepth, mode, compressionMethod, filterMethod, interlaceMethod);
+		HeaderChunk hc = new HeaderChunk(image.width, image.height, image.sampleDepth, mode, compressionEngine, filterMethod, interlaceMethod);
 		return hc;
 	}
 	
@@ -1838,7 +1838,10 @@ public class PortableNetworkGraphic {
 	private void processImageData() throws InvalidFormatException {
 		byte[] compressedData = concatenateImageData();
 		byte[] decompressedData = decompressData(compressedData);
+		//InterlaceEngine iEngine = interlaceMethod.getInterlaceEngine();
+		//iEngine.setRawData(decompressedData);
 		Scanline[] lines = getScanlinesFromData(decompressedData);
+		//Scanline[] lines = iEngine.getScanlines();
 		constructImage(lines);
 	}
 	
@@ -1852,7 +1855,7 @@ public class PortableNetworkGraphic {
 	 * If an invalid compression method is specified.
 	 */
 	private EmbeddedColorProfileChunk profileToChunk() throws InvalidFormatException {
-		EmbeddedColorProfileChunk ecpc = new EmbeddedColorProfileChunk(profile.name, profile.data, compressionMethod);
+		EmbeddedColorProfileChunk ecpc = new EmbeddedColorProfileChunk(profile.name, profile.data, compressionEngine);
 		return ecpc;
 	}
 	
@@ -1871,11 +1874,11 @@ public class PortableNetworkGraphic {
 	}
 	
 	/**
-	 * Reads a chromaticites chunk and assigns properties based
+	 * Reads a chromaticities chunk and assigns properties based
 	 * on it.
 	 *
 	 * @param chunk
-	 * The chromaticites chunk.
+	 * The chromaticities chunk.
 	 */
 	private void readChromaticitiesChunk(ChromaticitiesChunk chunk) {
 		Point r = chunk.getRed();
@@ -2158,7 +2161,7 @@ public class PortableNetworkGraphic {
 			for(String contents: texts) {
 				TextChunk tc = null;
 				if(contents.length() > UNCOMPRESSED_DATA_LIMIT) {
-					tc = new CompressedTextDataChunk(keyword, contents, compressionMethod);
+					tc = new CompressedTextDataChunk(keyword, contents, compressionEngine);
 				} else {
 					tc = new TextDataChunk(keyword, contents);
 				}

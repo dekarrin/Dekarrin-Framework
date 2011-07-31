@@ -1,11 +1,13 @@
 package com.dekarrin.program;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import com.dekarrin.cli.ArgumentDescription;
 import com.dekarrin.cli.Command;
 import com.dekarrin.cli.CommandDescription;
 import com.dekarrin.cli.FlagDescription;
+import com.dekarrin.file.png.ColorMode;
 import com.dekarrin.file.png.PortableNetworkGraphic;
 import com.dekarrin.graphics.Color;
 import com.dekarrin.graphics.ColorFormatException;
@@ -155,7 +157,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 	 * The 'new' command's description.
 	 */
 	private CommandDescription createNewCommand() {
-		ArgumentDescription[] args = new ArgumentDescription[2];
+		ArgumentDescription[] args = new ArgumentDescription[3];
 		args[0] = new ArgumentDescription("width", "width of the image");
 		args[1] = new ArgumentDescription("height", "height of the image");
 		args[2] = new ArgumentDescription("color", "the background color");
@@ -462,7 +464,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		String ext = location.substring(location.lastIndexOf(".")+1, location.length());
 		if(ext.equalsIgnoreCase("png")) {
 			try {
-				PortableNetworkGraphic.ColorMode mode = selectPngColorMode();
+				ColorMode mode = selectPngColorMode();
 				PortableNetworkGraphic png = new PortableNetworkGraphic(image, mode);
 				png.save(location);
 			} catch (StreamFailureException e) {
@@ -565,7 +567,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		}
 		Color color = null;
 		try {
-			color = Color.parseColor(command.getArgument("color"), image.bitDepth);
+			color = Color.parseColor(command.getArgument("color"), image.sampleDepth);
 		} catch(ColorFormatException e) {
 			throw new ArgumentFormatException("color", command.getArgument("color"), e.getMessage());
 		}
@@ -593,12 +595,12 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		Color oldColor=null,newColor=null;
 		double tolerance = 0.0;
 		try {
-			oldColor = Color.parseColor(command.getArgument("oldColor"), image.bitDepth);
+			oldColor = Color.parseColor(command.getArgument("oldColor"), image.sampleDepth);
 		} catch(ColorFormatException e) {
 			throw new ArgumentFormatException("oldColor", command.getArgument("oldColor"), e.getMessage());
 		}
 		try {
-			newColor = Color.parseColor(command.getArgument("newColor"), image.bitDepth);
+			newColor = Color.parseColor(command.getArgument("newColor"), image.sampleDepth);
 		} catch(ColorFormatException e) {
 			throw new ArgumentFormatException("newColor", command.getArgument("newColor"), e.getMessage());
 		}
@@ -673,7 +675,7 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 		pen.setAntiAlias(!command.hasFlag("a"));
 		if(command.hasFlag("c")) {
 			try {
-				pen.setColor(Color.parseColor(command.getFlag("c"), image.bitDepth));
+				pen.setColor(Color.parseColor(command.getFlag("c"), image.sampleDepth));
 			} catch(ColorFormatException e) {
 				throw new ArgumentFormatException("color", command.getFlag("c"), e.getMessage());
 			}
@@ -730,22 +732,22 @@ public class KireiKore extends ConsoleProgram implements ScriptListener {
 	 * @return
 	 * The color mode.
 	 */
-	private PortableNetworkGraphic.ColorMode selectPngColorMode() {
-		PortableNetworkGraphic.ColorMode mode = null;
+	private ColorMode selectPngColorMode() {
+		ColorMode mode = null;
 		if(usePalette) {
-			mode = PortableNetworkGraphic.ColorMode.INDEXED;
+			mode = ColorMode.INDEXED;
 		} else {
 			if(image.hasChannel(Image.RED) && image.hasChannel(Image.GREEN) && image.hasChannel(Image.BLUE)) {
 				if(image.hasChannel(Image.ALPHA)) {
-					mode = PortableNetworkGraphic.ColorMode.TRUECOLOR_ALPHA;
+					mode = ColorMode.TRUECOLOR_ALPHA;
 				} else {
-					mode = PortableNetworkGraphic.ColorMode.TRUECOLOR;
+					mode = ColorMode.TRUECOLOR;
 				}
 			} else {
 				if(image.hasChannel(Image.GRAY_ALPHA)) {
-					mode = PortableNetworkGraphic.ColorMode.GRAYSCALE_ALPHA;
+					mode = ColorMode.GRAYSCALE_ALPHA;
 				} else {
-					mode = PortableNetworkGraphic.ColorMode.GRAYSCALE;
+					mode = ColorMode.GRAYSCALE;
 				}
 			}
 		}

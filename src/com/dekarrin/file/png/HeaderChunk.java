@@ -37,7 +37,7 @@ class HeaderChunk extends Chunk {
 	 * Compression method. Currently, only deflate/inflate is
 	 * defined. If this is not 0, it should result in an error.
 	 */
-	private CompressionMethod compressionMethod;
+	private CompressionEngine compressionEngine;
 	
 	/**
 	 * Filter method. Only 0 is defined, and an error should
@@ -87,7 +87,7 @@ class HeaderChunk extends Chunk {
 	 * @param interlaceMethod
 	 * The interlace method to use for this PNG.
 	 */
-	public HeaderChunk(int width, int height, int depth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
+	public HeaderChunk(int width, int height, int depth, ColorMode mode, CompressionEngine cm, FilterMethod fm, InterlaceMethod im) {
 		super(Chunk.IHDR);
 		setProperties(width, height, depth, mode, cm, fm, im);
 		setChunkData(createDataBytes());
@@ -139,8 +139,8 @@ class HeaderChunk extends Chunk {
 	 * @return
 	 * The compression method.
 	 */
-	public CompressionMethod getCompressionMethod() {
-		return compressionMethod;
+	public CompressionEngine getCompressionEngine() {
+		return compressionEngine;
 	}
 	
 	/**
@@ -171,7 +171,7 @@ class HeaderChunk extends Chunk {
 		int h							= parser.parseInt();
 		int depth						= parser.parseInt(1);
 		ColorMode mode					= ColorMode.fromData(parser.parseInt(1));
-		CompressionMethod compression	= CompressionMethod.fromData(parser.parseInt(1));
+		CompressionEngine compression	= CompressionEngine.fromData(parser.parseInt(1));
 		FilterMethod filter				= FilterMethod.fromData(parser.parseInt(1));
 		InterlaceMethod interlace		= InterlaceMethod.fromData(parser.parseInt(1));
 		setProperties(w, h, depth, mode, compression, filter, interlace);
@@ -201,12 +201,12 @@ class HeaderChunk extends Chunk {
 	 * @param interlaceMethod
 	 * The interlace method to use for this PNG.
 	 */
-	private void setProperties(int width, int height, int depth, ColorMode mode, CompressionMethod cm, FilterMethod fm, InterlaceMethod im) {
+	private void setProperties(int width, int height, int depth, ColorMode mode, CompressionEngine cm, FilterMethod fm, InterlaceMethod im) {
 		this.width = width;
 		this.height = height;
 		this.sampleDepth = depth;
 		this.mode = mode;
-		this.compressionMethod = cm;
+		this.compressionEngine = cm;
 		this.filterMethod = fm;
 		this.interlaceMethod = im;
 	}
@@ -223,7 +223,7 @@ class HeaderChunk extends Chunk {
 		composer.composeInt(height);
 		composer.composeInt(sampleDepth, 1);
 		composer.composeInt(mode.dataValue(), 1);
-		composer.composeInt(compressionMethod.dataValue(), 1);
+		composer.composeInt(compressionEngine.dataValue(), 1);
 		composer.composeInt(filterMethod.dataValue(), 1);
 		composer.composeInt(interlaceMethod.dataValue(), 1);
 		return composer.toArray();

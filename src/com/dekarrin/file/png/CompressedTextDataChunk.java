@@ -16,7 +16,7 @@ class CompressedTextDataChunk extends TextChunk {
 	/**
 	 * The method used for compression.
 	 */
-	private CompressionMethod compressionMethod;
+	private CompressionEngine compressionEngine;
 	
 	/**
 	 * Creates a new CompressedTextDataChunk. Does not decompress
@@ -49,7 +49,7 @@ class CompressedTextDataChunk extends TextChunk {
 	 * @throws InvalidFormatException
 	 * If an invalid compression method is specified.
 	 */
-	public CompressedTextDataChunk(String keyword, String contents, CompressionMethod cm) throws InvalidFormatException {
+	public CompressedTextDataChunk(String keyword, String contents, CompressionEngine cm) throws InvalidFormatException {
 		super(Chunk.zTXt);
 		setProperties(keyword, contents, null, cm);
 		setChunkData(createDataBytes());
@@ -71,8 +71,8 @@ class CompressedTextDataChunk extends TextChunk {
 	 * @return
 	 * The compression method.
 	 */
-	public CompressionMethod getCompressionMethod() {
-		return compressionMethod;
+	public CompressionEngine getCompressionEngine() {
+		return compressionEngine;
 	}
 	
 	/**
@@ -96,7 +96,7 @@ class CompressedTextDataChunk extends TextChunk {
 	 */
 	private void parseData() throws InvalidFormatException  {
 		String keyword = parser.parseString();
-		CompressionMethod cm = CompressionMethod.fromData(parser.parseInt(1));
+		CompressionEngine cm = CompressionEngine.fromData(parser.parseInt(1));
 		String compressed = parser.parseRemainingString();
 		setProperties(keyword, null, compressed, cm);
 	}
@@ -108,8 +108,8 @@ class CompressedTextDataChunk extends TextChunk {
 	 * If an invalid compression method is specified.
 	 */
 	private void decompressText() throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(compressedText, compressionMethod);
-		text = eng.decompressString();
+		compressionEngine.setContents(compressedText);
+		text = compressionEngine.decompressString();
 	}
 	
 	/**
@@ -119,8 +119,8 @@ class CompressedTextDataChunk extends TextChunk {
 	 * If an invalid compression method is specified.
 	 */
 	private void compressText() throws InvalidFormatException {
-		PngCompressionEngine eng = new PngCompressionEngine(text, compressionMethod);
-		compressedText = eng.compressString();
+		compressionEngine.setContents(text);
+		compressedText = compressionEngine.compressString();
 	}
 	
 	/**
@@ -144,9 +144,9 @@ class CompressedTextDataChunk extends TextChunk {
 	 * @throws InvalidFormatException
 	 * If an invalid compression method is specified.
 	 */
-	private void setProperties(String keyword, String contents, String compressedContents, CompressionMethod cm) throws InvalidFormatException {
+	private void setProperties(String keyword, String contents, String compressedContents, CompressionEngine cm) throws InvalidFormatException {
 		this.keyword = keyword;
-		this.compressionMethod = cm;
+		this.compressionEngine = cm;
 		if(contents != null) {
 			text = contents;
 		}
@@ -171,7 +171,7 @@ class CompressedTextDataChunk extends TextChunk {
 		int dataLength = keyword.length() + compressedText.length() + 2;
 		ByteComposer composer = new ByteComposer(dataLength);
 		composer.composeString(keyword, true);
-		composer.composeInt(compressionMethod.dataValue(), 1);
+		composer.composeInt(compressionEngine.dataValue(), 1);
 		composer.composeString(compressedText, false);
 		return composer.toArray();
 	}
