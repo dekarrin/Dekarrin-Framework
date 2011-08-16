@@ -33,7 +33,7 @@ public enum InterlaceMethod {
 			}
 			return lines;
 		}
-	},
+	};/*,
 	
 	/**
 	 * Uses the Adam7 interlacing algorithm. The image data is
@@ -51,7 +51,7 @@ public enum InterlaceMethod {
 	 * 7 7 7 7 7 7 7 7
 	 * 5 6 5 6 5 6 5 6
 	 * 7 7 7 7 7 7 7 7
-	 */
+	 *
 	ADAM7(1, 7) {
 		protected Scanline[] pass() throws InvalidFormatException {
 			int[] vertOff = {0, 0, 4, 0, 2, 0, 1};
@@ -64,7 +64,7 @@ public enum InterlaceMethod {
 			}
 			return null;
 		}
-	};
+	};*/
 	
 	/**
 	 * Maps data values to InterlaceMethods.

@@ -5,7 +5,6 @@ import com.dekarrin.cli.FlagArgumentList;
 import com.dekarrin.io.InteractionModule;
 import com.dekarrin.util.HelperString;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**

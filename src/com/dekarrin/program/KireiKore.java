@@ -1,7 +1,6 @@
 package com.dekarrin.program;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import com.dekarrin.cli.ArgumentDescription;
 import com.dekarrin.cli.Command;

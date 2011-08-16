@@ -43,6 +43,10 @@ public class InteractionModule {
 		return read;
 	}
 	
+	public String readPassword(String prompt) {
+		return new String(System.console().readPassword(prompt+" "));
+	}
+	
 	public void printError(String message) {
 		System.err.println(message);
 	}
