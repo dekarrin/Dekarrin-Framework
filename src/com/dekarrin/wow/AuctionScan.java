@@ -19,7 +19,9 @@ import org.json.JSONObject;
 
 import com.dekarrin.db.MySqlEngine;
 import com.dekarrin.db.TableData;
+import com.dekarrin.error.TrafficException;
 import com.dekarrin.program.ConsoleProgram;
+import com.dekarrin.program.FatalErrorException;
 
 /**
  * Grabs data from the WOW auction house.
@@ -28,62 +30,25 @@ import com.dekarrin.program.ConsoleProgram;
  */
 public class AuctionScan extends ConsoleProgram {
 	
-	private class AuctionData {
-		public long auc = 0L;
-		public int item = 0;
-		public String owner = null;
-		public int quantity = 0;
-		public AuctionTime timeLeft = null;
-		public int bid = 0;
-		public int buyout = 0;
-		public String faction = null;
-		public AuctionData() {super();}
-		public AuctionData(HashMap<String,String> dataSource) {
-			auc = Long.parseLong(dataSource.get("auc"));
-			item = Integer.parseInt(dataSource.get("item"));
-			owner = dataSource.get("owner");
-			quantity = Integer.parseInt(dataSource.get("quantity"));
-			timeLeft = AuctionTime.valueOf(dataSource.get("timeLeft"));
-			bid = Integer.parseInt(dataSource.get("bid"));
-			buyout = Integer.parseInt(dataSource.get("buyout"));
-			faction = dataSource.get("faction");
-		}
-		public boolean equals(AuctionData ad) {
-			if(
-			 ad.auc == auc && ad.item == item &&
-			 ad.owner.equals(owner) && ad.quantity == quantity &&
-			 ad.timeLeft == timeLeft && ad.bid == bid &&
-			 ad.buyout == buyout && ad.faction == faction
-			) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	
-	private HttpClient client = new DefaultHttpClient();
-	
-	/**
-	 * The time between snapshots, in milliseconds.
-	 */
-	private static final long SNAPSHOT_INTERVAL = 180000000L;
- 	private static final String BLIZZARD_HOST = "us.battle.net";
 	private static final String AUCTION_API = "/api/wow/auction/data/";
-	private static final int MAXIMUM_REQUESTS = 2500;
 	private static final int FLAG_ALLIANCE = 1;
 	private static final int FLAG_HORDE = 2;
 	private static final int FLAG_NEUTRAL = 4;
 	
 	private JSONObject remoteDump;
 	
-	MySqlEngine db = new MySqlEngine();
+	private ApiCore core;
 	
 	/**
 	 * The realm to scan. Multiple realms are unacceptable, due to the
 	 * massive amount of memory required to hold data on even one.
 	 */
-	private String realm = "bronzebeard";
+	private String realm;
+	
+	/**
+	 * The time between snapshots, in milliseconds.
+	 */
+	private long snapshotInterval;
 	
 	/**
 	 * The faction(s) that are to be scanned and kept track of.
@@ -91,17 +56,12 @@ public class AuctionScan extends ConsoleProgram {
 	private Faction faction;
 	
 	/**
-	 * The number of requests made to the WOW server today.
-	 */
-	private int requestCount;
-	
-	/**
 	 * The time that a dump was last retrieved from the WOW server.
 	 */
 	private long lastDumpTime = 0;
 	
 	/**
-	 * The database id of the snapshot being commited.
+	 * The database id of the snapshot being comitted.
 	 */
 	private long lastSnapshot;
 	
@@ -140,24 +100,48 @@ public class AuctionScan extends ConsoleProgram {
 	public AuctionScan(String[] args) {
 		super(args);
 		try {
-			db.connect("localhost", 3306, "wow", "greeneconomyapple");
-			db.use("auctionscan");
+			System.out.println("Opening database host connection...");
+			core = new ApiCore();
+			System.out.println("Loading settings...");
 			loadSettings();
+			System.out.println("Checking snapshot...");
 			checkSnapshot();
 			if(dumpOutOfDate() || onFullSnapshot) {
+				System.out.println("New dump is required.");
+				System.out.println("Downloading auction data...");
 				downloadAuctionData();
-				setupDeletedAuctions();
-				addNewAndChangedAuctions();
 				if(!onFullSnapshot) {
-					removeOldAuctions();
+					System.out.println("Setting up used auction ID's...");
+					setupDeletedAuctions();
 				}
+				System.out.println("Adding new and changed auctions...");
+				addNewAndChangedAuctions();
+				System.out.println("Checking for auction deletion...");
+				if(!onFullSnapshot) {
+					System.out.println("Auction deletion required.");
+					System.out.println("Adding deletion events...");
+					removeOldAuctions();
+				} else {
+					System.out.println("Auction deletion not required.");
+				}
+			} else {
+				System.out.println("Snapshot is up to date.");
 			}
-			saveState();
+			System.out.println("Saving settings...");
+			saveSettings();
+			System.out.println("Closing database host connection...");
+			core.db.close();
 		} catch(SQLException e) {
-			giveFatalError("SQL Error: "+e.getMessage()+"\nQuery: "+db.getLastQuery());
+			e.printStackTrace();
+			giveFatalError("Last Query: "+core.db.getLastQuery());
 		} catch(JSONException e) {
 			giveFatalError("BAD JSON!");
+		} catch(TrafficException e) {
+			ui.println("Request limit exceeded");
+			ui.println("Canont access WOW API until limit has reset.");
 		}
+		System.out.println();
+		System.out.println("done");
 	}
 	
 	/**
@@ -166,8 +150,9 @@ public class AuctionScan extends ConsoleProgram {
 	 * 
 	 * @return
 	 * True if the dump is out of date, false otherwise.
+	 * @throws TrafficException 
 	 */
-	private boolean dumpOutOfDate() throws SQLException {
+	private boolean dumpOutOfDate() throws SQLException, TrafficException {
 		try {
 			downloadRemoteDumpData();
 		} catch(MalformedURLException e) {
@@ -189,14 +174,15 @@ public class AuctionScan extends ConsoleProgram {
 	 * hours long.
 	 * 
 	 * @throws SQLException 
+	 * @throws TrafficException 
 	 */
-	private void checkSnapshot() throws SQLException {
+	private void checkSnapshot() throws SQLException, TrafficException {
 		if(lastSnapshot == 0) {
 			setupFullSnapshot();
 		} else {
-			String time = db.selectItem("time", "snapshots", "`id`='"+lastSnapshot+"'");
+			String time = core.db.selectItem("time", "snapshots", "`id`='"+lastSnapshot+"'");
 			long snapshotTime = Long.parseLong(time);
-			if(snapshotTime + SNAPSHOT_INTERVAL < System.currentTimeMillis()) {
+			if(snapshotTime + snapshotInterval < System.currentTimeMillis()) {
 				setupFullSnapshot();
 			} else if(dumpOutOfDate()) {
 				setupIncrementalSnapshot();
@@ -208,9 +194,15 @@ public class AuctionScan extends ConsoleProgram {
 	 * Downloads the data from the remote source.
 	 * @throws JSONException 
 	 * @throws MalformedURLException 
+	 * @throws TrafficException
 	 */
-	private void downloadRemoteDumpData() throws JSONException, MalformedURLException {
-		String response = getRequest(new URL("http://" + BLIZZARD_HOST + AUCTION_API + realm));
+	private void downloadRemoteDumpData() throws JSONException, MalformedURLException, TrafficException {
+		String response = null;
+		try {
+			response = core.getRequest(AUCTION_API + realm, true);
+		} catch(FatalErrorException e) {
+			giveFatalError(e.getMessage());
+		}
 		JSONObject json = new JSONObject(response);
 		JSONObject data = json.getJSONArray("files").getJSONObject(0);
 		remoteDumpLocation = new URL(data.getString("url"));
@@ -221,85 +213,34 @@ public class AuctionScan extends ConsoleProgram {
 	 * Loads the application settings from the database.
 	 */
 	private void loadSettings() throws SQLException {
-		realm = getSetting("realm");
-		lastFullSnapshot = Long.parseLong(getSetting("last_full_snapshot"));
-		lastDumpTime = Long.parseLong(getSetting("last_dump_time"));
-		lastSnapshot = Long.parseLong(getSetting("last_snapshot"));
-		requestCount = Integer.parseInt(getSetting("requests"));
-		faction = Faction.valueOf(getSetting("faction"));
+		realm = core.getSetting("realm");
+		lastFullSnapshot = Long.parseLong(core.getSetting("last_full_snapshot"));
+		lastDumpTime = Long.parseLong(core.getSetting("last_dump_time"));
+		lastSnapshot = Long.parseLong(core.getSetting("last_snapshot"));
+		faction = Faction.valueOf(core.getSetting("faction"));
+		snapshotInterval = Long.parseLong(core.getSetting("snapshot_interval"));
 	}
 	
 	/**
-	 * Saves the current timestamp to disk.
+	 * Saves the current settings to the database.
 	 */
-	private void saveState() throws SQLException {
-		setSetting("last_dump_time", Long.toString(lastDumpTime));
-		setSetting("last_full_snapshot", Long.toString(lastFullSnapshot));
-		setSetting("last_snapshot", Long.toString(lastSnapshot));
-		setSetting("requests", Integer.toString(requestCount));
+	private void saveSettings() throws SQLException {
+		core.setSetting("last_dump_time", Long.toString(lastDumpTime));
+		core.setSetting("last_full_snapshot", Long.toString(lastFullSnapshot));
+		core.setSetting("last_snapshot", Long.toString(lastSnapshot));
 	}
 	
 	/**
 	 * Gets the auction house data.
 	 */
-	private void downloadAuctionData() throws JSONException {
-		String response = getRequest(remoteDumpLocation);
-		remoteDump = new JSONObject(response);
-	}
-	
-	/**
-	 * Generates an HTTP GET request.
-	 */
-	private String getRequest(URL location) {
-		HttpGet request = new HttpGet(location.toString());
-		HttpResponse response = null;
+	private void downloadAuctionData() throws JSONException, TrafficException {
+		String response = null;
 		try {
-			response = client.execute(request);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-			giveFatalError("Bad request");
-		} catch (IOException e) {
-			e.printStackTrace();
+			response = core.getRequest(remoteDumpLocation.toString(), false);
+		} catch(FatalErrorException e) {
 			giveFatalError(e.getMessage());
 		}
-		byte[] responseContent = null;
-		HttpEntity ent = response.getEntity();
-		if(ent != null) {
-			InputStream is = null;
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			try {
-				is = ent.getContent();
-				int next;
-				while((next = is.read()) != -1) {
-					buffer.write(next);
-				}
-				buffer.flush();
-			} catch(IOException e) {
-				giveFatalError("Bad IO!");
-			} finally {
-				try {
-					is.close();
-				} catch (IOException e) {
-					giveFatalError("Can't close response!");
-				}
-			}
-			responseContent = buffer.toByteArray();
-		}
-		return new String(responseContent);
-	}
-	
-	/**
-	 * Sets a setting in the table.
-	 */
-	private void setSetting(String key, String value) throws SQLException {
-		db.updateItem("settings", "value", value, "`key`='"+key+"'");
-	}
-	
-	/**
-	 * Gets a setting from the db.
-	 */
-	private String getSetting(String key) throws SQLException {
-		return db.selectItem("value", "settings", "`key`='"+key+"'");
+		remoteDump = new JSONObject(response);
 	}
 	
 	/**
@@ -385,11 +326,8 @@ public class AuctionScan extends ConsoleProgram {
 	 * @throws SQLException
 	 */
 	private void setupFullSnapshot() throws SQLException {
-		TableData data = new TableData("settings");
-		data.addColumn("type");
-		data.addRow("full");
-		db.insert(new TableData("settings").addColumn("type").addRow("full"));
-		lastSnapshot = db.getInsertId();
+		core.db.insert(new TableData("snapshots").addColumn("type").addRow("full"));
+		lastSnapshot = core.db.getInsertId();
 		lastFullSnapshot = lastSnapshot;
 		onFullSnapshot = true;
 		lastDumpTime = System.currentTimeMillis() / 1000L;
@@ -401,8 +339,8 @@ public class AuctionScan extends ConsoleProgram {
 	 * @throws SQLException
 	 */
 	private void setupIncrementalSnapshot() throws SQLException {
-		db.insert(new TableData("snapshots").addColumn("type").addRow("incremental"));
-		lastSnapshot = db.getInsertId();
+		core.db.insert(new TableData("snapshots").addColumn("type").addRow("incremental"));
+		lastSnapshot = core.db.getInsertId();
 		onFullSnapshot = false;
 		lastDumpTime = System.currentTimeMillis() / 1000L;
 	}
@@ -415,7 +353,7 @@ public class AuctionScan extends ConsoleProgram {
 	 * @throws SQLException 
 	 */
 	private void processAuction(AuctionData auction) throws SQLException {
-		if(auctionExists(auction) && !onFullSnapshot) {
+		if(!onFullSnapshot && auctionExists(auction)) {
 			setNotDeleted(auction);
 			changeExistingAuction(auction);
 		} else {
@@ -428,16 +366,14 @@ public class AuctionScan extends ConsoleProgram {
 	 * @throws SQLException 
 	 */
 	private boolean auctionExists(AuctionData auction) throws SQLException {
-		String item = db.selectItem("id", "auctions",
-				"`auc`='"+auction.auc+"' AND `snapshot`='"+lastSnapshot+"'");
-		return (item != null);
+		return deletedAuctions.containsKey(auction.auc);
 	}
 	
 	/**
 	 * Checks for auctions that no longer exist and adds a removed
 	 * event for them.
 	 */
-	private void removeOldAuctions() {
+	private void removeOldAuctions() throws SQLException {
 		for(Long auc: deletedAuctions.values()) {
 			AuctionData ad = new AuctionData();
 			ad.auc = auc;
@@ -451,9 +387,9 @@ public class AuctionScan extends ConsoleProgram {
 	 * @throws SQLException 
 	 */
 	private void changeExistingAuction(AuctionData auction) throws SQLException {
-		db.selectRows("auctions", "`auc`='"+auction.auc+"' AND `snapshot`='"+lastSnapshot+"'");
+		core.db.selectRows("auctions", "`auc`='"+auction.auc+"' AND `snapshot`='"+lastSnapshot+"'");
 		HashMap<String,String> newData;
-		newData = db.getResult().getMap();
+		newData = core.db.getResult().getMap();
 		AuctionData oldAuction = new AuctionData(newData);
 		if(!oldAuction.equals(auction)) {
 			if(auction.bid != oldAuction.bid) {
@@ -471,7 +407,7 @@ public class AuctionScan extends ConsoleProgram {
 	 * @param auction
 	 * The auction to add.
 	 */
-	private void addNewAuction(AuctionData auction) {
+	private void addNewAuction(AuctionData auction) throws SQLException {
 		addAuction(auction);
 		addEvent("add", auction);
 	}
@@ -481,8 +417,8 @@ public class AuctionScan extends ConsoleProgram {
 	 * @throws SQLException 
 	 */
 	private long[] getCurrentIds() throws SQLException {
-		db.call("get_current_ids");
-		TableData td = db.getResult();
+		core.db.call("get_current_ids");
+		TableData td = core.db.getResult();
 		return td.getLongArray("auc");
 	}
 	
@@ -512,7 +448,7 @@ public class AuctionScan extends ConsoleProgram {
 	 * @param auction
 	 * Information on the auction being added.
 	 */
-	private void addEvent(String eventType, AuctionData auction) {
+	private void addEvent(String eventType, AuctionData auction) throws SQLException {
 		TableData td = new TableData("events");
 		td.addColumn("auction", "event", "snapshot");
 		td.addRow(Long.toString(auction.auc), eventType, Long.toString(lastSnapshot));
@@ -524,7 +460,7 @@ public class AuctionScan extends ConsoleProgram {
 			td.addColumn("argument");
 			td.jumpColumn("argument").set(Integer.toString(auction.bid));
 		}
-		db.insert(td);
+		core.db.insert(td);
 	}
 	
 	/**
@@ -533,7 +469,8 @@ public class AuctionScan extends ConsoleProgram {
 	 * @param auction
 	 * The data on the auction.
 	 */
-	private void addAuction(AuctionData auction) {
+	private void addAuction(AuctionData auction) throws SQLException {
+		checkItem(auction.item);
 		TableData td = new TableData("auctions");
 		td.addColumn("auc", "item", "owner", "bid", "buyout", "quantity", "time_left", "faction");
 		td.addRow();
@@ -545,5 +482,47 @@ public class AuctionScan extends ConsoleProgram {
 		td.setInt(auction.quantity);
 		td.set(auction.timeLeft.toString());
 		td.set(auction.faction.toString());
+		core.db.insert(td);
+	}
+	
+	/**
+	 * Checks whether the item for an auction exists. If it does not exist,
+	 * then it is created. This does not fill in any values for the item;
+	 * it only adds the item to the database so that the ItemScan program
+	 * knows what to update when it runs.
+	 * 
+	 * @param itemId
+	 * The id of the item to check.
+	 */
+	private void checkItem(int itemId) throws SQLException {
+		if(!itemExists(itemId)) {
+			addBlankItem(itemId);
+		}
+	}
+	
+	/**
+	 * Checks whether an entry for an item exists in the local database.
+	 * 
+	 * @param itemId
+	 * The ID of the item to check for.
+	 * 
+	 * @return
+	 * Whether an entry for the item exists.
+	 */
+	private boolean itemExists(int itemId) throws SQLException {
+		core.db.selectRows("items", "`id` = "+itemId);
+		return (!core.db.getResult().isEmpty());
+	}
+	
+	/**
+	 * Adds a blank entry to the local item database.
+	 * 
+	 * @param itemId
+	 * The ID of the item to add.
+	 */
+	private void addBlankItem(int itemId) throws SQLException {
+		TableData td = new TableData("items");
+		td.addColumn("id").setInt(itemId);
+		core.db.insert(td);
 	}
 }

@@ -30,7 +30,7 @@ public interface DatabaseManager {
 	 * @throws SQLException
 	 * If there was a problem connecting to the host.
 	 */
-	public DatabaseManager connect(String host, int port, String user, String password) throws SQLException;
+	public DatabaseManager open(String host, int port, String user, String password) throws SQLException;
 	
 	/**
 	 * Gets the last query that the DatabaseManager attempted to execute.
@@ -322,4 +322,48 @@ public interface DatabaseManager {
 	 * This DatabaseManager.
 	 */
 	public DatabaseManager close() throws SQLException;
+	
+	/**
+	 * Gets the number of rows in a table. This method requires a default
+	 * database to be set, and so {@link use() use()} must be called before
+	 * this method is.
+	 * 
+	 * @param table
+	 * The table to count rows in. This must be a table that exists on the
+	 * current database.
+	 * 
+	 * @param where
+	 * A condition that evaluates to true on all rows counted.
+	 * 
+	 * @return
+	 * The number of rows.
+	 * 
+	 * @throws SQLException
+	 * If there is a problem with getting the row count.
+	 */
+	public int count(String table, String where) throws SQLException;
+	
+	/**
+	 * Gets the number of non-null rows in a table. This method requires a
+	 * default database to be set, and so {@link use() use()} must be called
+	 * before this method is.
+	 * 
+	 * @param column
+	 * The column to count. Only rows that contain a value in this column will
+	 * be counted.
+	 * 
+	 * @param table
+	 * The table to count rows in. This must be a table that exists on the
+	 * current database.
+	 * 
+	 * @param where
+	 * A condition that evaluates to true on all rows counted.
+	 * 
+	 * @return
+	 * The number of rows.
+	 * 
+	 * @throws SQLException
+	 * If there is a problem with getting the row count.
+	 */
+	public int count(String column, String table, String where) throws SQLException;
 }

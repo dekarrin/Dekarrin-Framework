@@ -27,7 +27,7 @@ public class MySqlEngine implements DatabaseManager {
 	/**
 	 * {@inheritDoc}
 	 */
-	public MySqlEngine connect(String host, int port, String user, String password) throws SQLException {
+	public MySqlEngine open(String host, int port, String user, String password) throws SQLException {
 		Properties props = new Properties();
 		props.put("user", user);
 		props.put("password", password);
@@ -95,7 +95,7 @@ public class MySqlEngine implements DatabaseManager {
 	/**
 	 * {@inheritDoc}
 	 */
-	public MySqlEngine insert(TableData data) {
+	public MySqlEngine insert(TableData data) throws SQLException {
 		lastTable = data.getTable();
 		query = "INSERT INTO `"+data.getTable()+"` (";
 		for(int i = 0; i < data.columns(); i++) {
@@ -105,7 +105,7 @@ public class MySqlEngine implements DatabaseManager {
 		query += ") VALUES ";
 		for(int i = 0; i < data.rows(); data.jump(i++)) {
 			query += "(";
-			while(data.hasNextColumn()) {
+			for(int j = 0; j < data.columns(); data.jumpColumn(j++)) {
 				query += "'"+data.get()+"'";
 				query += (data.hasNextColumn()) ? "," : "";
 			}
@@ -113,6 +113,7 @@ public class MySqlEngine implements DatabaseManager {
 			query += (i + 1 < data.rows()) ? "," : "";
 		}
 		query += ";";
+		insertQuery();
 		return this;
 	}
 	
@@ -212,12 +213,15 @@ public class MySqlEngine implements DatabaseManager {
 	public TableData getResult() throws SQLException {
 		ResultSetMetaData md = result.getMetaData();
 		TableData tableResult = new TableData(lastTable);
-		for(int i = 0; i < md.getColumnCount(); i++) {
+		// The Java SQL package uses index 1 as the first column, NOT index 0.
+		for(int i = 1; i <= md.getColumnCount(); i++) {
 			tableResult.addColumn(md.getColumnLabel(i));
 		}
 		while(result.next()) {
 			tableResult.addRow();
-			for(int i = 0; i < tableResult.columns(); i++) {
+			for(int i = 1; i <= tableResult.columns(); i++) {
+				// TableData column index not set explicitly;
+				// it will automatically 0-index them.
 				tableResult.set(result.getString(i));
 			}
 		}
@@ -237,6 +241,26 @@ public class MySqlEngine implements DatabaseManager {
 	public MySqlEngine close() throws SQLException {
 		connection.close();
 		return this;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int count(String table, String where) throws SQLException {
+		query = "SELECT COUNT(*) FROM `"+table+"` WHERE "+where+";";
+		getQuery();
+		int rowCount = getResult().getInt(0);
+		return rowCount;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int count(String column, String table, String where) throws SQLException {
+		query = "SELECT COUNT(`"+column+"`) FROM `"+table+"` WHERE "+where+";";
+		getQuery();
+		int rowCount = getResult().getInt(0);
+		return rowCount;
 	}
 	
 	/**
@@ -269,7 +293,7 @@ public class MySqlEngine implements DatabaseManager {
 		affectedRows = ((PreparedStatement)statement).executeUpdate();
 		ResultSet keys = statement.getGeneratedKeys();
 		if(keys.next()) {
-			insertId = keys.getLong(0);
+			insertId = keys.getLong(1);
 		}
 	}
 	
