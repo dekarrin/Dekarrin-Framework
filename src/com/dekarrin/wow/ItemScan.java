@@ -8,7 +8,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.dekarrin.db.TableData;
+import com.dekarrin.error.TrafficException;
 import com.dekarrin.program.ConsoleProgram;
+import com.dekarrin.program.FatalErrorException;
 import com.dekarrin.util.GrowableIntHolder;
 
 /**
@@ -33,6 +36,7 @@ public class ItemScan extends ConsoleProgram {
 		super(args);
 		try {
 			core = new ApiCore();
+			core.db.use("itemdata");
 			loadSettings();
 			if(hasNullItems()) {
 				downloadItemData();
@@ -89,6 +93,38 @@ public class ItemScan extends ConsoleProgram {
 	}
 	
 	/**
+	 * Gets the id of the next item to get info on.
+	 * 
+	 * @return
+	 * The id of the next item entry whose fields are null.
+	 */
+	private int getNextId() throws SQLException {
+		String item = core.db.selectItem("id", "items", "`name`=NULL AND `description`=NULL AND `item_class`=NULL");
+		int id = Integer.parseInt(item);
+		return id;
+	}
+	
+	/**
+	 * Gets the next item's information from the WOW community
+	 * API.
+	 * 
+	 * @param id
+	 * The id of the item to get info on.
+	 * 
+	 * @return
+	 * The response from the API.
+	 */
+	private String getItemData(int id) throws TrafficException {
+		String itemData = null;
+		try {
+			itemData = core.getRequest(ITEM_API+id, true);
+		} catch(FatalErrorException e) {
+			giveFatalError(e.getMessage());
+		}
+		return itemData;
+	}
+	
+	/**
 	 * Parses the JSON response into an ItemData object.
 	 * 
 	 * @param json
@@ -100,36 +136,37 @@ public class ItemScan extends ConsoleProgram {
 	private ItemData parseItemResponse(JSONObject json) throws JSONException {
 		ItemData item = new ItemData();
 		item.id					=	json.getInt("id");
-		item.disenchantingSkillRank	= json.getInt("disenchantingSkillRank");
-		item.description		=	json.getString("description");
-		item.name				=	json.getString("name");
-		item.icon				=	json.getString("icon");
-		item.stackable			=	json.getInt("stackable");
-		item.itemBind			=	json.getInt("itemBind");
+		item.disenchantingSkillRank	= getJsonInt("disenchantingSkillRank", -1, json);
+		item.description		=	getJsonString("description", json);
+		item.name				=	getJsonString("name", json);
+		item.icon				=	getJsonString("icon", json);
+		item.stackable			=	getJsonInt("stackable", -1, json);
+		item.itemBind			=	getJsonInt("itemBind", -1, json);
 		item.itemSpells			=	extractItemSpells(json);
 		item.bonusStats			=	extractBonusStats(json);
-		item.buyPrice			=	json.getInt("buyPrice");
+		item.buyPrice			=	getJsonInt("buyPrice", -1, json);
 		item.allowableClasses	=	extractAllowableClasses(json);
-		item.itemClass			=	json.getInt("itemClass");
-		item.itemSubClass		=	json.getInt("itemSubClass");
-		item.containerSlots		=	json.getInt("containerSlots");
-		item.inventoryType		=	json.getInt("inventoryType");
-		item.equippable			=	json.getBoolean("equippable");
-		item.itemLevel			=	json.getInt("itemLevel");
-		item.maxCount			=	json.getInt("maxCount");
-		item.maxDurability		=	json.getInt("maxDurability");
-		item.minFactionId		=	json.getInt("minFactionId");
-		item.minReputation		=	json.getInt("minReputation");
-		item.quality			=	json.getInt("quality");
-		item.sellPrice			=	json.getInt("sellPrice");
-		item.requiredSkill		=	json.getInt("requiredSkill");
-		item.requiredLevel		=	json.getInt("requiredLevel");
-		item.requiredSkillRank	=	json.getInt("requiredSkillRank");
+		item.itemClass			=	getJsonInt("itemClass", -1, json);
+		item.itemSubClass		=	getJsonInt("itemSubClass", -1, json);
+		item.containerSlots		=	getJsonInt("containerSlots", -1, json);
+		item.inventoryType		=	getJsonInt("inventoryType", -1, json);
+		item.equippable			=	getJsonBoolean("equippable", false, json);
+		item.itemLevel			=	getJsonInt("itemLevel", -1, json);
+		item.maxCount			=	getJsonInt("maxCount", -1, json);
+		item.maxDurability		=	getJsonInt("maxDurability", -1, json);
+		item.minFactionId		=	getJsonInt("minFactionId", -1, json);
+		item.minReputation		=	getJsonInt("minReputation", -1, json);
+		item.quality			=	getJsonInt("quality", -1, json);
+		item.sellPrice			=	getJsonInt("sellPrice", -1, json);
+		item.requiredSkill		=	getJsonInt("requiredSkill", -1, json);
+		item.requiredLevel		=	getJsonInt("requiredLevel", -1, json);
+		item.requiredSkillRank	=	getJsonInt("requiredSkillRank", -1, json);
 		item.itemSource			=	extractItemSource(json);
-		item.baseArmor			=	json.getInt("baseArmor");
-		item.hasSockets			=	json.getBoolean("hasSockets");
-		item.isAuctionable		=	json.getBoolean("isAuctionable");
+		item.baseArmor			=	getJsonInt("baseArmor", -1, json);
+		item.hasSockets			=	getJsonBoolean("hasSockets", false, json);
+		item.isAuctionable		=	getJsonBoolean("isAuctionable", false, json);
 		item.weaponInfo			=	extractWeaponInfo(json);
+		return item;
 	}
 	
 	/**
@@ -234,14 +271,128 @@ public class ItemScan extends ConsoleProgram {
 	 * @return
 	 * The weapon info.
 	 */
-	private int extractMinDamage(JSONObject json) throws JSONException {
-		JSONObject weaponInfo = json.optJSONObject("weaponInfo");
-		WeaponInfo wi = null;
-		if(weaponInfo != null) {
-			JSONArray damage = weaponInfo.getJSONArray("damage");
+	private WeaponInfo extractWeaponInfo(JSONObject json) throws JSONException {
+		WeaponInfo weaponInfo = null;
+		JSONObject info = json.optJSONObject("weaponInfo");
+		if(info != null) {
+			weaponInfo = new WeaponInfo();
+			JSONArray damage = info.getJSONArray("damage");
 			JSONObject d = damage.getJSONObject(0);
-			
+			weaponInfo.minDamage = d.getInt("minDamage");
+			weaponInfo.maxDamage = d.getInt("maxDamage");
+			weaponInfo.weaponSpeed = info.getDouble("weaponSpeed");
+			weaponInfo.dps = info.getDouble("dps");
 		}
-		return wi;
+		return weaponInfo;
+	}
+	
+	/**
+	 * Gets an int from a JSONObject if it exists; otherwise returns the
+	 * given default value.
+	 * 
+	 * @param key
+	 * The key of the int to get.
+	 * 
+	 * @param defaultValue
+	 * The value to return if the given JSONObject does not contain the key.
+	 * 
+	 * @param json
+	 * The source JSONObject for this item.
+	 * 
+	 * @return
+	 * The value of the given key if it exists; otherwise the given default
+	 * value.
+	 */
+	private int getJsonInt(String key, int defaultValue, JSONObject json) throws JSONException {
+		int value = defaultValue;
+		if(json.has(key)) {
+			value = json.getInt(key);
+		}
+		return value;
+	}
+	
+	/**
+	 * Gets a boolean from a JSONObject if it exists.
+	 * 
+	 * @param key
+	 * The key of the boolean to get.
+	 * 
+	 * @param defaultValue
+	 * The value to return if the key does not exist.
+	 * 
+	 * @param json
+	 * The source JSONObject for this item.
+	 * 
+	 * @return
+	 * The value of the given key if it exists; otherwise the given default
+	 * value.
+	 */
+	private boolean getJsonBoolean(String key, boolean defaultValue, JSONObject json) throws JSONException {
+		boolean value = defaultValue;
+		if(json.has(key)) {
+			value = json.getBoolean(key);
+		}
+		return value;
+	}
+	
+	/**
+	 * Gets a String from a JSONObject if it exists.
+	 * 
+	 * @param key
+	 * The key of the String to get.
+	 * 
+	 * @param json
+	 * The source JSONObject for this item.
+	 * 
+	 * @return
+	 * The value of the given key if it exists; otherwise null.
+	 */
+	private String getJsonString(String key, JSONObject json) throws JSONException {
+		String value = null;
+		if(json.has(key)) {
+			value = json.getString(key);
+		}
+		return value;
+	}
+	
+	/**
+	 * Deconstructs an ItemData struct and saves it into the database.
+	 * 
+	 * @param data
+	 * The ItemData object to save.
+	 */
+	private void saveToDatabase(ItemData data) throws SQLException {
+		TableData td = new TableData("items");
+		addIntData(data.id, td);
+		addIntData(data.disenchantingSkillRank, td);
+		addStringData(data.description, td);
+		addStringData(data.name, td);
+		addStringData(data.icon, td);
+		addIntData(data.stackable, td);
+		addIntData(data.itemBind, td);
+		addStatData(data.bonusStats, td);
+		addIntArrData(data.itemSpells, td);
+		addIntArrData(data.allowableClasses, td);
+		addIntData(data.buyPrice, td);
+		addIntData(data.itemClass, td);
+		addIntData(data.itemSubClass, td);
+		addIntData(data.containerSlots, td);
+		addWeaponData(data.weaponInfo, td);
+		addIntData(data.inventoryType, td);
+		addBooleanData(data.equippable, td);
+		addIntData(data.itemLevel, td);
+		addIntData(data.maxCount, td);
+		addIntData(data.maxDurability, td);
+		addIntData(data.minFactionId, td);
+		addIntData(data.minReputation, td);
+		addIntData(data.quality, td);
+		addIntData(data.sellPrice, td);
+		addIntData(data.requiredSkill, td);
+		addIntData(data.requiredLevel, td);
+		addIntData(data.requiredSkillRank, td);
+		addIntData(data.itemSource, td);
+		addIntData(data.baseArmor, td);
+		addBooleanData(data.hasSockets, td);
+		addBooleanData(data.isAuctionable, td);
 	}
 }
